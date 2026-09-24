@@ -1,0 +1,41 @@
+{
+  "manifest_version": 3,
+  "name": "Page Helper AI",
+  "version": "2.1.0",
+  "author": "Muhammad Hamza / Dezignwise",
+  "homepage_url": "https://dezignwise.com",
+  "description": "Set an instruction once, then click a button on any page to get an AI answer based on a screenshot — for understanding page content or finding on-page options.",
+  "permissions": ["storage", "activeTab", "unlimitedStorage"],
+  "host_permissions": ["<all_urls>", "https://api.openai.com/*", "https://generativelanguage.googleapis.com/*"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "css": ["content.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Page Helper AI",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": true
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}

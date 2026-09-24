@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Welcome to Page Helper AI</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: #f5f2e9;
+      color: #4a3b3b;
+      margin: 0;
+      padding: 50px 20px;
+    }
+    .wrap { max-width: 620px; margin: 0 auto; text-align: center; }
+    img.logo { width: 72px; height: 72px; margin-bottom: 16px; }
+    h1 { color: #946d6d; font-size: 26px; margin: 0 0 8px; }
+    p.lead { font-size: 15px; color: #6b6b66; line-height: 1.6; margin-bottom: 32px; }
+    .steps {
+      text-align: left;
+      background: #fffdf7;
+      border: 1.5px solid #e4dfce;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    .step { display: flex; gap: 14px; margin-bottom: 18px; }
+    .step:last-child { margin-bottom: 0; }
+    .step-num {
+      flex-shrink: 0;
+      width: 28px; height: 28px;
+      background: #a290b7;
+      color: #fffdf7;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 13px;
+    }
+    .step-body h3 { margin: 0 0 4px; font-size: 14.5px; color: #4a3b3b; }
+    .step-body p { margin: 0; font-size: 13px; color: #6b6b66; line-height: 1.5; }
+    a.cta {
+      display: inline-block;
+      background: #a290b7;
+      color: #fffdf7;
+      text-decoration: none;
+      padding: 12px 26px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 14px;
+    }
+    a.cta:hover { background: #946d6d; }
+    .note {
+      margin-top: 24px;
+      font-size: 12px;
+      color: #8a8a86;
+    }
+    .note a { color: #a290b7; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <img class="logo" src="icons/icon128.png" alt="Page Helper AI logo" />
+    <h1>Welcome to Page Helper AI 👋</h1>
+    <p class="lead">
+      Capture a screenshot of any webpage and get instant AI help — understand what's on the page,
+      or locate the option you're looking for. Setup takes about two minutes.
+    </p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h3>Set your API key</h3>
+          <p>Open Settings and enter your OpenAI or Gemini API key. It's stored only in your browser.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h3>Customize your instruction</h3>
+          <p>A default instruction is ready to go, but you can create your own presets for different tasks.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h3>Click the button on any page</h3>
+          <p>Look for "🧠 Solve with AI" in the bottom-right corner — click it and get your answer.</p>
+        </div>
+      </div>
+    </div>
+
+    <a class="cta" href="options.html" target="_blank">Open Settings and Get Started →</a>
+
+    <p class="note">
+      Curious about your data? <a href="privacy-policy.html" target="_blank">Read the Privacy Policy</a>.
+    </p>
+  </div>
+</body>
+</html>

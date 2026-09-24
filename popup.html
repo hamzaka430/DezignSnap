@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Page Helper AI</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <img src="icons/icon32.png" width="22" height="22" alt="" />
+        <h1>Page Helper AI</h1>
+      </div>
+      <button id="openOptionsBtn" title="Open full settings">⚙️</button>
+    </header>
+
+    <div id="keyWarning" class="warning hidden">
+      ⚠️ No API key set. <a href="#" id="setupLink">Open Settings</a>
+    </div>
+
+    <label for="providerSelect">AI Provider</label>
+    <select id="providerSelect">
+      <option value="openai">OpenAI (GPT-4o)</option>
+      <option value="gemini">Gemini (3.6 Flash)</option>
+    </select>
+
+    <label for="presetSelect">Active Instruction</label>
+    <select id="presetSelect"></select>
+
+    <button id="fallbackAskBtn">🧠 Ask for this page now</button>
+    <p class="hint">
+      If the "Solve with AI" button isn't visible on a website, use this — it always works.
+    </p>
+    <div id="fallbackAnswer" class="hidden"></div>
+
+    <div id="statusMsg" class="hidden"></div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

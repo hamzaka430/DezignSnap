@@ -1,0 +1,113 @@
+* { box-sizing: border-box; }
+
+body {
+  width: 320px;
+  font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+  margin: 0;
+  background: #fdf4d2;
+  color: #4a3b3b;
+}
+
+.container { padding: 14px; }
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  border-bottom: 2px solid #b0cde6;
+  padding-bottom: 8px;
+}
+
+h1 { font-size: 15px; margin: 0; color: #946d6d; }
+
+#openOptionsBtn {
+  background: #b0cde6;
+  border: none;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 5px 8px;
+  border-radius: 6px;
+}
+#openOptionsBtn:hover { background: #a290b7; }
+
+.warning {
+  background: #f6dede;
+  border: 1.5px solid #cf9a9a;
+  color: #7a3a3a;
+  font-size: 12px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  margin-bottom: 10px;
+}
+.warning a { color: #7a3a3a; font-weight: 700; }
+
+label {
+  font-size: 12.5px;
+  font-weight: 600;
+  display: block;
+  margin-bottom: 4px;
+  color: #946d6d;
+}
+
+select, textarea, input[type="password"] {
+  width: 100%;
+  padding: 8px;
+  border: 1.5px solid #b0cde6;
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: inherit;
+  resize: vertical;
+  margin-bottom: 10px;
+  background: #fffdf7;
+  color: #4a3b3b;
+}
+
+select:focus, textarea:focus, input:focus {
+  outline: none;
+  border-color: #a290b7;
+}
+
+button { cursor: pointer; }
+button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.hidden { display: none !important; }
+
+.hint {
+  font-size: 11px;
+  color: #946d6d;
+  margin-top: 4px;
+}
+
+#statusMsg {
+  margin-top: 10px;
+  font-size: 12.5px;
+  color: #4a7a4a;
+  font-weight: 600;
+}
+
+#fallbackAskBtn {
+  width: 100%;
+  padding: 9px;
+  background: #a290b7;
+  color: #fffdf7;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+}
+#fallbackAskBtn:hover { background: #946d6d; }
+
+#fallbackAnswer {
+  margin-top: 8px;
+  padding: 8px;
+  background: #fffdf7;
+  border: 1.5px solid #a290b7;
+  border-radius: 6px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  color: #4a3b3b;
+  max-height: 200px;
+  overflow-y: auto;
+}
