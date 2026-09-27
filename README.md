@@ -1,18 +1,20 @@
-# Page Helper AI
+# DezignSnap — AI Visual Screen Assistant
 
-A Chrome extension that captures a screenshot of any webpage and gets you an instant AI answer — to understand what's on the page, or to locate a specific option or button. Supports both OpenAI (GPT-4o) and Google Gemini (3.6 Flash) as providers, using your own API key.
+A high-performance Chrome extension that captures screenshots or drag-selected regions of any webpage and delivers instant, grounded AI answers — to understand interface elements, debug layouts, locate buttons, or translate text. Powered by **Groq (Llama 3.2 Vision)**, **Google Gemini (3.6 Flash)**, **OpenAI (GPT-4o)**, **OpenRouter**, or private local **Ollama** using your own API keys.
 
 ## 🚀 Standout Features
 
-- **🎯 Select Area (Smart Zoom)** — Instead of capturing the whole page, drag-select just the region you care about. The extension crops and upscales it before sending it to the AI, dramatically improving accuracy on small text and icons.
+- **🎯 Select Area [Alt+S] (Smart Zoom)** — Instead of capturing the whole page, drag-select just the region you care about. The extension crops and upscales it (1.4x–2.5x) before sending it to the AI, dramatically improving accuracy on small text and icons.
+- **⚡ Multi-Engine Freedom** — Switch on the fly between Groq, Gemini, OpenAI, OpenRouter, or 100% free local Ollama.
+- **🖱️ Quick Text Ask** — Right-click any highlighted text on a webpage and select *"⚡ Ask AI about selection"* for instant explanation without snipping.
 - **🚦 Confidence Meter** — Every answer comes with a self-reported confidence level (High / Medium / Low). When confidence is Low, the panel automatically suggests using Select Area for a more reliable answer.
 - **💬 Follow-up Conversations** — Answers aren't one-shot. Ask follow-up questions in the same context as your original screenshot, just like a real chat thread. Full threads are included in the PDF export.
 
 ## ✨ Core Features
 
-- **Set an instruction once, it's remembered** — create multiple presets and switch between them anytime.
-- **OpenAI or Gemini** — both providers are supported; save both keys and switch whenever you like (from the popup or Settings).
-- **On-page floating button** — click "🧠 Solve with AI" on any page for a screenshot-grounded answer.
+- **Set an instruction once, it's remembered** — create multiple presets (ELI5, Roast UI, Target Finder, Translate) and switch between them anytime.
+- **On-page floating button** — click "⚡ Snip & Ask" or "🎯 Snip Area" on any page.
+- **Global Hotkey** — press `Alt+S` anywhere to instantly trigger region selection.
 - **Toolbar fallback** — if a site blocks content scripts, the popup's "Ask for this page now" button always works.
 - **"📄 End Session" PDF export** — your entire conversation history (instructions, answers, screenshot thumbnails, confidence levels) exports to a PDF in one click.
 - **Accuracy-focused**: `temperature: 0`, lossless PNG screenshots, a strict "only state what's clearly visible" system prompt, and automatic detection of black/DRM-protected screenshots.

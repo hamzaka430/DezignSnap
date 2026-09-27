@@ -2,86 +2,67 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Page Helper AI - Privacy Policy</title>
+  <title>DezignSnap — Privacy Policy</title>
   <style>
     body {
-      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
-      max-width: 680px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      max-width: 720px;
       margin: 40px auto;
       padding: 0 20px;
-      color: #333;
+      background: #222831;
+      color: #f5f2eb;
       line-height: 1.7;
     }
-    h1 { color: #946d6d; }
-    h2 { color: #946d6d; font-size: 17px; margin-top: 28px; }
-    .updated { color: #888; font-size: 13px; }
+    h1 { color: #DFD0B8; }
+    h2 { color: #DFD0B8; font-size: 17px; margin-top: 28px; }
+    a { color: #DFD0B8; }
+    .updated { color: #948979; font-size: 13px; }
   </style>
 </head>
 <body>
-  <h1>Privacy Policy — Page Helper AI</h1>
+  <h1>Privacy Policy — DezignSnap</h1>
   <p class="updated">Last updated: September 2026</p>
 
   <h2>What this extension does</h2>
   <p>
-    Page Helper AI lets you capture a screenshot of the currently visible part of a webpage and send it,
-    together with an instruction you configure, to <strong>OpenAI's API</strong> or <strong>Google's Gemini API</strong>
-    (whichever you select, using your own API key for that provider) to get an answer.
+    DezignSnap lets you capture a screenshot of the currently visible part of a webpage, select a specific region (Smart Zoom), or highlight text and send it directly to your chosen AI engine (Groq, Google Gemini, OpenAI, OpenRouter, or local Ollama) to receive instant, grounded explanations.
   </p>
 
   <h2>What data we collect</h2>
   <p>
-    <strong>We (the extension developer) do not operate any server and do not collect, receive, or store
-    any of your data ourselves.</strong> All data handled by this extension stays either on your device or
-    is sent directly from your browser to OpenAI or Google Gemini.
+    <strong>We (the extension developer) do not operate any intermediate servers and do not collect, receive, or store any of your data ourselves.</strong> All data handled by this extension stays either on your device or is dispatched directly from your browser to your selected AI provider (or processed 100% locally when using Ollama).
   </p>
 
   <h2>What is stored locally on your device</h2>
   <ul>
-    <li>Your OpenAI and/or Gemini API key(s) (used only to authenticate requests to the selected provider's API from your browser).</li>
-    <li>Which provider (OpenAI or Gemini) is currently active.</li>
-    <li>Your saved instruction presets.</li>
-    <li>A session history of your Q&amp;A exchanges (instruction, AI answer, page title/URL, and a compressed
-      screenshot thumbnail), used only to generate the PDF export you request and to show you a local history.
-      This can be cleared at any time from the extension's Settings page.</li>
+    <li>Your API key(s) for Groq, Gemini, OpenAI, and/or OpenRouter (used only to authenticate requests to the selected provider's API directly from your browser).</li>
+    <li>Which provider engine is currently active.</li>
+    <li>Your saved instruction presets and personas.</li>
+    <li>A local session history of your Q&amp;A exchanges and compressed thumbnails, used only to display your session transcript and generate client-side PDF reports. This can be cleared at any time from Settings.</li>
   </ul>
   <p>
-    This data is stored using the browser's built-in extension storage and is not synced to any external
-    service by this extension.
+    This data is stored using the browser's built-in extension storage (<code>chrome.storage.local</code>) and is never synced to external analytics or ad trackers.
   </p>
 
   <h2>What is sent to third parties</h2>
   <p>
-    When you use the "Solve with AI" feature, a screenshot of your currently visible tab and your instruction
-    text are sent directly from your browser to whichever provider you have selected —
-    <strong>OpenAI's API (api.openai.com)</strong> or <strong>Google's Gemini API (generativelanguage.googleapis.com)</strong> —
-    using your own API key for that provider, so it can generate a response. This request is authenticated with
-    your key and billed to your account with that provider. Please refer to
-    <a href="https://openai.com/policies/privacy-policy" target="_blank" rel="noopener">OpenAI's Privacy Policy</a>
-    or <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google's Privacy Policy</a>
-    for how each provider handles data sent to its API.
+    When you invoke DezignSnap, the screenshot or selected text and your instruction are sent directly from your browser to your selected provider:
+    <strong>Groq (api.groq.com)</strong>, <strong>Google Gemini (generativelanguage.googleapis.com)</strong>, <strong>OpenAI (api.openai.com)</strong>, or <strong>OpenRouter (openrouter.ai)</strong> using your own API key. If you select <strong>Ollama</strong>, no data leaves your local machine.
   </p>
-  <p>We do not intercept, log, or have access to this data at any point.</p>
+  <p>We do not intercept, log, or have access to your data or tokens at any point.</p>
 
   <h2>Permissions this extension requests, and why</h2>
   <ul>
-    <li><strong>storage</strong> — to save your API key, instruction presets, and session history locally.</li>
-    <li><strong>activeTab</strong> — to allow the popup to capture a screenshot of the tab you're currently viewing.</li>
-    <li><strong>unlimitedStorage</strong> — to allow storing screenshot thumbnails in your local session history without hitting the default storage quota.</li>
-    <li><strong>host_permissions (&lt;all_urls&gt;)</strong> — required so the on-page "Solve with AI" / "End Session" buttons can be shown on any website you visit, and so a screenshot can be captured when you click that on-page button (this action is not initiated via the browser toolbar, so the narrower <code>activeTab</code> permission alone is not sufficient for it).</li>
-    <li><strong>host_permissions (api.openai.com, generativelanguage.googleapis.com)</strong> — required to send your requests directly to OpenAI's and/or Google Gemini's API, whichever you choose to use.</li>
+    <li><strong>storage &amp; unlimitedStorage</strong> — to save your API keys, presets, and session thumbnails locally.</li>
+    <li><strong>activeTab</strong> — to allow the extension to capture a screenshot of the tab you are viewing when you trigger an action.</li>
+    <li><strong>contextMenus</strong> — to provide the right-click "⚡ Ask AI about selection" convenience menu for highlighted text.</li>
+    <li><strong>host_permissions</strong> — required to display the floating HUD on pages and communicate directly with AI provider APIs.</li>
   </ul>
 
   <h2>Your controls</h2>
   <p>
-    You can clear your session history at any time from the Settings page. You can remove your API key at
-    any time by clearing the field in Settings. Uninstalling the extension removes all locally stored data.
+    You can clear your session history at any time from the Settings page. You can remove or replace your API keys at any time. Uninstalling the extension completely purges all local storage.
   </p>
-
-  <h2>Children's privacy</h2>
-  <p>This extension is not directed at children and does not knowingly collect data from children.</p>
-
-  <h2>Changes to this policy</h2>
-  <p>If this policy changes, the "Last updated" date above will be revised.</p>
 
   <h2>Contact</h2>
   <p>If you have questions, feedback, or concerns regarding this Privacy Policy, please contact Muhammad Hamza (Dezignwise) at <a href="mailto:hamzaka@dezignwise.com">hamzaka@dezignwise.com</a> or visit <a href="https://dezignwise.com" target="_blank" rel="noopener">dezignwise.com</a>.</p>

@@ -2,98 +2,268 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Welcome to Page Helper AI</title>
+  <title>Welcome to DezignSnap — Setup Guide &amp; Operations Manual</title>
   <style>
-    * { box-sizing: border-box; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
-      background: #f5f2e9;
-      color: #4a3b3b;
-      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #222831;
+      color: #f5f2eb;
+      line-height: 1.6;
       padding: 50px 20px;
     }
-    .wrap { max-width: 620px; margin: 0 auto; text-align: center; }
-    img.logo { width: 72px; height: 72px; margin-bottom: 16px; }
-    h1 { color: #946d6d; font-size: 26px; margin: 0 0 8px; }
-    p.lead { font-size: 15px; color: #6b6b66; line-height: 1.6; margin-bottom: 32px; }
-    .steps {
-      text-align: left;
-      background: #fffdf7;
-      border: 1.5px solid #e4dfce;
-      border-radius: 12px;
-      padding: 24px;
-      margin-bottom: 24px;
+    .wrap {
+      max-width: 720px;
+      margin: 0 auto;
     }
-    .step { display: flex; gap: 14px; margin-bottom: 18px; }
+    .hero {
+      text-align: center;
+      margin-bottom: 36px;
+    }
+    .logo {
+      width: 76px;
+      height: 76px;
+      margin-bottom: 16px;
+      border-radius: 16px;
+      box-shadow: 0 0 25px rgba(223, 208, 184, 0.25);
+      border: 1.5px solid rgba(223, 208, 184, 0.4);
+    }
+    h1 {
+      color: #DFD0B8;
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+    .brand-glow {
+      color: #DFD0B8;
+      text-shadow: 0 0 12px rgba(223, 208, 184, 0.4);
+    }
+    p.lead {
+      font-size: 15px;
+      color: #c5baaa;
+      max-width: 580px;
+      margin: 0 auto 24px;
+    }
+    .badge-bar {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 32px;
+    }
+    .pill {
+      background: rgba(57, 62, 70, 0.7);
+      border: 1px solid #948979;
+      color: #DFD0B8;
+      font-size: 11.5px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 999px;
+    }
+
+    .card {
+      background: rgba(44, 52, 64, 0.95);
+      border: 1px solid #393E46;
+      border-radius: 14px;
+      padding: 24px;
+      margin-bottom: 22px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+    }
+    h2 {
+      color: #DFD0B8;
+      font-size: 18px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .step {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
     .step:last-child { margin-bottom: 0; }
     .step-num {
       flex-shrink: 0;
-      width: 28px; height: 28px;
-      background: #a290b7;
-      color: #fffdf7;
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, #DFD0B8 0%, #948979 100%);
+      color: #222831;
+      border: 1px solid #DFD0B8;
       border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-weight: 700; font-size: 13px;
-    }
-    .step-body h3 { margin: 0 0 4px; font-size: 14.5px; color: #4a3b3b; }
-    .step-body p { margin: 0; font-size: 13px; color: #6b6b66; line-height: 1.5; }
-    a.cta {
-      display: inline-block;
-      background: #a290b7;
-      color: #fffdf7;
-      text-decoration: none;
-      padding: 12px 26px;
-      border-radius: 8px;
-      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
       font-size: 14px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
     }
-    a.cta:hover { background: #946d6d; }
-    .note {
-      margin-top: 24px;
-      font-size: 12px;
-      color: #8a8a86;
+    .step-body h3 {
+      font-size: 15px;
+      color: #ffffff;
+      margin-bottom: 4px;
     }
-    .note a { color: #a290b7; }
+    .step-body p {
+      font-size: 13.5px;
+      color: #c5baaa;
+      line-height: 1.55;
+    }
+    .step-body a {
+      color: #DFD0B8;
+      text-decoration: underline;
+      font-weight: 600;
+    }
+    .step-body a:hover { color: #ffffff; }
+
+    .code-box {
+      background: #171b21;
+      border: 1px solid #393E46;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-family: monospace;
+      font-size: 12.5px;
+      color: #DFD0B8;
+      margin: 8px 0;
+      user-select: all;
+    }
+
+    .cta-center {
+      text-align: center;
+      margin: 36px 0 20px;
+    }
+    a.cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(135deg, #DFD0B8 0%, #948979 100%);
+      color: #222831;
+      text-decoration: none;
+      padding: 13px 30px;
+      border-radius: 10px;
+      font-weight: 800;
+      font-size: 15px;
+      letter-spacing: 0.4px;
+      border: 1px solid #DFD0B8;
+      box-shadow: 0 6px 25px rgba(0, 0, 0, 0.4);
+      transition: all 0.2s ease;
+    }
+    a.cta:hover {
+      background: #DFD0B8;
+      box-shadow: 0 0 25px rgba(223, 208, 184, 0.45);
+      transform: translateY(-2px);
+    }
+
+    footer {
+      text-align: center;
+      font-size: 13px;
+      color: #948979;
+      margin-top: 30px;
+    }
+    footer a { color: #DFD0B8; text-decoration: none; }
   </style>
 </head>
 <body>
   <div class="wrap">
-    <img class="logo" src="icons/icon128.png" alt="Page Helper AI logo" />
-    <h1>Welcome to Page Helper AI 👋</h1>
-    <p class="lead">
-      Capture a screenshot of any webpage and get instant AI help — understand what's on the page,
-      or locate the option you're looking for. Setup takes about two minutes.
-    </p>
+    <div class="hero">
+      <img class="logo" src="icons/icon128.png" alt="DezignSnap logo" />
+      <h1>DezignSnap <span class="brand-glow">PRO</span></h1>
+      <p class="lead">
+        Your high-performance on-page AI visual assistant. Grounded screen intelligence powered by Groq, Gemini, OpenAI, OpenRouter, or local Ollama.
+      </p>
 
-    <div class="steps">
+      <div class="badge-bar">
+        <span class="pill">⚡ Groq Llama 3.2</span>
+        <span class="pill">✨ Gemini 3.6 Flash</span>
+        <span class="pill">🧠 GPT-4o</span>
+        <span class="pill">🌐 OpenRouter</span>
+        <span class="pill">💻 Local Ollama</span>
+        <span class="pill">⌨️ Alt+S Snipping</span>
+      </div>
+    </div>
+
+    <!-- QUICK SETUP -->
+    <div class="card">
+      <h2>🚀 Quick Setup in 4 Steps</h2>
+
       <div class="step">
         <div class="step-num">1</div>
         <div class="step-body">
-          <h3>Set your API key</h3>
-          <p>Open Settings and enter your OpenAI or Gemini API key. It's stored only in your browser.</p>
+          <h3>Get an API Key or Use Local AI</h3>
+          <p>
+            Choose your preferred provider:
+            <a href="https://console.groq.com/keys" target="_blank" rel="noopener">Groq (Ultra-Fast)</a> •
+            <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener">Gemini (Free)</a> •
+            <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener">OpenAI</a> •
+            <a href="https://openrouter.ai/keys" target="_blank" rel="noopener">OpenRouter</a> •
+            or run <strong>Ollama locally for 100% free offline usage</strong>.
+          </p>
         </div>
       </div>
+
       <div class="step">
         <div class="step-num">2</div>
         <div class="step-body">
-          <h3>Customize your instruction</h3>
-          <p>A default instruction is ready to go, but you can create your own presets for different tasks.</p>
+          <h3>Pin &amp; Configure</h3>
+          <p>
+            1. Pin the extension 📌 to your Chrome toolbar.<br />
+            2. Click the icon, open <strong>Settings</strong>, and save your API key.
+          </p>
         </div>
       </div>
+
       <div class="step">
         <div class="step-num">3</div>
         <div class="step-body">
-          <h3>Click the button on any page</h3>
-          <p>Look for "🧠 Solve with AI" in the bottom-right corner — click it and get your answer.</p>
+          <h3>Enable Local File Access (Optional)</h3>
+          <p>
+            To let the AI analyze local PDFs or images on your machine: Go to <code>chrome://extensions</code> &rarr; Click <em>Details</em> on this extension &rarr; Toggle <strong>"Allow access to file URLs"</strong> to ON.
+          </p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <h3>Start Snipping!</h3>
+          <p>
+            Press <strong>Alt + S</strong> or click <strong>🎯 Snip Area</strong> on any page, drag a rectangle over anything you want explained, and get instant answers!
+          </p>
         </div>
       </div>
     </div>
 
-    <a class="cta" href="options.html" target="_blank">Open Settings and Get Started →</a>
+    <!-- LOCAL OLLAMA SETUP -->
+    <div class="card">
+      <h2>💻 Local AI Setup (Ollama 100% Private)</h2>
+      <p style="color:#c5baaa; font-size:13.5px; margin-bottom:12px;">
+        To run local vision models without sending any screenshots over the internet, configure Ollama to accept browser requests by starting it with origins enabled:
+      </p>
+      <div class="code-box">set OLLAMA_ORIGINS=* &amp;&amp; ollama serve</div>
+      <p style="color:#c5baaa; font-size:13px; margin-top:8px;">
+        Then pull a vision model in your terminal: <code>ollama pull llama3.2-vision</code>, select Ollama in settings, and you are ready!
+      </p>
+    </div>
 
-    <p class="note">
-      Curious about your data? <a href="privacy-policy.html" target="_blank">Read the Privacy Policy</a>.
-    </p>
+    <!-- FEATURES & TIPS -->
+    <div class="card">
+      <h2>✨ Standout Features &amp; Tips</h2>
+      <div style="font-size:13.5px; color:#c5baaa; line-height: 1.7;">
+        <p>• <strong>Right-Click Text Ask:</strong> Highlight any sentence or code snippet on a page, right-click, and select <em>"⚡ Ask AI about selection"</em>.</p>
+        <p>• <strong>Custom Personas:</strong> Create custom modes in settings like <em>"Explain Like I'm 5"</em>, <em>"Roast My UI"</em>, or <em>"Target Finder"</em>.</p>
+        <p>• <strong>Smart Zoom Upscale:</strong> Selected regions are automatically cropped and upscaled 1.4x–2.5x via offscreen canvas for supreme OCR clarity.</p>
+        <p>• <strong>PDF Session Transcript:</strong> Export your full research Q&amp;A history with screenshots in one click.</p>
+      </div>
+    </div>
+
+    <div class="cta-center">
+      <a class="cta" href="options.html" target="_blank">⚙️ Open Settings &amp; Start Snipping →</a>
+    </div>
+
+    <footer>
+      <p>DezignSnap • <a href="privacy-policy.html" target="_blank">Privacy Policy</a> • <a href="options.html" target="_blank">Settings</a></p>
+    </footer>
   </div>
 </body>
 </html>

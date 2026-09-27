@@ -3,17 +3,19 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Page Helper AI — Screen Assistant Chrome Extension</title>
+  <title>DezignSnap — AI Visual Screen Assistant Chrome Extension</title>
   <style>
     :root {
-      --bg: #0f1117;
-      --card-bg: #181b26;
-      --border: #282d3f;
-      --text: #e2e8f0;
-      --muted: #94a3b8;
-      --primary: #8b5cf6;
-      --primary-hover: #7c3aed;
-      --accent: #38bdf8;
+      --bg: #222831;
+      --card-bg: rgba(44, 52, 64, 0.95);
+      --border: #393E46;
+      --text: #f5f2eb;
+      --muted: #c5baaa;
+      --taupe: #948979;
+      --primary: #DFD0B8;
+      --primary-hover: #ffffff;
+      --primary-text: #222831;
+      --glow: rgba(223, 208, 184, 0.35);
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -25,138 +27,187 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 32px 20px;
+      padding: 40px 20px;
+      background-image: radial-gradient(circle at 50% 0%, rgba(57, 62, 70, 0.5) 0%, rgba(34, 40, 49, 1) 70%);
     }
     .container {
-      max-width: 680px;
+      max-width: 760px;
       width: 100%;
       background: var(--card-bg);
       border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 40px 32px;
+      border-radius: 20px;
+      padding: 44px 36px;
       text-align: center;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 30px rgba(223, 208, 184, 0.12);
+      backdrop-filter: blur(12px);
     }
     .icon {
-      width: 80px;
-      height: 80px;
-      border-radius: 18px;
+      width: 88px;
+      height: 88px;
+      border-radius: 20px;
       margin-bottom: 20px;
-      box-shadow: 0 8px 24px rgba(139, 92, 246, 0.25);
+      box-shadow: 0 0 30px var(--glow);
+      border: 1.5px solid rgba(223, 208, 184, 0.5);
     }
     h1 {
-      font-size: 28px;
-      font-weight: 700;
-      color: #fff;
+      font-size: 32px;
+      font-weight: 800;
+      color: #DFD0B8;
       margin-bottom: 12px;
+      letter-spacing: 0.5px;
+    }
+    .brand-glow {
+      color: #ffffff;
+      text-shadow: 0 0 16px var(--glow);
     }
     p.lead {
       color: var(--muted);
       font-size: 16px;
       line-height: 1.6;
-      margin-bottom: 28px;
+      margin-bottom: 32px;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .engine-pills {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 32px;
+    }
+    .pill {
+      background: rgba(57, 62, 70, 0.7);
+      border: 1px solid var(--taupe);
+      color: #DFD0B8;
+      font-size: 11.5px;
+      font-weight: 700;
+      padding: 5px 12px;
+      border-radius: 999px;
     }
     .features {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 12px;
+      gap: 14px;
       text-align: left;
-      margin-bottom: 32px;
+      margin-bottom: 36px;
     }
-    @media (max-width: 560px) {
+    @media (max-width: 580px) {
       .features { grid-template-columns: 1fr; }
     }
     .feature-card {
-      background: rgba(255,255,255,0.03);
+      background: #1c2128;
       border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 14px 16px;
-      font-size: 14px;
-      color: #cbd5e1;
+      border-radius: 12px;
+      padding: 16px 18px;
+      font-size: 13.5px;
+      color: #f5f2eb;
+      line-height: 1.5;
+      transition: all 0.2s ease;
+    }
+    .feature-card:hover {
+      border-color: var(--primary);
+      box-shadow: 0 0 15px rgba(223, 208, 184, 0.2);
     }
     .feature-card strong {
-      color: #fff;
-      display: block;
-      margin-bottom: 4px;
+      color: #DFD0B8;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 5px;
       font-size: 14px;
     }
     .cta-row {
       display: flex;
       flex-wrap: wrap;
-      gap: 12px;
+      gap: 14px;
       justify-content: center;
-      margin-top: 12px;
+      margin-top: 16px;
     }
     .btn {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      padding: 12px 24px;
-      border-radius: 8px;
+      padding: 13px 28px;
+      border-radius: 10px;
       font-size: 15px;
-      font-weight: 600;
+      font-weight: 700;
       text-decoration: none;
       transition: all 0.2s ease;
     }
     .btn-primary {
-      background: var(--primary);
-      color: #fff;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--taupe) 100%);
+      color: var(--primary-text);
+      border: 1px solid var(--primary);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
     }
     .btn-primary:hover {
-      background: var(--primary-hover);
+      background: var(--primary);
+      box-shadow: 0 0 25px rgba(223, 208, 184, 0.45);
+      transform: translateY(-2px);
     }
     .btn-secondary {
-      background: transparent;
-      color: var(--text);
-      border: 1px solid var(--border);
+      background: #393E46;
+      color: var(--primary);
+      border: 1px solid var(--taupe);
     }
     .btn-secondary:hover {
-      background: rgba(255,255,255,0.05);
-      border-color: #475569;
+      background: var(--taupe);
+      border-color: var(--primary);
+      color: var(--primary-text);
+      transform: translateY(-2px);
     }
     footer {
-      margin-top: 28px;
-      color: #64748b;
+      margin-top: 36px;
+      color: var(--taupe);
       font-size: 13px;
     }
-    footer a { color: var(--muted); text-decoration: none; }
+    footer a { color: var(--primary); text-decoration: none; }
     footer a:hover { color: #fff; }
   </style>
 </head>
 <body>
   <div class="container">
-    <img src="icons/icon128.png" alt="Page Helper AI logo" class="icon" />
-    <h1>Page Helper AI</h1>
+    <img src="icons/icon128.png" alt="DezignSnap logo" class="icon" />
+    <h1>DezignSnap <span class="brand-glow">PRO</span></h1>
     <p class="lead">
-      Instant on-page AI visual assistant. Set an instruction once, then ask questions about any page or UI element using your own OpenAI (GPT-4o) or Google Gemini (3.6 Flash) API key.
+      The private visual AI copilot for your browser. Capture webpage screenshots or drag-select any element with Alt+S for instant, grounded AI answers.
     </p>
+
+    <div class="engine-pills">
+      <span class="pill">⚡ Groq Llama 3.2</span>
+      <span class="pill">✨ Gemini 3.6 Flash</span>
+      <span class="pill">🧠 GPT-4o</span>
+      <span class="pill">🌐 OpenRouter</span>
+      <span class="pill">💻 Local Ollama</span>
+    </div>
 
     <div class="features">
       <div class="feature-card">
-        <strong>🧠 Instant AI Answers</strong>
-        Captures screenshot and analyzes UI with strict visual grounding.
+        <strong>🎯 Select Area [Alt+S]</strong>
+        Drag-select region with automatic 2.5x sub-pixel upscaling for crisp text and tiny icon recognition.
       </div>
       <div class="feature-card">
-        <strong>🎯 Select Area</strong>
-        Drag-select region for high-precision cropped answers.
+        <strong>⚡ Multi-Engine Freedom</strong>
+        Switch between Groq, Gemini, OpenAI, OpenRouter, or run 100% offline with local Ollama.
       </div>
       <div class="feature-card">
-        <strong>🔒 Private & Direct</strong>
-        No middle server. Requests go directly from browser to OpenAI/Gemini.
+        <strong>🔒 Zero Middleman Privacy</strong>
+        Bring Your Own Key (BYOK) architecture. Requests dispatch directly from your browser — no proxy servers.
       </div>
       <div class="feature-card">
-        <strong>📄 Session PDF Export</strong>
-        Download complete conversation history and thumbnails in one click.
+        <strong>📄 Session PDF Reports</strong>
+        Compile your complete Q&amp;A history with embedded thumbnails into executive A4 PDF reports in one click.
       </div>
     </div>
 
     <div class="cta-row">
-      <a href="privacy-policy.html" class="btn btn-primary">📜 View Privacy Policy</a>
-      <a href="https://dezignwise.com" target="_blank" rel="noopener" class="btn btn-secondary">🌐 Dezignwise</a>
+      <a href="welcome.html" class="btn btn-primary">🚀 Setup Guide &amp; Manual</a>
+      <a href="privacy-policy.html" class="btn btn-secondary">📜 Privacy Policy</a>
     </div>
 
     <footer>
-      Created by Muhammad Hamza • <a href="privacy-policy.html">Privacy Policy</a> • Version 2.1.0
+      DezignSnap • Built by Muhammad Hamza • <a href="https://dezignwise.com" target="_blank" rel="noopener">Dezignwise</a>
     </footer>
   </div>
 </body>

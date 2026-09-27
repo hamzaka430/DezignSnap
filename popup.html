@@ -2,38 +2,58 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Page Helper AI</title>
+  <title>DezignSnap — AI Visual Assistant</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <div class="container">
     <header>
-      <div style="display:flex; align-items:center; gap:8px;">
-        <img src="icons/icon32.png" width="22" height="22" alt="" />
-        <h1>Page Helper AI</h1>
+      <div class="logo-wrap">
+        <img src="icons/icon32.png" width="22" height="22" alt="DezignSnap logo" />
+        <h1>DezignSnap <span class="brand-badge">PRO</span></h1>
       </div>
-      <button id="openOptionsBtn" title="Open full settings">⚙️</button>
+      <button id="openOptionsBtn" title="Settings & Providers">⚙️ Setup</button>
     </header>
 
     <div id="keyWarning" class="warning hidden">
-      ⚠️ No API key set. <a href="#" id="setupLink">Open Settings</a>
+      ⚠️ <span id="warningText">No API key set for active provider.</span> <a href="#" id="setupLink">Configure Key</a>
     </div>
 
-    <label for="providerSelect">AI Provider</label>
-    <select id="providerSelect">
-      <option value="openai">OpenAI (GPT-4o)</option>
-      <option value="gemini">Gemini (3.6 Flash)</option>
-    </select>
+    <div class="form-group">
+      <label for="providerSelect">
+        <span>AI Engine</span>
+        <span id="providerStatusText" style="color: #4ade80; text-transform:none; font-weight:normal;">Ready</span>
+      </label>
+      <select id="providerSelect">
+        <option value="groq">⚡ Groq (Llama 3.2 Vision - Fast)</option>
+        <option value="gemini">✨ Google Gemini (3.6 Flash)</option>
+        <option value="openai">🧠 OpenAI (GPT-4o)</option>
+        <option value="openrouter">🌐 OpenRouter (Multi-model)</option>
+        <option value="ollama">💻 Ollama (Local AI - 100% Free)</option>
+      </select>
+    </div>
 
-    <label for="presetSelect">Active Instruction</label>
-    <select id="presetSelect"></select>
+    <div class="form-group">
+      <label for="presetSelect">
+        <span>Persona / Mode</span>
+      </label>
+      <select id="presetSelect"></select>
+    </div>
 
-    <button id="fallbackAskBtn">🧠 Ask for this page now</button>
+    <div class="btn-group">
+      <button id="quickSnipBtn" class="btn btn-primary" title="Trigger area selection (Alt+S)">
+        🎯 Snip [Alt+S]
+      </button>
+      <button id="fallbackAskBtn" class="btn btn-secondary" title="Analyze full page (Alt+A)">
+        ⚡ Ask Page
+      </button>
+    </div>
+
     <p class="hint">
-      If the "Solve with AI" button isn't visible on a website, use this — it always works.
+      Tip: Right-click any text on a page to <strong>"Ask AI about selection"</strong>.
     </p>
-    <div id="fallbackAnswer" class="hidden"></div>
 
+    <div id="fallbackAnswer" class="hidden"></div>
     <div id="statusMsg" class="hidden"></div>
   </div>
 

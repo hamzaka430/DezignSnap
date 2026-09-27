@@ -23,12 +23,12 @@
     const btn = document.createElement("button");
     btn.id = "ph-ai-btn";
     btn.type = "button";
-    btn.textContent = "🧠 Solve with AI";
+    btn.textContent = "⚡ Snip & Ask";
 
     const regionBtn = document.createElement("button");
     regionBtn.id = "ph-region-btn";
     regionBtn.type = "button";
-    regionBtn.textContent = "🎯 Select Area";
+    regionBtn.textContent = "🎯 Snip Area [Alt+S]";
 
     const endBtn = document.createElement("button");
     endBtn.id = "ph-end-btn";
@@ -40,7 +40,7 @@
     panel.className = "ph-hidden";
     panel.innerHTML =
       '<div class="ph-panel-header">' +
-      "<span>AI Response</span>" +
+      "<span>⚡ DezignSnap AI</span>" +
       '<button id="ph-panel-close" type="button" aria-label="Close">✕</button>' +
       "</div>" +
       '<div id="ph-panel-body"></div>' +
@@ -68,7 +68,20 @@
     endBtn.addEventListener("click", onEndSessionClick);
     followupSend.addEventListener("click", sendFollowup);
     followupInput.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") sendFollowup();
+      if (e.key === "Enter") sendFollowup(e);
+    });
+
+    // Listen for extension commands (e.g. Alt+S hotkey or right-click text query)
+    chrome.runtime.onMessage.addListener((message) => {
+      if (message && message.type === "TRIGGER_SNIP") {
+        startRegionSelection({ isTrusted: true });
+      } else if (message && message.type === "START_TEXT_QUERY") {
+        resetPanel();
+        appendUserBubble(`Selected: "${message.text}"`);
+        appendLoading("🧠 Analyzing selected text...");
+      } else if (message && message.type === "SHOW_RESULT") {
+        handleResponse(message.result);
+      }
     });
   }
 
@@ -153,10 +166,16 @@
     }
   }
 
-  function onSolveClick() {
+  let isRequestInFlight = false;
+
+  function onSolveClick(e) {
+    if (e && !e.isTrusted) return; // Prevent malicious host-page script clickjacking
+    if (isRequestInFlight) return;
+    isRequestInFlight = true;
     resetPanel();
     appendLoading("📸 Capturing screenshot and preparing your answer...");
     chrome.runtime.sendMessage({ type: "SOLVE_WITH_AI" }, (response) => {
+      isRequestInFlight = false;
       if (response && response.success && response.instructionUsed) {
         clearLoading();
         appendUserBubble(response.instructionUsed);
@@ -168,7 +187,9 @@
     });
   }
 
-  function startRegionSelection() {
+  function startRegionSelection(e) {
+    if (e && !e.isTrusted) return; // Prevent malicious host-page script clickjacking
+    if (isRequestInFlight) return;
     const overlay = document.createElement("div");
     overlay.id = "ph-select-overlay";
 
@@ -180,6 +201,7 @@
     let startX = 0, startY = 0, dragging = false;
 
     function onMouseDown(e) {
+      if (e && !e.isTrusted) return;
       dragging = true;
       startX = e.clientX;
       startY = e.clientY;
@@ -203,6 +225,10 @@
     }
 
     function onMouseUp(e) {
+      if (e && !e.isTrusted) {
+        cleanup();
+        return;
+      }
       dragging = false;
       const x = Math.min(startX, e.clientX);
       const y = Math.min(startY, e.clientY);
@@ -214,10 +240,14 @@
 
       const region = { x, y, width, height, dpr: window.devicePixelRatio || 1 };
 
+      isRequestInFlight = true;
       resetPanel();
       appendUserBubble("[Selected area] 🎯");
       appendLoading("🔍 Analyzing the selected area...");
-      chrome.runtime.sendMessage({ type: "SOLVE_WITH_AI_REGION", region }, handleResponse);
+      chrome.runtime.sendMessage({ type: "SOLVE_WITH_AI_REGION", region }, (res) => {
+        isRequestInFlight = false;
+        handleResponse(res);
+      });
     }
 
     function onKeyDown(e) {
@@ -240,16 +270,23 @@
     document.documentElement.appendChild(overlay);
   }
 
-  function sendFollowup() {
+  function sendFollowup(e) {
+    if (e && !e.isTrusted) return; // Prevent malicious host-page script clickjacking
+    if (isRequestInFlight) return;
     const q = followupInput.value.trim();
     if (!q) return;
+    isRequestInFlight = true;
     appendUserBubble(q);
     followupInput.value = "";
     appendLoading("Thinking...");
-    chrome.runtime.sendMessage({ type: "FOLLOWUP_WITH_AI", question: q }, handleResponse);
+    chrome.runtime.sendMessage({ type: "FOLLOWUP_WITH_AI", question: q }, (res) => {
+      isRequestInFlight = false;
+      handleResponse(res);
+    });
   }
 
-  function onEndSessionClick() {
+  function onEndSessionClick(e) {
+    if (e && !e.isTrusted) return;
     const endBtn = document.getElementById("ph-end-btn");
     if (!endBtn) return;
     endBtn.disabled = true;

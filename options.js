@@ -1,9 +1,16 @@
-const providerOpenAI = document.getElementById("providerOpenAI");
-const providerGemini = document.getElementById("providerGemini");
-const openaiKeyInput = document.getElementById("openaiKeyInput");
+const groqKeyInput = document.getElementById("groqKeyInput");
 const geminiKeyInput = document.getElementById("geminiKeyInput");
-const saveOpenAIKeyBtn = document.getElementById("saveOpenAIKeyBtn");
+const openaiKeyInput = document.getElementById("openaiKeyInput");
+const openrouterKeyInput = document.getElementById("openrouterKeyInput");
+const ollamaEndpointInput = document.getElementById("ollamaEndpointInput");
+const ollamaModelInput = document.getElementById("ollamaModelInput");
+
+const saveGroqKeyBtn = document.getElementById("saveGroqKeyBtn");
 const saveGeminiKeyBtn = document.getElementById("saveGeminiKeyBtn");
+const saveOpenAIKeyBtn = document.getElementById("saveOpenAIKeyBtn");
+const saveOpenRouterKeyBtn = document.getElementById("saveOpenRouterKeyBtn");
+const saveOllamaBtn = document.getElementById("saveOllamaBtn");
+
 const keyStatus = document.getElementById("keyStatus");
 const presetList = document.getElementById("presetList");
 const newPresetName = document.getElementById("newPresetName");
@@ -11,6 +18,9 @@ const newPresetText = document.getElementById("newPresetText");
 const addPresetBtn = document.getElementById("addPresetBtn");
 const historyCount = document.getElementById("historyCount");
 const clearHistoryBtn = document.getElementById("clearHistoryBtn");
+const exportPdfBtn = document.getElementById("exportPdfBtn");
+
+const radioCards = document.querySelectorAll(".radio-card");
 
 init();
 
@@ -18,88 +28,131 @@ async function init() {
   const {
     openaiApiKey = "",
     geminiApiKey = "",
-    activeProvider = "openai",
+    groqApiKey = "",
+    openrouterApiKey = "",
+    ollamaEndpoint = "http://localhost:11434",
+    ollamaModel = "llama3.2-vision",
+    activeProvider = "groq",
     instructionPresets = [],
     activePresetId,
     sessionHistory = [],
   } = await chrome.storage.local.get([
     "openaiApiKey",
     "geminiApiKey",
+    "groqApiKey",
+    "openrouterApiKey",
+    "ollamaEndpoint",
+    "ollamaModel",
     "activeProvider",
     "instructionPresets",
     "activePresetId",
     "sessionHistory",
   ]);
 
-  openaiKeyInput.value = openaiApiKey;
+  groqKeyInput.value = groqApiKey;
   geminiKeyInput.value = geminiApiKey;
-  if (activeProvider === "gemini") {
-    providerGemini.checked = true;
-  } else {
-    providerOpenAI.checked = true;
-  }
+  openaiKeyInput.value = openaiApiKey;
+  openrouterKeyInput.value = openrouterApiKey;
+  ollamaEndpointInput.value = ollamaEndpoint;
+  ollamaModelInput.value = ollamaModel;
 
+  setActiveProviderCard(activeProvider);
   renderPresets(instructionPresets, activePresetId);
   historyCount.textContent = sessionHistory.length;
 }
 
-providerOpenAI.addEventListener("change", () => {
-  if (providerOpenAI.checked) chrome.storage.local.set({ activeProvider: "openai" });
-});
-providerGemini.addEventListener("change", () => {
-  if (providerGemini.checked) chrome.storage.local.set({ activeProvider: "gemini" });
+function setActiveProviderCard(provider) {
+  radioCards.forEach((card) => {
+    const radio = card.querySelector('input[type="radio"]');
+    if (radio.value === provider) {
+      card.classList.add("active");
+      radio.checked = true;
+    } else {
+      card.classList.remove("active");
+    }
+  });
+}
+
+radioCards.forEach((card) => {
+  card.addEventListener("click", async () => {
+    const radio = card.querySelector('input[type="radio"]');
+    const val = radio.value;
+    setActiveProviderCard(val);
+    await chrome.storage.local.set({ activeProvider: val });
+    showStatus(`Active engine switched to ${val.toUpperCase()} ⚡`, true);
+  });
 });
 
-saveOpenAIKeyBtn.addEventListener("click", async () => {
-  const key = openaiKeyInput.value.trim();
-  if (!key) {
-    showStatus("The OpenAI key cannot be empty.", false);
-    return;
+saveGroqKeyBtn.addEventListener("click", async () => {
+  const key = groqKeyInput.value.trim();
+  if (!key) return showStatus("Groq API key cannot be empty.", false);
+  if (!key.startsWith("gsk_")) {
+    return showStatus("Warning: Groq keys typically start with 'gsk_'.", false);
   }
-  if (!key.startsWith("sk-")) {
-    showStatus("This doesn't look like a valid OpenAI key (should start with 'sk-').", false);
-    return;
-  }
-  await chrome.storage.local.set({ openaiApiKey: key });
-  showStatus("OpenAI API key saved ✅", true);
+  await chrome.storage.local.set({ groqApiKey: key });
+  showStatus("Groq API key saved successfully ✅", true);
 });
 
 saveGeminiKeyBtn.addEventListener("click", async () => {
   const key = geminiKeyInput.value.trim();
-  if (!key) {
-    showStatus("The Gemini key cannot be empty.", false);
-    return;
-  }
+  if (!key) return showStatus("Gemini API key cannot be empty.", false);
   await chrome.storage.local.set({ geminiApiKey: key });
-  showStatus("Gemini API key saved ✅", true);
+  showStatus("Gemini API key saved successfully ✅", true);
+});
+
+saveOpenAIKeyBtn.addEventListener("click", async () => {
+  const key = openaiKeyInput.value.trim();
+  if (!key) return showStatus("OpenAI API key cannot be empty.", false);
+  if (!key.startsWith("sk-")) {
+    return showStatus("Warning: OpenAI keys typically start with 'sk-'.", false);
+  }
+  await chrome.storage.local.set({ openaiApiKey: key });
+  showStatus("OpenAI API key saved successfully ✅", true);
+});
+
+saveOpenRouterKeyBtn.addEventListener("click", async () => {
+  const key = openrouterKeyInput.value.trim();
+  if (!key) return showStatus("OpenRouter key cannot be empty.", false);
+  await chrome.storage.local.set({ openrouterApiKey: key });
+  showStatus("OpenRouter API key saved successfully ✅", true);
+});
+
+saveOllamaBtn.addEventListener("click", async () => {
+  const endpoint = ollamaEndpointInput.value.trim() || "http://localhost:11434";
+  const model = ollamaModelInput.value.trim() || "llama3.2-vision";
+  await chrome.storage.local.set({ ollamaEndpoint: endpoint, ollamaModel: model });
+  showStatus(`Ollama configuration saved (${model}) ✅`, true);
 });
 
 function showStatus(text, ok) {
   keyStatus.textContent = text;
-  keyStatus.style.color = ok ? "#4a7a4a" : "#b0524f";
+  keyStatus.style.background = ok ? "rgba(57, 62, 70, 0.95)" : "rgba(57, 62, 70, 0.95)";
+  keyStatus.style.color = ok ? "#DFD0B8" : "#ff8585";
+  keyStatus.style.border = ok ? "1px solid #948979" : "1px solid #e06c75";
   keyStatus.classList.remove("hidden");
   setTimeout(() => keyStatus.classList.add("hidden"), 3500);
 }
 
 function renderPresets(presets, activeId) {
   presetList.innerHTML = "";
-  if (presets.length === 0) {
-    presetList.innerHTML = '<p class="desc">No presets yet. Add one below.</p>';
+  if (!presets || presets.length === 0) {
+    presetList.innerHTML = '<p class="desc">No modes configured yet. Add one below.</p>';
     return;
   }
 
   presets.forEach((preset) => {
     const isActive = preset.id === activeId;
+    const safeId = escapeHtml(preset.id);
     const div = document.createElement("div");
     div.className = "preset" + (isActive ? " active" : "");
     div.innerHTML = `
-      <input type="radio" name="activePreset" ${isActive ? "checked" : ""} data-id="${preset.id}" />
+      <input type="radio" name="activePreset" ${isActive ? "checked" : ""} data-id="${safeId}" />
       <div class="preset-body">
         <div class="preset-name">${escapeHtml(preset.name)}</div>
         <div class="preset-text">${escapeHtml(preset.text)}</div>
         <div class="preset-actions">
-          <button class="ghost edit-btn" data-id="${preset.id}">Edit</button>
-          <button class="ghost delete-btn" data-id="${preset.id}">Delete</button>
+          <button class="ghost edit-btn" data-id="${safeId}">Edit</button>
+          <button class="ghost delete-btn" data-id="${safeId}">Delete</button>
         </div>
       </div>
     `;
@@ -121,9 +174,9 @@ function renderPresets(presets, activeId) {
       const { instructionPresets = [] } = await chrome.storage.local.get(["instructionPresets"]);
       const preset = instructionPresets.find((p) => p.id === id);
       if (!preset) return;
-      const newName = prompt("Preset name:", preset.name);
+      const newName = prompt("Mode name:", preset.name);
       if (newName === null) return;
-      const newText = prompt("Instruction:", preset.text);
+      const newText = prompt("Instruction prompt:", preset.text);
       if (newText === null) return;
       preset.name = newName.trim() || preset.name;
       preset.text = newText.trim() || preset.text;
@@ -141,10 +194,10 @@ function renderPresets(presets, activeId) {
         "activePresetId",
       ]);
       if (instructionPresets.length <= 1) {
-        alert("At least one preset is required — create a new one first, then delete this one.");
+        alert("At least one mode is required.");
         return;
       }
-      if (!confirm("Delete this preset?")) return;
+      if (!confirm("Delete this mode?")) return;
       const updated = instructionPresets.filter((p) => p.id !== id);
       let newActiveId = activePresetId;
       if (activePresetId === id) newActiveId = updated[0].id;
@@ -158,7 +211,7 @@ addPresetBtn.addEventListener("click", async () => {
   const name = newPresetName.value.trim();
   const text = newPresetText.value.trim();
   if (!name || !text) {
-    alert("Please enter both a name and an instruction.");
+    alert("Please enter both a mode name and instruction text.");
     return;
   }
   const { instructionPresets = [] } = await chrome.storage.local.get(["instructionPresets"]);
@@ -168,16 +221,25 @@ addPresetBtn.addEventListener("click", async () => {
   newPresetName.value = "";
   newPresetText.value = "";
   renderPresets(instructionPresets, id);
+  showStatus(`Mode "${name}" created ✅`, true);
 });
 
 clearHistoryBtn.addEventListener("click", async () => {
-  if (!confirm("This will permanently delete your entire session history. Continue?")) return;
+  if (!confirm("This will permanently clear your session history. Continue?")) return;
   await chrome.storage.local.set({ sessionHistory: [] });
   historyCount.textContent = "0";
+  showStatus("Session history cleared.", true);
+});
+
+exportPdfBtn.addEventListener("click", () => {
+  chrome.tabs.create({ url: chrome.runtime.getURL("session.html") });
 });
 
 function escapeHtml(str) {
-  const d = document.createElement("div");
-  d.textContent = str || "";
-  return d.innerHTML;
+  return String(str || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 }

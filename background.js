@@ -1,9 +1,44 @@
-const OPENAI_MODEL = "gpt-4o";
-const GEMINI_MODEL = "gemini-3.6-flash";
+/**
+ * Page Helper AI / Snip & Ask — Background Service Worker
+ * Supports: OpenAI (GPT-4o), Google Gemini, Groq, OpenRouter, and Ollama (Local AI)
+ */
+
+const PROVIDER_CONFIGS = {
+  openai: {
+    label: "OpenAI",
+    endpoint: "https://api.openai.com/v1/chat/completions",
+    defaultModel: "gpt-4o",
+    type: "openai_compat",
+  },
+  gemini: {
+    label: "Google Gemini",
+    endpoint: "https://generativelanguage.googleapis.com/v1beta/models",
+    defaultModel: "gemini-3.6-flash",
+    type: "gemini",
+  },
+  groq: {
+    label: "Groq (Ultra-Fast)",
+    endpoint: "https://api.groq.com/openai/v1/chat/completions",
+    defaultModel: "llama-3.2-11b-vision-preview",
+    type: "openai_compat",
+  },
+  openrouter: {
+    label: "OpenRouter",
+    endpoint: "https://openrouter.ai/api/v1/chat/completions",
+    defaultModel: "google/gemini-2.0-flash-001",
+    type: "openai_compat",
+  },
+  ollama: {
+    label: "Ollama (Local AI)",
+    endpoint: "http://localhost:11434/v1/chat/completions",
+    defaultModel: "llama3.2-vision",
+    type: "ollama",
+  },
+};
 
 const SYSTEM_PROMPT =
   "You are a page-understanding assistant. The user has configured a fixed instruction that you must follow every time, " +
-  "and you are given a screenshot of the current webpage (this may be the full visible page, or a specific region the user selected and zoomed into). " +
+  "and you are given a screenshot of the current webpage (this may be the full visible page, or a specific region the user selected and zoomed into) or highlighted text. " +
   "RULES: " +
   "1) Only state what is CLEARLY visible in the screenshot — if something is blurry, cut off, or not visible, do not guess; state plainly that it is not visible. " +
   "2) Do not fill in facts from your training knowledge when the screenshot itself shows that content — what is on screen is the source of truth. " +
@@ -15,22 +50,57 @@ const SYSTEM_PROMPT =
   "If the user asks a follow-up question, remember the prior conversation and answer with reference to the same screenshot. " +
   "Respond in the same language the user's instruction is written in.";
 
-const DEFAULT_PRESET = {
-  id: "default",
-  name: "General page helper",
-  text: "Explain what this page is about, or tell me the exact location of the option/button I'm looking for.",
-};
+const DEFAULT_PRESETS = [
+  {
+    id: "default",
+    name: "General page helper",
+    text: "Explain what this page is about, or tell me the exact location of the option/button I'm looking for.",
+  },
+  {
+    id: "eli5",
+    name: "Explain Like I'm 5 (ELI5)",
+    text: "Explain what is on this screen in super simple terms that a 5-year-old or non-technical beginner would understand. Use bullet points.",
+  },
+  {
+    id: "roast",
+    name: "Roast My UI / Code",
+    text: "Give a witty, humorous, but constructive roast and design critique of the UI, layout, typography, or code visible on this screen.",
+  },
+  {
+    id: "finder",
+    name: "Target Option Finder",
+    text: "Locate the specific button, setting, or navigation link on this screen. State its exact visual position (e.g. top-right, under header) and color.",
+  },
+  {
+    id: "translate",
+    name: "Translate & Summarize",
+    text: "Translate any text on this screen to clear English and provide a short executive summary.",
+  },
+  {
+    id: "bug_hunter",
+    name: "Bug & Edge Case Hunter",
+    text: "Audit this UI for design bugs, alignment errors, contrast issues, or UX anti-patterns.",
+  },
+];
 
 // tabId -> { id, provider, apiKey, screenshotDataUrl, thumbnail, pageTitle, pageUrl, startedAt, turns: [{role, text, confidence}] }
 const activeConversations = new Map();
+const inFlightTabs = new Set();
 
 chrome.runtime.onInstalled.addListener((details) => {
+  // Context menu for quick right-click text queries
+  chrome.contextMenus.create({
+    id: "ph_ask_text",
+    title: "⚡ Ask AI about '%s'",
+    contexts: ["selection"],
+  });
+
   if (details.reason === "install") {
     chrome.storage.local.get(["instructionPresets", "activeProvider"], (result) => {
       if (!result.instructionPresets || result.instructionPresets.length === 0) {
         chrome.storage.local.set({
-          instructionPresets: [DEFAULT_PRESET],
-          activePresetId: DEFAULT_PRESET.id,
+          instructionPresets: DEFAULT_PRESETS,
+          activePresetId: DEFAULT_PRESETS[0].id,
         });
       }
       if (!result.activeProvider) {
@@ -39,6 +109,28 @@ chrome.runtime.onInstalled.addListener((details) => {
     });
     chrome.tabs.create({ url: chrome.runtime.getURL("welcome.html") });
   }
+});
+
+// Handle right click context menu selection
+chrome.contextMenus.onClicked.addListener((info, tab) => {
+  if (info.menuItemId === "ph_ask_text" && info.selectionText) {
+    handleTextQuery(tab, info.selectionText);
+  }
+});
+
+// Handle keyboard shortcuts (Alt+S for snip, Alt+A for full page)
+chrome.commands.onCommand.addListener((command) => {
+  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    const tab = tabs && tabs[0];
+    if (!tab || !tab.id) return;
+    if (command === "snip_screen") {
+      chrome.tabs.sendMessage(tab.id, { type: "TRIGGER_SNIP" });
+    } else if (command === "solve_full_page") {
+      handleSolve(tab, (res) => {
+        chrome.tabs.sendMessage(tab.id, { type: "SHOW_RESULT", result: res });
+      });
+    }
+  });
 });
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -65,40 +157,154 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 });
 
-// Free the in-memory conversation when its tab is closed.
-chrome.tabs.onRemoved.addListener((tabId) => activeConversations.delete(tabId));
+// Free the in-memory conversation when its tab is closed
+chrome.tabs.onRemoved.addListener((tabId) => {
+  activeConversations.delete(tabId);
+  inFlightTabs.delete(tabId);
+});
 
 async function handleSolve(tab, sendResponse) {
+  if (tab && tab.id && inFlightTabs.has(tab.id)) {
+    sendResponse({ success: false, error: "An AI analysis is already running for this tab. Please wait a moment." });
+    return;
+  }
+  if (tab && tab.id) inFlightTabs.add(tab.id);
+
   try {
     const check = await validateBasics(tab);
     if (!check.ok) return sendResponse(check.response);
-    const { provider, apiKey, aiInstruction } = check;
+    const { providerInfo, aiInstruction } = check;
 
     const dataUrl = await captureTab(tab.windowId);
-    await runFreshConversation({ tab, provider, apiKey, screenshotDataUrl: dataUrl, instruction: aiInstruction, sendResponse });
+    await runFreshConversation({
+      tab,
+      providerInfo,
+      screenshotDataUrl: dataUrl,
+      instruction: aiInstruction,
+      sendResponse,
+    });
   } catch (err) {
     sendResponse({ success: false, error: err.message || String(err) });
+  } finally {
+    if (tab && tab.id) inFlightTabs.delete(tab.id);
   }
 }
 
 async function handleSolveRegion(tab, region, sendResponse) {
+  if (tab && tab.id && inFlightTabs.has(tab.id)) {
+    sendResponse({ success: false, error: "An AI analysis is already running for this tab. Please wait a moment." });
+    return;
+  }
+
+  // Strict region validation against malformed or malicious payloads
+  if (
+    !region ||
+    typeof region.x !== "number" ||
+    typeof region.y !== "number" ||
+    typeof region.width !== "number" ||
+    typeof region.height !== "number" ||
+    !Number.isFinite(region.x) ||
+    !Number.isFinite(region.y) ||
+    !Number.isFinite(region.width) ||
+    !Number.isFinite(region.height) ||
+    region.width < 10 ||
+    region.height < 10
+  ) {
+    sendResponse({ success: false, error: "Invalid selection area dimensions. Please select a larger region." });
+    return;
+  }
+
+  if (tab && tab.id) inFlightTabs.add(tab.id);
+
   try {
     const check = await validateBasics(tab);
     if (!check.ok) return sendResponse(check.response);
-    const { provider, apiKey, aiInstruction } = check;
-
-    if (!region || !region.width || !region.height) {
-      sendResponse({ success: false, error: "Invalid selection area." });
-      return;
-    }
+    const { providerInfo, aiInstruction } = check;
 
     const fullShot = await captureTab(tab.windowId);
     const croppedDataUrl = await cropAndUpscale(fullShot, region);
     const focusedInstruction = `${aiInstruction}\n\n(Note: this screenshot is ONLY the specific area the user selected and zoomed into.)`;
 
-    await runFreshConversation({ tab, provider, apiKey, screenshotDataUrl: croppedDataUrl, instruction: focusedInstruction, displayInstruction: aiInstruction, sendResponse });
+    await runFreshConversation({
+      tab,
+      providerInfo,
+      screenshotDataUrl: croppedDataUrl,
+      instruction: focusedInstruction,
+      displayInstruction: aiInstruction,
+      sendResponse,
+    });
   } catch (err) {
     sendResponse({ success: false, error: err.message || String(err) });
+  } finally {
+    if (tab && tab.id) inFlightTabs.delete(tab.id);
+  }
+}
+
+async function handleTextQuery(tab, selectedText) {
+  if (!tab || !tab.id) return;
+  chrome.tabs.sendMessage(tab.id, { type: "START_TEXT_QUERY", text: selectedText });
+
+  try {
+    const providerInfo = await getActiveProviderAndKey();
+    if (!providerInfo.apiKey && providerInfo.provider !== "ollama") {
+      chrome.tabs.sendMessage(tab.id, {
+        type: "SHOW_RESULT",
+        result: { success: false, error: `Please set your ${providerInfo.providerLabel} API key in Settings first.` },
+      });
+      return;
+    }
+
+    const prompt = `Selected text from the webpage:\n"${selectedText}"\n\nPlease explain what this means, define any unfamiliar terms, or answer any question it raises concisely.`;
+    const turns = [{ role: "user", text: prompt }];
+
+    let raw;
+    if (providerInfo.type === "gemini") {
+      raw = await askGeminiMultiTurn(providerInfo.apiKey, null, turns, providerInfo.model);
+    } else {
+      raw = await askOpenAICompatibleMultiTurn({
+        endpoint: providerInfo.endpoint,
+        model: providerInfo.model,
+        apiKey: providerInfo.apiKey,
+        screenshotDataUrl: null,
+        turns,
+        isOllama: providerInfo.provider === "ollama",
+      });
+    }
+
+    const { text, confidence } = parseConfidence(raw);
+    const conv = {
+      id: "conv_" + Date.now() + "_" + Math.random().toString(36).slice(2, 8),
+      providerInfo,
+      screenshotDataUrl: null,
+      thumbnail: null,
+      pageTitle: tab.title || "",
+      pageUrl: tab.url || "",
+      startedAt: Date.now(),
+      lastUpdated: Date.now(),
+      turns: [
+        { role: "user", text: `Selected text: "${selectedText}"` },
+        { role: "assistant", text, confidence: confidence || "High" },
+      ],
+    };
+
+    activeConversations.set(tab.id, conv);
+    await upsertSessionHistoryFromConv(conv, tab);
+
+    chrome.tabs.sendMessage(tab.id, {
+      type: "SHOW_RESULT",
+      result: {
+        success: true,
+        answer: text,
+        confidence: confidence || "High",
+        instructionUsed: `Selected text: "${selectedText}"`,
+        conversationId: conv.id,
+      },
+    });
+  } catch (err) {
+    chrome.tabs.sendMessage(tab.id, {
+      type: "SHOW_RESULT",
+      result: { success: false, error: err.message || String(err) },
+    });
   }
 }
 
@@ -108,24 +314,42 @@ async function handleFollowup(tab, question, sendResponse) {
       sendResponse({ success: false, error: "Could not identify the tab." });
       return;
     }
-    const conv = activeConversations.get(tab.id);
-    if (!conv) {
-      sendResponse({ success: false, error: "Start with 'Solve with AI' or 'Select Area' first, then ask a follow-up." });
+    if (inFlightTabs.has(tab.id)) {
+      sendResponse({ success: false, error: "An AI request is already in progress for this tab. Please wait." });
       return;
     }
-    if (!question || !question.trim()) {
+    const conv = activeConversations.get(tab.id);
+    if (!conv) {
+      sendResponse({ success: false, error: "Start with 'Snip & Ask' or 'Select Area' first, then ask a follow-up." });
+      return;
+    }
+    const trimmedQuestion = (question || "").trim();
+    if (!trimmedQuestion) {
       sendResponse({ success: false, error: "Please enter a follow-up question." });
       return;
     }
+    if (trimmedQuestion.length > 2000) {
+      sendResponse({ success: false, error: "Follow-up question exceeds maximum allowed length (2,000 characters)." });
+      return;
+    }
 
-    conv.turns.push({ role: "user", text: question.trim() });
+    inFlightTabs.add(tab.id);
+    conv.turns.push({ role: "user", text: trimmedQuestion });
 
     let raw;
     try {
-      raw =
-        conv.provider === "gemini"
-          ? await askGeminiMultiTurn(conv.apiKey, conv.screenshotDataUrl, conv.turns)
-          : await askOpenAIMultiTurn(conv.apiKey, conv.screenshotDataUrl, conv.turns);
+      if (conv.providerInfo.type === "gemini") {
+        raw = await askGeminiMultiTurn(conv.providerInfo.apiKey, conv.screenshotDataUrl, conv.turns, conv.providerInfo.model);
+      } else {
+        raw = await askOpenAICompatibleMultiTurn({
+          endpoint: conv.providerInfo.endpoint,
+          model: conv.providerInfo.model,
+          apiKey: conv.providerInfo.apiKey,
+          screenshotDataUrl: conv.screenshotDataUrl,
+          turns: conv.turns,
+          isOllama: conv.providerInfo.provider === "ollama",
+        });
+      }
     } catch (err) {
       conv.turns.pop(); // roll back the failed turn so the user can retry cleanly
       throw err;
@@ -139,6 +363,8 @@ async function handleFollowup(tab, question, sendResponse) {
     sendResponse({ success: true, answer: text, confidence, conversationId: conv.id });
   } catch (err) {
     sendResponse({ success: false, error: err.message || String(err) });
+  } finally {
+    if (tab && tab.id) inFlightTabs.delete(tab.id);
   }
 }
 
@@ -146,11 +372,23 @@ async function validateBasics(tab) {
   const providerInfo = await getActiveProviderAndKey();
   const aiInstruction = await getActiveInstruction();
 
-  if (!providerInfo.apiKey) {
-    return { ok: false, response: { success: false, error: `Please set your ${providerInfo.providerLabel} API key in Settings first.` } };
+  if (providerInfo.provider !== "ollama" && !providerInfo.apiKey) {
+    return {
+      ok: false,
+      response: { success: false, error: `Please set your ${providerInfo.providerLabel} API key in Settings first.` },
+    };
   }
   if (providerInfo.provider === "openai" && !providerInfo.apiKey.startsWith("sk-")) {
-    return { ok: false, response: { success: false, error: "This doesn't look like a valid OpenAI API key (should start with 'sk-'). Please check Settings." } };
+    return {
+      ok: false,
+      response: { success: false, error: "This doesn't look like a valid OpenAI API key (should start with 'sk-'). Please check Settings." },
+    };
+  }
+  if (providerInfo.provider === "groq" && !providerInfo.apiKey.startsWith("gsk_")) {
+    return {
+      ok: false,
+      response: { success: false, error: "This doesn't look like a valid Groq API key (should start with 'gsk_'). Please check Settings." },
+    };
   }
   if (!aiInstruction || !aiInstruction.trim()) {
     return { ok: false, response: { success: false, error: "Please set or select an instruction in Settings first." } };
@@ -164,17 +402,26 @@ async function validateBasics(tab) {
       response: { success: false, error: "This page (a browser-internal, file, or extension page) cannot be captured. Try this on a regular website." },
     };
   }
-  return { ok: true, provider: providerInfo.provider, apiKey: providerInfo.apiKey, aiInstruction };
+  return { ok: true, providerInfo, aiInstruction };
 }
 
-async function runFreshConversation({ tab, provider, apiKey, screenshotDataUrl, instruction, displayInstruction, sendResponse }) {
+async function runFreshConversation({ tab, providerInfo, screenshotDataUrl, instruction, displayInstruction, sendResponse }) {
   const blankCheck = await detectBlankOrBlackCapture(screenshotDataUrl);
   const turns = [{ role: "user", text: instruction }];
 
-  const raw =
-    provider === "gemini"
-      ? await askGeminiMultiTurn(apiKey, screenshotDataUrl, turns)
-      : await askOpenAIMultiTurn(apiKey, screenshotDataUrl, turns);
+  let raw;
+  if (providerInfo.type === "gemini") {
+    raw = await askGeminiMultiTurn(providerInfo.apiKey, screenshotDataUrl, turns, providerInfo.model);
+  } else {
+    raw = await askOpenAICompatibleMultiTurn({
+      endpoint: providerInfo.endpoint,
+      model: providerInfo.model,
+      apiKey: providerInfo.apiKey,
+      screenshotDataUrl,
+      turns,
+      isOllama: providerInfo.provider === "ollama",
+    });
+  }
 
   const { text, confidence } = parseConfidence(raw);
 
@@ -184,8 +431,7 @@ async function runFreshConversation({ tab, provider, apiKey, screenshotDataUrl, 
 
   const conv = {
     id: "conv_" + Date.now() + "_" + Math.random().toString(36).slice(2, 8),
-    provider,
-    apiKey,
+    providerInfo,
     screenshotDataUrl,
     thumbnail: await makeThumbnail(screenshotDataUrl),
     pageTitle: tab.title || "",
@@ -220,7 +466,7 @@ async function upsertSessionHistoryFromConv(conv, tab) {
     lastUpdated: conv.lastUpdated || conv.startedAt,
     pageTitle: tab.title || conv.pageTitle || "",
     pageUrl: tab.url || conv.pageUrl || "",
-    provider: conv.provider,
+    provider: conv.providerInfo ? conv.providerInfo.providerLabel : "AI",
     turns: conv.turns,
     instruction: conv.turns[0]?.text || "",
     answer: lastAssistant?.text || "",
@@ -241,14 +487,49 @@ function parseConfidence(rawText) {
 }
 
 async function getActiveProviderAndKey() {
-  const { activeProvider = "openai", openaiApiKey = "", geminiApiKey = "" } = await chrome.storage.local.get([
+  const {
+    activeProvider = "openai",
+    openaiApiKey = "",
+    geminiApiKey = "",
+    groqApiKey = "",
+    openrouterApiKey = "",
+    ollamaEndpoint = "http://localhost:11434",
+    ollamaModel = "llama3.2-vision",
+    customModel = "",
+  } = await chrome.storage.local.get([
     "activeProvider",
     "openaiApiKey",
     "geminiApiKey",
+    "groqApiKey",
+    "openrouterApiKey",
+    "ollamaEndpoint",
+    "ollamaModel",
+    "customModel",
   ]);
-  const provider = activeProvider === "gemini" ? "gemini" : "openai";
-  const apiKey = (provider === "gemini" ? geminiApiKey : openaiApiKey).trim();
-  return { provider, providerLabel: provider === "gemini" ? "Gemini" : "OpenAI", apiKey };
+
+  const cfg = PROVIDER_CONFIGS[activeProvider] || PROVIDER_CONFIGS.openai;
+  let apiKey = "";
+  let endpoint = cfg.endpoint;
+  let model = customModel || cfg.defaultModel;
+
+  if (activeProvider === "openai") apiKey = openaiApiKey.trim();
+  else if (activeProvider === "gemini") apiKey = geminiApiKey.trim();
+  else if (activeProvider === "groq") apiKey = groqApiKey.trim();
+  else if (activeProvider === "openrouter") apiKey = openrouterApiKey.trim();
+  else if (activeProvider === "ollama") {
+    apiKey = "ollama";
+    endpoint = (ollamaEndpoint.trim().replace(/\/$/, "") || "http://localhost:11434") + "/v1/chat/completions";
+    model = ollamaModel || "llama3.2-vision";
+  }
+
+  return {
+    provider: activeProvider,
+    providerLabel: cfg.label,
+    type: cfg.type,
+    apiKey,
+    endpoint,
+    model,
+  };
 }
 
 async function getActiveInstruction() {
@@ -265,6 +546,7 @@ async function getActiveInstruction() {
 }
 
 async function detectBlankOrBlackCapture(dataUrl) {
+  if (!dataUrl) return { suspicious: false, percent: 0 };
   try {
     const blob = await (await fetch(dataUrl)).blob();
     const bitmap = await createImageBitmap(blob);
@@ -289,8 +571,6 @@ async function detectBlankOrBlackCapture(dataUrl) {
     const blackPercent = Math.round((blackCount / total) * 100);
     const whitePercent = Math.round((whiteCount / total) * 100);
 
-    // Only flag near-black (the common signature of DRM output protection).
-    // A plain white/blank page can be legitimate, so we don't warn on that.
     if (blackPercent >= 85) {
       return { suspicious: true, percent: blackPercent, reason: "black" };
     }
@@ -302,7 +582,10 @@ async function detectBlankOrBlackCapture(dataUrl) {
 
 function isRestrictedUrl(url) {
   if (!url) return true;
-  return /^(chrome|chrome-extension|edge|about|devtools|view-source):/i.test(url);
+  return (
+    /^(chrome|chrome-extension|edge|about|devtools|view-source|data|file):/i.test(url) ||
+    /https?:\/\/((chrome\.google\.com\/webstore)|(chromewebstore\.google\.com))/i.test(url)
+  );
 }
 
 function captureTab(windowId) {
@@ -328,7 +611,7 @@ async function cropAndUpscale(dataUrl, region) {
   const sw = Math.min(Math.round(region.width * dpr), bitmap.width - sx);
   const sh = Math.min(Math.round(region.height * dpr), bitmap.height - sy);
 
-  const upscale = sw < 400 ? 2.5 : 1.4; // upscale small selections more aggressively
+  const upscale = sw < 400 ? 2.5 : 1.4;
   const outW = Math.max(1, Math.round(sw * upscale));
   const outH = Math.max(1, Math.round(sh * upscale));
 
@@ -351,6 +634,7 @@ async function blobToDataURL(blob) {
 }
 
 async function makeThumbnail(dataUrl, maxWidth = 360, quality = 0.55) {
+  if (!dataUrl) return null;
   try {
     const blob = await (await fetch(dataUrl)).blob();
     const bitmap = await createImageBitmap(blob);
@@ -371,19 +655,23 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-// ---------- OpenAI (multi-turn) ----------
+// ---------- OpenAI Compatible (OpenAI, Groq, OpenRouter, Ollama) ----------
 
 function buildOpenAIMessages(screenshotDataUrl, turns) {
   const messages = [{ role: "system", content: SYSTEM_PROMPT }];
   turns.forEach((turn, i) => {
     if (turn.role === "user" && i === 0) {
-      messages.push({
-        role: "user",
-        content: [
-          { type: "text", text: turn.text },
-          { type: "image_url", image_url: { url: screenshotDataUrl } },
-        ],
-      });
+      if (screenshotDataUrl) {
+        messages.push({
+          role: "user",
+          content: [
+            { type: "text", text: turn.text },
+            { type: "image_url", image_url: { url: screenshotDataUrl } },
+          ],
+        });
+      } else {
+        messages.push({ role: "user", content: turn.text });
+      }
     } else {
       messages.push({ role: turn.role === "assistant" ? "assistant" : "user", content: turn.text });
     }
@@ -391,18 +679,23 @@ function buildOpenAIMessages(screenshotDataUrl, turns) {
   return messages;
 }
 
-async function askOpenAIMultiTurn(apiKey, screenshotDataUrl, turns, attempt = 1) {
+async function askOpenAICompatibleMultiTurn(
+  { endpoint, model, apiKey, screenshotDataUrl, turns, isOllama = false },
+  attempt = 1
+) {
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 30000);
+  const timeoutId = setTimeout(() => controller.abort(), 45000);
+  const headers = { "Content-Type": "application/json" };
+  if (!isOllama && apiKey) headers["Authorization"] = `Bearer ${apiKey}`;
 
   let response;
   try {
-    response = await fetch("https://api.openai.com/v1/chat/completions", {
+    response = await fetch(endpoint, {
       method: "POST",
       signal: controller.signal,
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
+      headers,
       body: JSON.stringify({
-        model: OPENAI_MODEL,
+        model,
         max_tokens: 1024,
         temperature: 0,
         messages: buildOpenAIMessages(screenshotDataUrl, turns),
@@ -410,13 +703,18 @@ async function askOpenAIMultiTurn(apiKey, screenshotDataUrl, turns, attempt = 1)
     });
   } catch (networkErr) {
     clearTimeout(timeoutId);
+    if (isOllama) {
+      throw new Error(
+        `Could not connect to local Ollama at ${endpoint}. Make sure Ollama is running and OLLAMA_ORIGINS="*" is configured.`
+      );
+    }
     if (networkErr.name === "AbortError") {
-      if (attempt < 3) return askOpenAIMultiTurn(apiKey, screenshotDataUrl, turns, attempt + 1);
-      throw new Error("The request timed out. Check your connection and try again.");
+      if (attempt < 3) return askOpenAICompatibleMultiTurn({ endpoint, model, apiKey, screenshotDataUrl, turns, isOllama }, attempt + 1);
+      throw new Error("The request timed out. Please check your network connection and try again.");
     }
     if (attempt < 3) {
       await sleep(500 * attempt);
-      return askOpenAIMultiTurn(apiKey, screenshotDataUrl, turns, attempt + 1);
+      return askOpenAICompatibleMultiTurn({ endpoint, model, apiKey, screenshotDataUrl, turns, isOllama }, attempt + 1);
     }
     throw new Error("Network error: " + networkErr.message);
   }
@@ -424,18 +722,25 @@ async function askOpenAIMultiTurn(apiKey, screenshotDataUrl, turns, attempt = 1)
 
   if (!response.ok) {
     let errBody = "";
-    try { errBody = await response.text(); } catch (_) {}
+    try {
+      errBody = await response.text();
+    } catch (_) {}
 
-    if (response.status === 401) throw new Error("Your OpenAI API key is invalid or has expired. Please check it in Settings.");
+    if (response.status === 401) {
+      throw new Error(`Your API key for ${model} is invalid or expired. Please check Settings.`);
+    }
     if (response.status === 429) {
-      if (attempt < 3) { await sleep(1000 * attempt); return askOpenAIMultiTurn(apiKey, screenshotDataUrl, turns, attempt + 1); }
-      throw new Error("OpenAI rate limit or quota exceeded. Please try again shortly or check your billing.");
+      if (attempt < 3) {
+        await sleep(1000 * attempt);
+        return askOpenAICompatibleMultiTurn({ endpoint, model, apiKey, screenshotDataUrl, turns, isOllama }, attempt + 1);
+      }
+      throw new Error("API rate limit or quota exceeded. Please try again shortly or check your billing.");
     }
     if (response.status >= 500 && attempt < 3) {
       await sleep(700 * attempt);
-      return askOpenAIMultiTurn(apiKey, screenshotDataUrl, turns, attempt + 1);
+      return askOpenAICompatibleMultiTurn({ endpoint, model, apiKey, screenshotDataUrl, turns, isOllama }, attempt + 1);
     }
-    throw new Error(`OpenAI API error (${response.status}): ${errBody.slice(0, 200)}`);
+    throw new Error(`API error (${response.status}): ${errBody.slice(0, 200)}`);
   }
 
   const data = await response.json();
@@ -444,22 +749,26 @@ async function askOpenAIMultiTurn(apiKey, screenshotDataUrl, turns, attempt = 1)
   return text;
 }
 
-// ---------- Gemini (multi-turn) ----------
+// ---------- Google Gemini (multi-turn) ----------
 
 function buildGeminiContents(screenshotDataUrl, turns) {
-  const base64Data = screenshotDataUrl.split(",")[1];
+  const base64Data = screenshotDataUrl ? screenshotDataUrl.split(",")[1] : null;
   return turns.map((turn, i) => {
     if (turn.role === "user" && i === 0) {
-      return { role: "user", parts: [{ text: turn.text }, { inline_data: { mime_type: "image/png", data: base64Data } }] };
+      const parts = [{ text: turn.text }];
+      if (base64Data) {
+        parts.push({ inline_data: { mime_type: "image/png", data: base64Data } });
+      }
+      return { role: "user", parts };
     }
     return { role: turn.role === "assistant" ? "model" : "user", parts: [{ text: turn.text }] };
   });
 }
 
-async function askGeminiMultiTurn(apiKey, screenshotDataUrl, turns, attempt = 1) {
+async function askGeminiMultiTurn(apiKey, screenshotDataUrl, turns, model = "gemini-3.6-flash", attempt = 1) {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 30000);
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${encodeURIComponent(apiKey)}`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`;
 
   let response;
   try {
@@ -476,12 +785,12 @@ async function askGeminiMultiTurn(apiKey, screenshotDataUrl, turns, attempt = 1)
   } catch (networkErr) {
     clearTimeout(timeoutId);
     if (networkErr.name === "AbortError") {
-      if (attempt < 3) return askGeminiMultiTurn(apiKey, screenshotDataUrl, turns, attempt + 1);
+      if (attempt < 3) return askGeminiMultiTurn(apiKey, screenshotDataUrl, turns, model, attempt + 1);
       throw new Error("The request timed out. Check your connection and try again.");
     }
     if (attempt < 3) {
       await sleep(500 * attempt);
-      return askGeminiMultiTurn(apiKey, screenshotDataUrl, turns, attempt + 1);
+      return askGeminiMultiTurn(apiKey, screenshotDataUrl, turns, model, attempt + 1);
     }
     throw new Error("Network error: " + networkErr.message);
   }
@@ -489,24 +798,31 @@ async function askGeminiMultiTurn(apiKey, screenshotDataUrl, turns, attempt = 1)
 
   if (!response.ok) {
     let errBody = "";
-    try { errBody = await response.text(); } catch (_) {}
+    try {
+      errBody = await response.text();
+    } catch (_) {}
 
-    if (response.status === 400 || response.status === 403) throw new Error("Your Gemini API key is invalid or lacks permission for this model. Please check it in Settings.");
+    if (response.status === 400 || response.status === 403) {
+      throw new Error("Your Gemini API key is invalid or lacks permission for this model. Please check it in Settings.");
+    }
     if (response.status === 404) {
       let msg = "";
       try {
         const parsed = JSON.parse(errBody);
         msg = parsed?.error?.message;
       } catch (_) {}
-      throw new Error(`Gemini model not found (404): ${msg || "The requested model is not available or has been retired. Please update to a supported model."}`);
+      throw new Error(`Gemini model not found (404): ${msg || "The requested model is not available. Please update to a supported model."}`);
     }
     if (response.status === 429) {
-      if (attempt < 3) { await sleep(1000 * attempt); return askGeminiMultiTurn(apiKey, screenshotDataUrl, turns, attempt + 1); }
+      if (attempt < 3) {
+        await sleep(1000 * attempt);
+        return askGeminiMultiTurn(apiKey, screenshotDataUrl, turns, model, attempt + 1);
+      }
       throw new Error("Gemini rate limit or quota exceeded. Please try again shortly.");
     }
     if (response.status >= 500 && attempt < 3) {
       await sleep(700 * attempt);
-      return askGeminiMultiTurn(apiKey, screenshotDataUrl, turns, attempt + 1);
+      return askGeminiMultiTurn(apiKey, screenshotDataUrl, turns, model, attempt + 1);
     }
     throw new Error(`Gemini API error (${response.status}): ${errBody.slice(0, 200)}`);
   }

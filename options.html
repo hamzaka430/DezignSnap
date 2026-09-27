@@ -2,80 +2,164 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Page Helper AI - Settings</title>
+  <title>DezignSnap — Settings &amp; Engine Hub</title>
   <link rel="stylesheet" href="options.css" />
 </head>
 <body>
   <div class="wrap">
     <header>
-      <img src="icons/icon48.png" alt="" width="36" height="36" />
+      <img src="icons/icon48.png" alt="DezignSnap logo" class="header-icon" />
       <div>
-        <h1>Page Helper AI</h1>
-        <p class="subtitle">Settings</p>
+        <h1>DezignSnap <span class="brand-tag">PRO</span></h1>
+        <p class="subtitle">Multi-Engine AI Visual Assistant &amp; Settings Hub</p>
       </div>
     </header>
 
+    <!-- SECTION 1: ENGINE & API KEYS -->
     <section class="card">
-      <h2>AI Provider</h2>
-      <p class="desc">Select which provider is active. You can save both keys and switch between them at any time.</p>
-      <div class="row" style="margin-bottom:14px;">
-        <label class="radio-label"><input type="radio" name="provider" id="providerOpenAI" value="openai" /> OpenAI (GPT-4o)</label>
-        <label class="radio-label"><input type="radio" name="provider" id="providerGemini" value="gemini" /> Gemini (3.6 Flash)</label>
+      <h2>⚡ AI Engine &amp; API Keys</h2>
+      <p class="desc">
+        Choose your active AI engine. All keys are stored securely on your local device — zero middleman servers.
+      </p>
+
+      <div class="provider-grid">
+        <label class="radio-card" id="card-groq">
+          <input type="radio" name="activeProvider" value="groq" />
+          <span class="p-name">⚡ Groq</span>
+          <span class="p-sub">Llama 3.2 Vision (Fast)</span>
+        </label>
+        <label class="radio-card" id="card-gemini">
+          <input type="radio" name="activeProvider" value="gemini" />
+          <span class="p-name">✨ Gemini</span>
+          <span class="p-sub">Google 3.6 Flash</span>
+        </label>
+        <label class="radio-card" id="card-openai">
+          <input type="radio" name="activeProvider" value="openai" />
+          <span class="p-name">🧠 OpenAI</span>
+          <span class="p-sub">GPT-4o Vision</span>
+        </label>
+        <label class="radio-card" id="card-openrouter">
+          <input type="radio" name="activeProvider" value="openrouter" />
+          <span class="p-name">🌐 OpenRouter</span>
+          <span class="p-sub">Any Model Hub</span>
+        </label>
+        <label class="radio-card" id="card-ollama">
+          <input type="radio" name="activeProvider" value="ollama" />
+          <span class="p-name">💻 Ollama</span>
+          <span class="p-sub">Local AI (100% Free)</span>
+        </label>
       </div>
 
-      <h3>OpenAI API Key</h3>
-      <p class="desc">
-        Get one at <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener">platform.openai.com/api-keys</a>.
-      </p>
-      <div class="row">
-        <input type="password" id="openaiKeyInput" placeholder="sk-..." />
-        <button id="saveOpenAIKeyBtn">Save</button>
+      <!-- Groq Key -->
+      <div id="section-groq" class="provider-sub">
+        <h3>Groq API Key (Recommended for Speed)</h3>
+        <p class="desc">
+          Get a free ultra-fast key at <a href="https://console.groq.com/keys" target="_blank" rel="noopener">console.groq.com/keys</a>.
+        </p>
+        <div class="row">
+          <input type="password" id="groqKeyInput" placeholder="gsk_..." />
+          <button id="saveGroqKeyBtn">Save Groq Key</button>
+        </div>
       </div>
 
-      <h3>Gemini API Key</h3>
-      <p class="desc">
-        Get one at <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener">aistudio.google.com/app/apikey</a>.
-      </p>
-      <div class="row">
-        <input type="password" id="geminiKeyInput" placeholder="AIza..." />
-        <button id="saveGeminiKeyBtn">Save</button>
+      <!-- Gemini Key -->
+      <div id="section-gemini" class="provider-sub">
+        <h3>Google Gemini API Key</h3>
+        <p class="desc">
+          Get your free API key from Google AI Studio at <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener">aistudio.google.com/app/apikey</a>.
+        </p>
+        <div class="row">
+          <input type="password" id="geminiKeyInput" placeholder="AIza..." />
+          <button id="saveGeminiKeyBtn">Save Gemini Key</button>
+        </div>
+      </div>
+
+      <!-- OpenAI Key -->
+      <div id="section-openai" class="provider-sub">
+        <h3>OpenAI API Key</h3>
+        <p class="desc">
+          Get your key from <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener">platform.openai.com/api-keys</a>.
+        </p>
+        <div class="row">
+          <input type="password" id="openaiKeyInput" placeholder="sk-..." />
+          <button id="saveOpenAIKeyBtn">Save OpenAI Key</button>
+        </div>
+      </div>
+
+      <!-- OpenRouter Key -->
+      <div id="section-openrouter" class="provider-sub">
+        <h3>OpenRouter API Key</h3>
+        <p class="desc">
+          Unified access to Anthropic, Meta, and Google at <a href="https://openrouter.ai/keys" target="_blank" rel="noopener">openrouter.ai/keys</a>.
+        </p>
+        <div class="row">
+          <input type="password" id="openrouterKeyInput" placeholder="sk-or-v1-..." />
+          <button id="saveOpenRouterKeyBtn">Save OpenRouter Key</button>
+        </div>
+      </div>
+
+      <!-- Ollama Local AI -->
+      <div id="section-ollama" class="provider-sub">
+        <h3>Local AI via Ollama (No API Key Required)</h3>
+        <p class="desc">
+          Run vision models locally on your GPU/CPU with 100% privacy and zero cost.
+        </p>
+        <div class="row">
+          <input type="text" id="ollamaEndpointInput" placeholder="http://localhost:11434" />
+          <input type="text" id="ollamaModelInput" placeholder="llama3.2-vision" />
+          <button id="saveOllamaBtn">Save Config</button>
+        </div>
+        <p class="desc" style="margin-top: 8px;">
+          ⚠️ <strong>Ollama Setup Note:</strong> Browsers restrict extension requests to localhost by default. Before running, configure Ollama to accept requests by launching it with:
+        </p>
+        <div class="code-box">set OLLAMA_ORIGINS=* &amp;&amp; ollama serve</div>
       </div>
 
       <div id="keyStatus" class="status hidden"></div>
-      <p class="desc" style="margin-top:12px;">
-        Both keys are stored only in this browser's local storage — they are never sent anywhere else.
-      </p>
     </section>
 
+    <!-- SECTION 2: PERSONAS & INSTRUCTION PRESETS -->
     <section class="card">
-      <h2>Instructions</h2>
+      <h2>🎭 Personas &amp; Custom Prompts</h2>
       <p class="desc">
-        Each preset is a fixed instruction the AI follows when you click "Solve with AI" on a page.
-        You can create multiple presets (e.g. "Explain this page", "Find a button", "Translate") and
-        activate whichever you need — the toolbar popup also lets you switch quickly.
+        Select the active instruction or persona the AI applies when analyzing screenshots. Create custom modes for code review, translation, or quick element finding.
       </p>
 
       <div id="presetList"></div>
 
       <div class="add-preset">
-        <h3>Add a new preset</h3>
-        <input type="text" id="newPresetName" placeholder="Preset name (e.g. 'Explain this page')" />
-        <textarea id="newPresetText" rows="3" placeholder="Enter the instruction..."></textarea>
-        <button id="addPresetBtn">+ Add Preset</button>
+        <h3>+ Create New Persona / Mode</h3>
+        <input type="text" id="newPresetName" placeholder="Mode Name (e.g. 'Roast My Code', 'Bug Hunter')" />
+        <textarea id="newPresetText" rows="3" placeholder="Enter custom prompt instructions..."></textarea>
+        <button id="addPresetBtn">+ Save Mode</button>
       </div>
     </section>
 
+    <!-- SECTION 3: OPERATIONS & SHORTCUTS -->
     <section class="card">
-      <h2>Session History</h2>
+      <h2>⌨️ Quick Operations &amp; Shortcuts</h2>
+      <div class="desc">
+        <p>• <strong>Alt + S</strong>: Instant Area Snip (drag rectangle to zoom &amp; analyze).</p>
+        <p>• <strong>Alt + A</strong>: Full webpage screenshot solve.</p>
+        <p>• <strong>Right-Click Menu</strong>: Highlight any text on any webpage and select <em>"⚡ Ask AI about selection"</em> for instant explanation without snipping.</p>
+        <p>• <strong>File Access</strong>: To snip local PDFs/images, go to <code>chrome://extensions</code>, click <em>Details</em> on this extension, and toggle <em>"Allow access to file URLs"</em>.</p>
+      </div>
+    </section>
+
+    <!-- SECTION 4: SESSION & PRIVACY -->
+    <section class="card">
+      <h2>📄 Session History &amp; PDF Reports</h2>
       <p class="desc">
-        You have <strong id="historyCount">0</strong> saved Q&amp;A entries in this session.
-        Use the "📄 End Session" button on a page to export a PDF, or clear the history below.
+        You currently have <strong id="historyCount" style="color:#ffffff;">0</strong> saved exchanges in your local session.
       </p>
-      <button id="clearHistoryBtn" class="danger">🗑️ Clear History</button>
+      <div class="row">
+        <button id="exportPdfBtn" class="btn">📄 Open PDF Transcript</button>
+        <button id="clearHistoryBtn" class="danger">🗑️ Clear Session History</button>
+      </div>
     </section>
 
     <footer>
-      <p>Version 2.1.0 • <a href="privacy-policy.html" target="_blank">Privacy Policy</a></p>
+      <p>DezignSnap • Built by Muhammad Hamza • <a href="privacy-policy.html" target="_blank">Privacy Policy</a> • <a href="https://dezignwise.com" target="_blank">Dezignwise</a></p>
     </footer>
   </div>
 

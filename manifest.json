@@ -1,12 +1,35 @@
 {
   "manifest_version": 3,
-  "name": "Page Helper AI",
+  "name": "DezignSnap — AI Visual Assistant",
   "version": "2.1.0",
   "author": "Muhammad Hamza / Dezignwise",
   "homepage_url": "https://dezignwise.com",
-  "description": "Set an instruction once, then click a button on any page to get an AI answer based on a screenshot — for understanding page content or finding on-page options.",
-  "permissions": ["storage", "activeTab", "unlimitedStorage"],
-  "host_permissions": ["<all_urls>", "https://api.openai.com/*", "https://generativelanguage.googleapis.com/*"],
+  "description": "DezignSnap: Snip any webpage area or capture full screens to get instant, grounded AI answers powered by Groq, Gemini, OpenAI, and Ollama.",
+  "permissions": ["storage", "activeTab", "unlimitedStorage", "contextMenus"],
+  "host_permissions": [
+    "<all_urls>",
+    "https://api.openai.com/*",
+    "https://generativelanguage.googleapis.com/*",
+    "https://api.groq.com/*",
+    "https://openrouter.ai/*",
+    "http://localhost:11434/*"
+  ],
+  "commands": {
+    "snip_screen": {
+      "suggested_key": {
+        "default": "Alt+S",
+        "mac": "Alt+S"
+      },
+      "description": "Trigger DezignSnap Area Snip"
+    },
+    "solve_full_page": {
+      "suggested_key": {
+        "default": "Alt+A",
+        "mac": "Alt+A"
+      },
+      "description": "Capture & Solve Full Page"
+    }
+  },
   "background": {
     "service_worker": "background.js"
   },
@@ -20,7 +43,7 @@
   ],
   "action": {
     "default_popup": "popup.html",
-    "default_title": "Page Helper AI",
+    "default_title": "DezignSnap",
     "default_icon": {
       "16": "icons/icon16.png",
       "32": "icons/icon32.png",

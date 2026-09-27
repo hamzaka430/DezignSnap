@@ -2,60 +2,148 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Session Export - Page Helper AI</title>
+  <title>Session Export — DezignSnap</title>
   <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
-      background: #fdf4d2;
-      color: #4a3b3b;
-      max-width: 700px;
-      margin: 30px auto;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #222831;
+      color: #f5f2eb;
+      max-width: 760px;
+      margin: 40px auto;
       padding: 0 20px;
+      line-height: 1.6;
     }
-    h1 { color: #946d6d; }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid rgba(148, 137, 121, 0.4);
+    }
+    h1 {
+      color: #DFD0B8;
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: 0.4px;
+    }
+    .badge {
+      background: linear-gradient(135deg, #DFD0B8 0%, #948979 100%);
+      color: #222831;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      border: 1px solid #DFD0B8;
+    }
     #status {
-      background: white;
-      border: 1.5px solid #a290b7;
-      border-radius: 8px;
-      padding: 14px;
-      margin-bottom: 16px;
-      font-weight: 600;
+      background: rgba(44, 52, 64, 0.95);
+      border: 1px solid #393E46;
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 20px;
+      font-weight: 700;
+      color: #DFD0B8;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    }
+    .actions {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 24px;
     }
     button {
-      background: #a290b7;
-      color: #fffdf7;
-      border: none;
-      padding: 10px 16px;
-      border-radius: 6px;
-      font-size: 13.5px;
-      font-weight: 600;
-      cursor: pointer;
-      margin-right: 8px;
-      margin-top: 10px;
-    }
-    button:hover { background: #946d6d; }
-    button.danger { background: #946d6d; }
-    button.danger:hover { background: #7a5a5a; }
-    .entry {
-      background: white;
-      border: 1px solid #b0cde6;
+      background: linear-gradient(135deg, #DFD0B8 0%, #948979 100%);
+      color: #222831;
+      border: 1px solid #DFD0B8;
+      padding: 11px 18px;
       border-radius: 8px;
-      padding: 12px;
-      margin-bottom: 12px;
+      font-size: 13.5px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
     }
-    .entry .meta { font-size: 11.5px; color: #946d6d; margin-bottom: 6px; }
-    .entry .instruction { font-weight: 600; margin-bottom: 4px; }
-    .entry .answer { white-space: pre-wrap; font-size: 13px; }
-    .entry .turn { font-size: 13px; margin-bottom: 4px; white-space: pre-wrap; }
+    button:hover {
+      background: #DFD0B8;
+      box-shadow: 0 0 16px rgba(223, 208, 184, 0.45);
+    }
+    button.danger {
+      background: #393E46;
+      border: 1px solid #e06c75;
+      color: #ff9999;
+      box-shadow: none;
+    }
+    button.danger:hover {
+      background: #e06c75;
+      color: #ffffff;
+      box-shadow: 0 0 14px rgba(224, 108, 117, 0.4);
+    }
+    .entry {
+      background: rgba(44, 52, 64, 0.95);
+      border: 1px solid #393E46;
+      border-radius: 12px;
+      padding: 18px;
+      margin-bottom: 16px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+      transition: border-color 0.2s ease;
+    }
+    .entry:hover {
+      border-color: #948979;
+    }
+    .entry .meta {
+      font-size: 12px;
+      color: #DFD0B8;
+      margin-bottom: 10px;
+      font-weight: 600;
+    }
+    .turn {
+      font-size: 13.5px;
+      margin-bottom: 8px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .turn strong {
+      color: #ffffff;
+    }
+    .turn.user-turn {
+      color: #DFD0B8;
+    }
+    .turn.ai-turn {
+      color: #f5f2eb;
+      background: #1c2128;
+      border: 1px solid #393E46;
+      padding: 10px 14px;
+      border-radius: 8px;
+      margin-top: 6px;
+    }
+    .conf-badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-left: 6px;
+      text-transform: uppercase;
+    }
+    .conf-high { background: rgba(34, 197, 94, 0.2); color: #4ade80; border: 1px solid #22c55e; }
+    .conf-medium { background: rgba(223, 208, 184, 0.2); color: #DFD0B8; border: 1px solid #DFD0B8; }
+    .conf-low { background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid #ef4444; }
   </style>
 </head>
 <body>
-  <h1>📄 Session Export</h1>
-  <div id="status">Preparing your PDF...</div>
-  <div>
-    <button id="downloadAgainBtn">⬇️ Download Again</button>
-    <button id="clearBtn" class="danger">🗑️ Clear History (Start New Session)</button>
+  <header>
+    <h1>📄 Session Export &amp; PDF Report</h1>
+    <span class="badge">DezignSnap</span>
+  </header>
+
+  <div id="status">⏳ Compiling your session PDF transcript...</div>
+
+  <div class="actions">
+    <button id="downloadAgainBtn">⬇️ Download PDF Again</button>
+    <button id="clearBtn" class="danger">🗑️ Clear History &amp; Start New</button>
   </div>
+
   <div id="entries"></div>
 
   <script src="lib/jspdf.umd.min.js"></script>

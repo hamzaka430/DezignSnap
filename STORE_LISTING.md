@@ -11,23 +11,26 @@
 
 ## 2. Suggested listing copy
 
-**Name** (max 45 chars): `Page Helper AI`
+**Name** (max 45 chars): `DezignSnap — AI Screen Assistant`
 
 **Short description** (max 132 chars):
-`Set an instruction once — click a button on any page to get an AI answer from a screenshot. Understand pages, find options fast.`
+`Snip any webpage area or screen for instant, grounded AI visual answers. Powered by Groq, Gemini, OpenAI, & local Ollama.`
 
 **Category:** Productivity
 
 **Detailed description** (draft — edit freely):
 
-> Page Helper AI adds a floating button to any webpage that lets you ask an AI (via your own OpenAI or Gemini API key)
-> about what's on your screen. Set your instruction once — e.g. "explain this page" or "find me the export
-> option" — and it's remembered for every future click.
+> DezignSnap adds an intelligent visual copilot to your browser. Snip any webpage region (Alt+S) or capture the full screen to get instant, grounded AI answers powered by Groq (Llama 3.2 Vision), Google Gemini (3.6 Flash), OpenAI (GPT-4o), OpenRouter, or private local Ollama.
 >
 > Features:
-> - One-click "Solve with AI" button on any page
-> - Choose OpenAI (GPT-4o) or Google Gemini (3.6 Flash) — bring your own key for either or both, switch anytime
-> - Multiple saved instruction presets, switchable from the toolbar popup
+> - Global hotkey: Alt+S for instant drag-selection snip & zoom
+> - One-click "⚡ Snip & Ask" button on any page
+> - Right-click context menu ("⚡ Ask AI about selection") for quick text queries
+> - Choose from 5 engines: Groq, Gemini, OpenAI, OpenRouter, or local Ollama
+> - Smart Zoom upscale (1.4x–2.5x) for crystal-clear small text and icon recognition
+> - Custom personas (ELI5, Roast My UI, Target Finder, Translate)
+> - Complete session transcript export to clean A4 PDF with thumbnails
+> - Bring Your Own Key (BYOK) — zero middleman servers; direct browser-to-AI privacy
 > - "End Session" button exports your whole Q&A history as a PDF, including screenshot thumbnails
 > - Works even on sites that block content scripts, via the toolbar popup fallback
 > - Built-in detection for DRM-protected/black screenshots so you know when an answer might be unreliable
