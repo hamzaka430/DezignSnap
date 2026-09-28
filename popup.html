@@ -25,11 +25,33 @@
         <span id="providerStatusText" style="color: #4ade80; text-transform:none; font-weight:normal;">Ready</span>
       </label>
       <select id="providerSelect">
-        <option value="groq">⚡ Groq (Llama 3.2 Vision - Fast)</option>
-        <option value="gemini">✨ Google Gemini (3.6 Flash)</option>
+        <option value="groq">⚡ Groq (Qwen 3.8 27B Vision - Ultra Fast)</option>
+        <option value="gemini">✨ Google Gemini (2.5 Flash)</option>
         <option value="openai">🧠 OpenAI (GPT-4o)</option>
         <option value="openrouter">🌐 OpenRouter (Multi-model)</option>
         <option value="ollama">💻 Ollama (Local AI - 100% Free)</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="aiModeSelect">
+        <span>AI Mode</span>
+        <span id="aiModeStatusText" style="color: #DFD0B8; text-transform:none; font-weight:normal;">Direct</span>
+      </label>
+      <select id="aiModeSelect">
+        <option value="direct">⚡ Direct Answer (Fastest)</option>
+        <option value="thinking">🧠 Deep Thinking &amp; Explanation (Gemini Style)</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="hudPositionSelect">
+        <span>Floating Toolbar Position</span>
+      </label>
+      <select id="hudPositionSelect">
+        <option value="right">Right (Bottom-Right)</option>
+        <option value="center">Center (Bottom-Center)</option>
+        <option value="left">Left (Bottom-Left)</option>
       </select>
     </div>
 
@@ -45,9 +67,13 @@
         🎯 Snip [Alt+S]
       </button>
       <button id="fallbackAskBtn" class="btn btn-secondary" title="Analyze full page (Alt+A)">
-        ⚡ Ask Page
+        📸 Ask Page
       </button>
     </div>
+
+    <button id="directChatBtn" class="btn btn-chat" style="margin-top: 8px; width: 100%;" title="Open AI Chat directly without screenshot">
+      💬 Direct AI Chat (No Screenshot)
+    </button>
 
     <p class="hint">
       Tip: Right-click any text on a page to <strong>"Ask AI about selection"</strong>.

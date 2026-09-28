@@ -4,9 +4,13 @@ const warningText = document.getElementById("warningText");
 const setupLink = document.getElementById("setupLink");
 const providerSelect = document.getElementById("providerSelect");
 const providerStatusText = document.getElementById("providerStatusText");
+const aiModeSelect = document.getElementById("aiModeSelect");
+const aiModeStatusText = document.getElementById("aiModeStatusText");
+const hudPositionSelect = document.getElementById("hudPositionSelect");
 const presetSelect = document.getElementById("presetSelect");
 const quickSnipBtn = document.getElementById("quickSnipBtn");
 const fallbackAskBtn = document.getElementById("fallbackAskBtn");
+const directChatBtn = document.getElementById("directChatBtn");
 const fallbackAnswer = document.getElementById("fallbackAnswer");
 const statusMsg = document.getElementById("statusMsg");
 
@@ -19,6 +23,8 @@ async function init() {
     groqApiKey = "",
     openrouterApiKey = "",
     activeProvider = "groq",
+    aiMode = "direct",
+    hudPosition = "right",
     instructionPresets = [],
     activePresetId,
   } = await chrome.storage.local.get([
@@ -27,13 +33,18 @@ async function init() {
     "groqApiKey",
     "openrouterApiKey",
     "activeProvider",
+    "aiMode",
+    "hudPosition",
     "instructionPresets",
     "activePresetId",
   ]);
 
   providerSelect.value = activeProvider;
-  updateKeyWarning(activeProvider, { openaiApiKey, geminiApiKey, groqApiKey, openrouterApiKey });
+  if (aiModeSelect) aiModeSelect.value = aiMode;
+  if (aiModeStatusText) aiModeStatusText.textContent = aiMode === "thinking" ? "Deep Thinking" : "Direct";
+  if (hudPositionSelect) hudPositionSelect.value = hudPosition;
 
+  updateKeyWarning(activeProvider, { openaiApiKey, geminiApiKey, groqApiKey, openrouterApiKey });
   renderPresetOptions(instructionPresets, activePresetId);
 }
 
@@ -56,7 +67,6 @@ function renderPresetOptions(instructionPresets, activePresetId) {
 
 function updateKeyWarning(provider, keys) {
   if (provider === "ollama") {
-    // Local AI requires no API key
     keyWarning.classList.add("hidden");
     providerStatusText.textContent = "Local AI (Ready)";
     providerStatusText.style.color = "#4ade80";
@@ -94,6 +104,23 @@ providerSelect.addEventListener("change", async () => {
   showStatus(`Engine switched to ${selectedProvider.toUpperCase()} ✅`);
 });
 
+if (aiModeSelect) {
+  aiModeSelect.addEventListener("change", async () => {
+    const val = aiModeSelect.value;
+    await chrome.storage.local.set({ aiMode: val });
+    if (aiModeStatusText) aiModeStatusText.textContent = val === "thinking" ? "Deep Thinking" : "Direct";
+    showStatus(`Mode: ${val === "thinking" ? "🧠 Thinking" : "⚡ Direct"} ✅`);
+  });
+}
+
+if (hudPositionSelect) {
+  hudPositionSelect.addEventListener("change", async () => {
+    const val = hudPositionSelect.value;
+    await chrome.storage.local.set({ hudPosition: val });
+    showStatus(`Toolbar position: ${val.toUpperCase()} ✅`);
+  });
+}
+
 presetSelect.addEventListener("change", async () => {
   await chrome.storage.local.set({ activePresetId: presetSelect.value });
   showStatus("Persona updated ✅");
@@ -110,9 +137,20 @@ quickSnipBtn.addEventListener("click", async () => {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   if (tab && tab.id) {
     chrome.tabs.sendMessage(tab.id, { type: "TRIGGER_SNIP" });
-    window.close(); // Close popup so user can immediately drag
+    window.close();
   }
 });
+
+// Direct AI Chat without screenshot
+if (directChatBtn) {
+  directChatBtn.addEventListener("click", async () => {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    if (tab && tab.id) {
+      chrome.tabs.sendMessage(tab.id, { type: "OPEN_DIRECT_CHAT" });
+      window.close();
+    }
+  });
+}
 
 // Full page analyze
 fallbackAskBtn.addEventListener("click", () => {

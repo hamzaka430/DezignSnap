@@ -177,6 +177,20 @@ select:focus {
   border-color: #DFD0B8;
 }
 
+.btn-chat {
+  background: rgba(57, 62, 70, 0.9);
+  color: #DFD0B8;
+  border: 1px solid rgba(223, 208, 184, 0.5);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+.btn-chat:hover:not(:disabled) {
+  background: #393E46;
+  border-color: #DFD0B8;
+  color: #ffffff;
+  box-shadow: 0 0 14px rgba(223, 208, 184, 0.35);
+  transform: translateY(-1px);
+}
+
 .hint {
   font-size: 11px;
   color: #948979;

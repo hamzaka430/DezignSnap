@@ -13,19 +13,20 @@ const PROVIDER_CONFIGS = {
   gemini: {
     label: "Google Gemini",
     endpoint: "https://generativelanguage.googleapis.com/v1beta/models",
-    defaultModel: "gemini-3.6-flash",
+    defaultModel: "gemini-2.5-flash",
     type: "gemini",
   },
   groq: {
     label: "Groq (Ultra-Fast)",
     endpoint: "https://api.groq.com/openai/v1/chat/completions",
-    defaultModel: "llama-3.2-11b-vision-preview",
+    defaultModel: "qwen/qwen3.8-27b",
+    textModel: "llama-3.3-70b-versatile",
     type: "openai_compat",
   },
   openrouter: {
     label: "OpenRouter",
     endpoint: "https://openrouter.ai/api/v1/chat/completions",
-    defaultModel: "google/gemini-2.0-flash-001",
+    defaultModel: "google/gemini-2.5-flash",
     type: "openai_compat",
   },
   ollama: {
@@ -37,18 +38,39 @@ const PROVIDER_CONFIGS = {
 };
 
 const SYSTEM_PROMPT =
-  "You are a page-understanding assistant. The user has configured a fixed instruction that you must follow every time, " +
-  "and you are given a screenshot of the current webpage (this may be the full visible page, or a specific region the user selected and zoomed into) or highlighted text. " +
+  "You are a page-understanding and visual intelligence assistant. The user has configured instructions or asked a direct question, " +
+  "and you may be given a screenshot of the webpage (full page or user-dragged region), highlighted text, or a direct question with no image. " +
   "RULES: " +
-  "1) Only state what is CLEARLY visible in the screenshot — if something is blurry, cut off, or not visible, do not guess; state plainly that it is not visible. " +
-  "2) Do not fill in facts from your training knowledge when the screenshot itself shows that content — what is on screen is the source of truth. " +
-  "3) Keep answers direct, short, and to the point — no lengthy preamble; give the actual answer in the first line. " +
-  "4) If the instruction asks you to locate a button/option/link, state its exact location (e.g. 'top-right corner', 'below the sidebar'). " +
-  "5) Before answering, verify that what you're about to say matches the screenshot — speed matters, but a correct answer that takes one extra second beats a fast wrong one. " +
-  "6) At the very end of your answer, on a new line, output ONLY this (nothing else on that line): CONFIDENCE: High or CONFIDENCE: Medium or CONFIDENCE: Low. " +
-  "Use High when what you stated was 100% clearly visible. Medium when it was somewhat ambiguous or partially visible. Low when you had to guess or the content wasn't clearly visible. " +
-  "If the user asks a follow-up question, remember the prior conversation and answer with reference to the same screenshot. " +
-  "Respond in the same language the user's instruction is written in.";
+  "1) When a screenshot is provided, only state what is CLEARLY visible — if something is blurry, cut off, or not visible, do not guess; state plainly that it is not visible. If no screenshot is provided, answer the user's question directly with accuracy. " +
+  "2) Do not hallucinate or contradict what the screenshot clearly displays. " +
+  "3) Keep answers crisp, direct, and structured. " +
+  "4) If asked to locate an element/button, state its exact visual position (e.g. 'top-right corner', 'below the navigation header'). " +
+  "5) Before answering, verify that your answer matches the visual or text context. " +
+  "6) At the very end of your response, on a new line, output ONLY this (nothing else on that line): CONFIDENCE: High or CONFIDENCE: Medium or CONFIDENCE: Low. " +
+  "Use High when what you stated is 100% clearly visible or certain. Medium when somewhat ambiguous. Low when guessing or content wasn't clear. " +
+  "Respond in the same language the user's question or instruction is written in.";
+
+function getSystemPrompt(aiMode = "direct") {
+  let prompt = SYSTEM_PROMPT;
+  if (aiMode === "thinking") {
+    prompt +=
+      "\n\nMODE: DEEP THINKING & DETAILED EXPLANATION (like Gemini/DeepSeek).\n" +
+      "Step 1: Write your deep step-by-step reasoning, visual/code inspection, and deductions enclosed strictly inside <thinking>...</thinking> tags.\n" +
+      "Step 2: Immediately following </thinking>, provide your clean, comprehensive, user-friendly final answer and explanation.\n" +
+      "Step 3: Conclude on the final line with CONFIDENCE: High or Medium or Low.";
+  } else {
+    prompt +=
+      "\n\nMODE: LIGHTNING-FAST DIRECT ANSWER.\n" +
+      "Provide an ultra-direct, immediate, concise answer without meta-commentary or filler preamble.\n" +
+      "Conclude on the final line with CONFIDENCE: High or Medium or Low.";
+  }
+  return prompt;
+}
+
+async function getActiveAiMode() {
+  const { aiMode = "direct" } = await chrome.storage.local.get(["aiMode"]);
+  return aiMode;
+}
 
 const DEFAULT_PRESETS = [
   {
@@ -135,21 +157,33 @@ chrome.commands.onCommand.addListener((command) => {
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message && message.type === "SOLVE_WITH_AI") {
-    handleSolve(sender.tab, sendResponse);
+    handleSolve(sender.tab, message.aiMode, sendResponse);
     return true;
   }
   if (message && message.type === "SOLVE_WITH_AI_ACTIVE_TAB") {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      handleSolve(tabs && tabs[0], sendResponse);
+      handleSolve(tabs && tabs[0], message?.aiMode, sendResponse);
     });
     return true;
   }
   if (message && message.type === "SOLVE_WITH_AI_REGION") {
-    handleSolveRegion(sender.tab, message.region, sendResponse);
+    handleSolveRegion(sender.tab, message.region, message.aiMode, sendResponse);
     return true;
   }
   if (message && message.type === "FOLLOWUP_WITH_AI") {
-    handleFollowup(sender.tab, message.question, sendResponse);
+    handleFollowup(sender.tab, message.question, message.aiMode, sendResponse);
+    return true;
+  }
+  if (message && message.type === "DIRECT_CHAT_WITH_AI") {
+    handleDirectChat(sender.tab, message.question, message.aiMode, sendResponse);
+    return true;
+  }
+  if (message && message.type === "TRIGGER_DIRECT_CHAT") {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (tabs && tabs[0]?.id) {
+        chrome.tabs.sendMessage(tabs[0].id, { type: "OPEN_DIRECT_CHAT" });
+      }
+    });
     return true;
   }
   if (message && message.type === "OPEN_SESSION_EXPORT") {
@@ -163,7 +197,7 @@ chrome.tabs.onRemoved.addListener((tabId) => {
   inFlightTabs.delete(tabId);
 });
 
-async function handleSolve(tab, sendResponse) {
+async function handleSolve(tab, aiMode, sendResponse) {
   if (tab && tab.id && inFlightTabs.has(tab.id)) {
     sendResponse({ success: false, error: "An AI analysis is already running for this tab. Please wait a moment." });
     return;
@@ -181,6 +215,7 @@ async function handleSolve(tab, sendResponse) {
       providerInfo,
       screenshotDataUrl: dataUrl,
       instruction: aiInstruction,
+      aiMode,
       sendResponse,
     });
   } catch (err) {
@@ -190,7 +225,7 @@ async function handleSolve(tab, sendResponse) {
   }
 }
 
-async function handleSolveRegion(tab, region, sendResponse) {
+async function handleSolveRegion(tab, region, aiMode, sendResponse) {
   if (tab && tab.id && inFlightTabs.has(tab.id)) {
     sendResponse({ success: false, error: "An AI analysis is already running for this tab. Please wait a moment." });
     return;
@@ -231,7 +266,83 @@ async function handleSolveRegion(tab, region, sendResponse) {
       screenshotDataUrl: croppedDataUrl,
       instruction: focusedInstruction,
       displayInstruction: aiInstruction,
+      aiMode,
       sendResponse,
+    });
+  } catch (err) {
+    sendResponse({ success: false, error: err.message || String(err) });
+  } finally {
+    if (tab && tab.id) inFlightTabs.delete(tab.id);
+  }
+}
+
+async function handleDirectChat(tab, question, aiMode, sendResponse) {
+  if (tab && tab.id && inFlightTabs.has(tab.id)) {
+    sendResponse({ success: false, error: "An AI request is already in progress for this tab. Please wait a moment." });
+    return;
+  }
+  const trimmed = (question || "").trim();
+  if (!trimmed) {
+    sendResponse({ success: false, error: "Please enter a question or message." });
+    return;
+  }
+
+  const providerInfo = await getActiveProviderAndKey();
+  if (providerInfo.provider !== "ollama" && !providerInfo.apiKey) {
+    sendResponse({ success: false, error: `Please set your ${providerInfo.providerLabel} API key in Settings first.` });
+    return;
+  }
+
+  if (tab && tab.id) inFlightTabs.add(tab.id);
+
+  try {
+    const turns = [{ role: "user", text: trimmed }];
+    const mode = aiMode || (await getActiveAiMode());
+    let raw;
+    let modelToUse = providerInfo.model;
+    if (providerInfo.provider === "groq" && providerInfo.textModel) {
+      modelToUse = providerInfo.textModel; // ultra-fast text model for direct questions on Groq
+    }
+
+    if (providerInfo.type === "gemini") {
+      raw = await askGeminiMultiTurn(providerInfo.apiKey, null, turns, modelToUse, 1, mode);
+    } else {
+      raw = await askOpenAICompatibleMultiTurn({
+        endpoint: providerInfo.endpoint,
+        model: modelToUse,
+        apiKey: providerInfo.apiKey,
+        screenshotDataUrl: null,
+        turns,
+        isOllama: providerInfo.provider === "ollama",
+        aiMode: mode,
+      });
+    }
+
+    const { text, confidence } = parseConfidence(raw);
+    const conv = {
+      id: "conv_" + Date.now() + "_" + Math.random().toString(36).slice(2, 8),
+      providerInfo,
+      screenshotDataUrl: null,
+      thumbnail: null,
+      pageTitle: tab?.title || "Direct AI Chat",
+      pageUrl: tab?.url || "",
+      startedAt: Date.now(),
+      lastUpdated: Date.now(),
+      turns: [
+        { role: "user", text: trimmed },
+        { role: "assistant", text, confidence: confidence || "High" },
+      ],
+    };
+
+    if (tab && tab.id) activeConversations.set(tab.id, conv);
+    await upsertSessionHistoryFromConv(conv, tab || {});
+
+    sendResponse({
+      success: true,
+      answer: text,
+      confidence: confidence || "High",
+      instructionUsed: trimmed,
+      conversationId: conv.id,
     });
   } catch (err) {
     sendResponse({ success: false, error: err.message || String(err) });
@@ -256,18 +367,25 @@ async function handleTextQuery(tab, selectedText) {
 
     const prompt = `Selected text from the webpage:\n"${selectedText}"\n\nPlease explain what this means, define any unfamiliar terms, or answer any question it raises concisely.`;
     const turns = [{ role: "user", text: prompt }];
+    const mode = await getActiveAiMode();
 
     let raw;
+    let modelToUse = providerInfo.model;
+    if (providerInfo.provider === "groq" && providerInfo.textModel) {
+      modelToUse = providerInfo.textModel;
+    }
+
     if (providerInfo.type === "gemini") {
-      raw = await askGeminiMultiTurn(providerInfo.apiKey, null, turns, providerInfo.model);
+      raw = await askGeminiMultiTurn(providerInfo.apiKey, null, turns, modelToUse, 1, mode);
     } else {
       raw = await askOpenAICompatibleMultiTurn({
         endpoint: providerInfo.endpoint,
-        model: providerInfo.model,
+        model: modelToUse,
         apiKey: providerInfo.apiKey,
         screenshotDataUrl: null,
         turns,
         isOllama: providerInfo.provider === "ollama",
+        aiMode: mode,
       });
     }
 
@@ -308,7 +426,7 @@ async function handleTextQuery(tab, selectedText) {
   }
 }
 
-async function handleFollowup(tab, question, sendResponse) {
+async function handleFollowup(tab, question, aiMode, sendResponse) {
   try {
     if (!tab || !tab.id) {
       sendResponse({ success: false, error: "Could not identify the tab." });
@@ -320,7 +438,7 @@ async function handleFollowup(tab, question, sendResponse) {
     }
     const conv = activeConversations.get(tab.id);
     if (!conv) {
-      sendResponse({ success: false, error: "Start with 'Snip & Ask' or 'Select Area' first, then ask a follow-up." });
+      sendResponse({ success: false, error: "Start with 'Snip & Ask', 'Select Area', or 'Direct Chat' first, then ask a follow-up." });
       return;
     }
     const trimmedQuestion = (question || "").trim();
@@ -336,10 +454,11 @@ async function handleFollowup(tab, question, sendResponse) {
     inFlightTabs.add(tab.id);
     conv.turns.push({ role: "user", text: trimmedQuestion });
 
+    const mode = aiMode || (await getActiveAiMode());
     let raw;
     try {
       if (conv.providerInfo.type === "gemini") {
-        raw = await askGeminiMultiTurn(conv.providerInfo.apiKey, conv.screenshotDataUrl, conv.turns, conv.providerInfo.model);
+        raw = await askGeminiMultiTurn(conv.providerInfo.apiKey, conv.screenshotDataUrl, conv.turns, conv.providerInfo.model, 1, mode);
       } else {
         raw = await askOpenAICompatibleMultiTurn({
           endpoint: conv.providerInfo.endpoint,
@@ -348,6 +467,7 @@ async function handleFollowup(tab, question, sendResponse) {
           screenshotDataUrl: conv.screenshotDataUrl,
           turns: conv.turns,
           isOllama: conv.providerInfo.provider === "ollama",
+          aiMode: mode,
         });
       }
     } catch (err) {
@@ -405,13 +525,14 @@ async function validateBasics(tab) {
   return { ok: true, providerInfo, aiInstruction };
 }
 
-async function runFreshConversation({ tab, providerInfo, screenshotDataUrl, instruction, displayInstruction, sendResponse }) {
+async function runFreshConversation({ tab, providerInfo, screenshotDataUrl, instruction, displayInstruction, aiMode, sendResponse }) {
   const blankCheck = await detectBlankOrBlackCapture(screenshotDataUrl);
   const turns = [{ role: "user", text: instruction }];
+  const mode = aiMode || (await getActiveAiMode());
 
   let raw;
   if (providerInfo.type === "gemini") {
-    raw = await askGeminiMultiTurn(providerInfo.apiKey, screenshotDataUrl, turns, providerInfo.model);
+    raw = await askGeminiMultiTurn(providerInfo.apiKey, screenshotDataUrl, turns, providerInfo.model, 1, mode);
   } else {
     raw = await askOpenAICompatibleMultiTurn({
       endpoint: providerInfo.endpoint,
@@ -420,6 +541,7 @@ async function runFreshConversation({ tab, providerInfo, screenshotDataUrl, inst
       screenshotDataUrl,
       turns,
       isOllama: providerInfo.provider === "ollama",
+      aiMode: mode,
     });
   }
 
@@ -464,13 +586,14 @@ async function upsertSessionHistoryFromConv(conv, tab) {
     id: conv.id,
     timestamp: conv.startedAt,
     lastUpdated: conv.lastUpdated || conv.startedAt,
-    pageTitle: tab.title || conv.pageTitle || "",
-    pageUrl: tab.url || conv.pageUrl || "",
+    pageTitle: tab?.title || conv.pageTitle || "",
+    pageUrl: tab?.url || conv.pageUrl || "",
     provider: conv.providerInfo ? conv.providerInfo.providerLabel : "AI",
     turns: conv.turns,
     instruction: conv.turns[0]?.text || "",
     answer: lastAssistant?.text || "",
     thumbnail: conv.thumbnail || null,
+    screenshot: conv.screenshotDataUrl || null, // Preserve original uncompressed image
   };
   if (idx >= 0) sessionHistory[idx] = entry;
   else sessionHistory.push(entry);
@@ -491,6 +614,7 @@ async function getActiveProviderAndKey() {
     activeProvider = "openai",
     openaiApiKey = "",
     geminiApiKey = "",
+    geminiModel = "",
     groqApiKey = "",
     openrouterApiKey = "",
     ollamaEndpoint = "http://localhost:11434",
@@ -500,6 +624,7 @@ async function getActiveProviderAndKey() {
     "activeProvider",
     "openaiApiKey",
     "geminiApiKey",
+    "geminiModel",
     "groqApiKey",
     "openrouterApiKey",
     "ollamaEndpoint",
@@ -513,7 +638,16 @@ async function getActiveProviderAndKey() {
   let model = customModel || cfg.defaultModel;
 
   if (activeProvider === "openai") apiKey = openaiApiKey.trim();
-  else if (activeProvider === "gemini") apiKey = geminiApiKey.trim();
+  else if (activeProvider === "gemini") {
+    apiKey = geminiApiKey.trim();
+    if (geminiModel && geminiModel.trim()) {
+      model = geminiModel.trim();
+    }
+    // Sanitize old deprecated Gemini models from saved storage
+    if (model === "gemini-1.5-flash" || model === "gemini-2.0-flash") {
+      model = "gemini-2.5-flash";
+    }
+  }
   else if (activeProvider === "groq") apiKey = groqApiKey.trim();
   else if (activeProvider === "openrouter") apiKey = openrouterApiKey.trim();
   else if (activeProvider === "ollama") {
@@ -529,6 +663,7 @@ async function getActiveProviderAndKey() {
     apiKey,
     endpoint,
     model,
+    textModel: cfg.textModel || model,
   };
 }
 
@@ -657,8 +792,8 @@ function sleep(ms) {
 
 // ---------- OpenAI Compatible (OpenAI, Groq, OpenRouter, Ollama) ----------
 
-function buildOpenAIMessages(screenshotDataUrl, turns) {
-  const messages = [{ role: "system", content: SYSTEM_PROMPT }];
+function buildOpenAIMessages(screenshotDataUrl, turns, aiMode = "direct") {
+  const messages = [{ role: "system", content: getSystemPrompt(aiMode) }];
   turns.forEach((turn, i) => {
     if (turn.role === "user" && i === 0) {
       if (screenshotDataUrl) {
@@ -680,7 +815,7 @@ function buildOpenAIMessages(screenshotDataUrl, turns) {
 }
 
 async function askOpenAICompatibleMultiTurn(
-  { endpoint, model, apiKey, screenshotDataUrl, turns, isOllama = false },
+  { endpoint, model, apiKey, screenshotDataUrl, turns, isOllama = false, aiMode = "direct" },
   attempt = 1
 ) {
   const controller = new AbortController();
@@ -696,9 +831,9 @@ async function askOpenAICompatibleMultiTurn(
       headers,
       body: JSON.stringify({
         model,
-        max_tokens: 1024,
+        max_tokens: 1536,
         temperature: 0,
-        messages: buildOpenAIMessages(screenshotDataUrl, turns),
+        messages: buildOpenAIMessages(screenshotDataUrl, turns, aiMode),
       }),
     });
   } catch (networkErr) {
@@ -709,12 +844,12 @@ async function askOpenAICompatibleMultiTurn(
       );
     }
     if (networkErr.name === "AbortError") {
-      if (attempt < 3) return askOpenAICompatibleMultiTurn({ endpoint, model, apiKey, screenshotDataUrl, turns, isOllama }, attempt + 1);
+      if (attempt < 3) return askOpenAICompatibleMultiTurn({ endpoint, model, apiKey, screenshotDataUrl, turns, isOllama, aiMode }, attempt + 1);
       throw new Error("The request timed out. Please check your network connection and try again.");
     }
     if (attempt < 3) {
       await sleep(500 * attempt);
-      return askOpenAICompatibleMultiTurn({ endpoint, model, apiKey, screenshotDataUrl, turns, isOllama }, attempt + 1);
+      return askOpenAICompatibleMultiTurn({ endpoint, model, apiKey, screenshotDataUrl, turns, isOllama, aiMode }, attempt + 1);
     }
     throw new Error("Network error: " + networkErr.message);
   }
@@ -732,13 +867,13 @@ async function askOpenAICompatibleMultiTurn(
     if (response.status === 429) {
       if (attempt < 3) {
         await sleep(1000 * attempt);
-        return askOpenAICompatibleMultiTurn({ endpoint, model, apiKey, screenshotDataUrl, turns, isOllama }, attempt + 1);
+        return askOpenAICompatibleMultiTurn({ endpoint, model, apiKey, screenshotDataUrl, turns, isOllama, aiMode }, attempt + 1);
       }
       throw new Error("API rate limit or quota exceeded. Please try again shortly or check your billing.");
     }
     if (response.status >= 500 && attempt < 3) {
       await sleep(700 * attempt);
-      return askOpenAICompatibleMultiTurn({ endpoint, model, apiKey, screenshotDataUrl, turns, isOllama }, attempt + 1);
+      return askOpenAICompatibleMultiTurn({ endpoint, model, apiKey, screenshotDataUrl, turns, isOllama, aiMode }, attempt + 1);
     }
     throw new Error(`API error (${response.status}): ${errBody.slice(0, 200)}`);
   }
@@ -765,10 +900,43 @@ function buildGeminiContents(screenshotDataUrl, turns) {
   });
 }
 
-async function askGeminiMultiTurn(apiKey, screenshotDataUrl, turns, model = "gemini-3.6-flash", attempt = 1) {
+let cachedDiscoveredGeminiModel = null;
+
+async function discoverActiveGeminiModel(apiKey) {
+  if (cachedDiscoveredGeminiModel) return cachedDiscoveredGeminiModel;
+  try {
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(apiKey)}`);
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (!Array.isArray(data.models)) return null;
+
+    // Filter models supporting generateContent
+    const candidates = data.models
+      .filter((m) => Array.isArray(m.supportedGenerationMethods) && m.supportedGenerationMethods.includes("generateContent"))
+      .map((m) => (m.name || "").replace(/^models\//, ""))
+      .filter(Boolean);
+
+    // Prefer modern flash models
+    const flashModel = candidates.find((id) => id.includes("2.5-flash") || id.includes("3.5-flash") || id.includes("flash"));
+    const selected = flashModel || candidates[0];
+    if (selected) {
+      cachedDiscoveredGeminiModel = selected;
+      return selected;
+    }
+  } catch (_) {}
+  return null;
+}
+
+async function askGeminiMultiTurn(apiKey, screenshotDataUrl, turns, model = "gemini-2.5-flash", attempt = 1, aiMode = "direct") {
+  // Normalize deprecated model names
+  let effectiveModel = model;
+  if (!effectiveModel || effectiveModel === "gemini-1.5-flash" || effectiveModel === "gemini-2.0-flash") {
+    effectiveModel = "gemini-2.5-flash";
+  }
+
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 30000);
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${effectiveModel}:generateContent?key=${encodeURIComponent(apiKey)}`;
 
   let response;
   try {
@@ -777,20 +945,20 @@ async function askGeminiMultiTurn(apiKey, screenshotDataUrl, turns, model = "gem
       signal: controller.signal,
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
+        system_instruction: { parts: [{ text: getSystemPrompt(aiMode) }] },
         contents: buildGeminiContents(screenshotDataUrl, turns),
-        generationConfig: { temperature: 0, maxOutputTokens: 1024 },
+        generationConfig: { temperature: 0, maxOutputTokens: 2048 },
       }),
     });
   } catch (networkErr) {
     clearTimeout(timeoutId);
     if (networkErr.name === "AbortError") {
-      if (attempt < 3) return askGeminiMultiTurn(apiKey, screenshotDataUrl, turns, model, attempt + 1);
+      if (attempt < 3) return askGeminiMultiTurn(apiKey, screenshotDataUrl, turns, effectiveModel, attempt + 1, aiMode);
       throw new Error("The request timed out. Check your connection and try again.");
     }
     if (attempt < 3) {
       await sleep(500 * attempt);
-      return askGeminiMultiTurn(apiKey, screenshotDataUrl, turns, model, attempt + 1);
+      return askGeminiMultiTurn(apiKey, screenshotDataUrl, turns, effectiveModel, attempt + 1, aiMode);
     }
     throw new Error("Network error: " + networkErr.message);
   }
@@ -806,23 +974,39 @@ async function askGeminiMultiTurn(apiKey, screenshotDataUrl, turns, model = "gem
       throw new Error("Your Gemini API key is invalid or lacks permission for this model. Please check it in Settings.");
     }
     if (response.status === 404) {
+      // Step 1 fallback: if custom or old model failed, try gemini-2.5-flash
+      if (attempt === 1 && effectiveModel !== "gemini-2.5-flash") {
+        return askGeminiMultiTurn(apiKey, screenshotDataUrl, turns, "gemini-2.5-flash", attempt + 1, aiMode);
+      }
+      // Step 2 fallback: try gemini-3.5-flash
+      if (attempt <= 2 && effectiveModel !== "gemini-3.5-flash") {
+        return askGeminiMultiTurn(apiKey, screenshotDataUrl, turns, "gemini-3.5-flash", attempt + 1, aiMode);
+      }
+      // Step 3 fallback: dynamically query ModelService.ListModels for active supported models
+      if (attempt <= 3) {
+        const discovered = await discoverActiveGeminiModel(apiKey);
+        if (discovered && discovered !== effectiveModel) {
+          return askGeminiMultiTurn(apiKey, screenshotDataUrl, turns, discovered, 4, aiMode);
+        }
+      }
+
       let msg = "";
       try {
         const parsed = JSON.parse(errBody);
         msg = parsed?.error?.message;
       } catch (_) {}
-      throw new Error(`Gemini model not found (404): ${msg || "The requested model is not available. Please update to a supported model."}`);
+      throw new Error(`Gemini model not found (404): ${msg || "The requested model is not available for this API version. Please select a supported model in Settings."}`);
     }
     if (response.status === 429) {
       if (attempt < 3) {
         await sleep(1000 * attempt);
-        return askGeminiMultiTurn(apiKey, screenshotDataUrl, turns, model, attempt + 1);
+        return askGeminiMultiTurn(apiKey, screenshotDataUrl, turns, effectiveModel, attempt + 1, aiMode);
       }
       throw new Error("Gemini rate limit or quota exceeded. Please try again shortly.");
     }
     if (response.status >= 500 && attempt < 3) {
       await sleep(700 * attempt);
-      return askGeminiMultiTurn(apiKey, screenshotDataUrl, turns, model, attempt + 1);
+      return askGeminiMultiTurn(apiKey, screenshotDataUrl, turns, effectiveModel, attempt + 1, aiMode);
     }
     throw new Error(`Gemini API error (${response.status}): ${errBody.slice(0, 200)}`);
   }

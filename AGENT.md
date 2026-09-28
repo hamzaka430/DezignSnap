@@ -9,8 +9,10 @@
 - **Project Type**: Client-Side Chrome Extension (Manifest V3) with Vision AI integration.
 - **Main Purpose**: Visual AI on-page assistant capturing webpage screenshots or cropped regions and delivering grounded explanations or UI navigation guidance.
 - **Integrations in Use**:
+  - Groq REST API (`api.groq.com/openai/v1/chat/completions` with `qwen/qwen3.8-27b` & `llama-3.3-70b-versatile`)
+  - Google Gemini REST API (`generativelanguage.googleapis.com` with `gemini-2.5-flash`)
   - OpenAI REST API (`api.openai.com/v1/chat/completions` with `gpt-4o`)
-  - Google Gemini REST API (`generativelanguage.googleapis.com` with `gemini-3.6-flash`)
+  - OpenRouter & local Ollama APIs
   - jsPDF (`lib/jspdf.umd.min.js`) for client-side offline PDF creation
 - **Multi-Tenant Pattern**: Client-side single-user isolation via browser extension storage (`chrome.storage.local`). No shared multi-tenant database exists.
 

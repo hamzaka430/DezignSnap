@@ -1,6 +1,6 @@
 # DezignSnap — AI Visual Screen Assistant
 
-A high-performance Chrome extension that captures screenshots or drag-selected regions of any webpage and delivers instant, grounded AI answers — to understand interface elements, debug layouts, locate buttons, or translate text. Powered by **Groq (Llama 3.2 Vision)**, **Google Gemini (3.6 Flash)**, **OpenAI (GPT-4o)**, **OpenRouter**, or private local **Ollama** using your own API keys.
+A high-performance Chrome extension that captures screenshots or drag-selected regions of any webpage and delivers instant, grounded AI answers — to understand interface elements, debug layouts, locate buttons, or translate text. Powered by **Groq (Qwen 3.8 27B Vision / Llama 3.3 70B)**, **Google Gemini (2.5 Flash)**, **OpenAI (GPT-4o)**, **OpenRouter**, or private local **Ollama** using your own API keys.
 
 ## 🚀 Standout Features
 
@@ -92,4 +92,4 @@ lib/jspdf.umd.min.js     Bundled locally — no CDN dependency, MV3-CSP safe
 - This extension uses your own OpenAI and/or Gemini API key(s) — API usage is billed to your own account with that provider.
 - The `<all_urls>` permission is required because the on-page button click isn't a toolbar action, so the narrower `activeTab` permission alone isn't sufficient. Full reasoning is documented in `STORE_LISTING.md` and `privacy-policy.html`.
 - No website can block screenshot capture via JavaScript (it's a browser-level API) — only DRM-protected content renders as black, which the extension detects automatically.
-- **This tool is not designed for use in exams, quizzes, or other assessments where independent work is expected, and should not be used for that purpose.** Its intended use is understanding page content and navigation assistance.
+- **This tool is not designed for use in exams, quizzes, or other assessments where independent work is expected, and should not be used for that purpose. 😁** Its intended use is understanding page content and navigation assistance.

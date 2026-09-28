@@ -46,6 +46,7 @@ function renderPreview(history) {
     div.innerHTML = `
       <div class="meta">#${i + 1} • ${escapeHtml(e.pageTitle || e.pageUrl || "Webpage")} • ${date}${e.provider ? " • Engine: " + escapeHtml(e.provider) : ""}</div>
       ${body}
+      ${(e.screenshot || e.thumbnail) ? `<div style="margin-top: 12px;"><img src="${e.screenshot || e.thumbnail}" alt="Screenshot" style="max-width: 100%; max-height: 320px; border-radius: 8px; border: 1px solid #393E46; display: block;" /><span style="font-size: 11px; color: #DFD0B8; margin-top: 4px; display: inline-block;">📸 Original Screenshot Evidence</span></div>` : ""}
     `;
     entriesEl.appendChild(div);
   });
@@ -148,16 +149,18 @@ async function buildAndDownloadPdf(history) {
       y += 8;
     }
 
-    if (entry.thumbnail) {
+    const imgSource = entry.screenshot || entry.thumbnail;
+    if (imgSource) {
       try {
-        const dims = await getImageDims(entry.thumbnail);
-        const imgWidth = Math.min(maxWidth, 240);
+        const dims = await getImageDims(imgSource);
+        const imgWidth = Math.min(maxWidth, 480);
         const imgHeight = (dims.height / dims.width) * imgWidth;
         y = ensureSpace(doc, y, margin, imgHeight + 10);
-        doc.addImage(entry.thumbnail, "JPEG", margin, y, imgWidth, imgHeight);
+        const imgFormat = imgSource.startsWith("data:image/png") ? "PNG" : "JPEG";
+        doc.addImage(imgSource, imgFormat, margin, y, imgWidth, imgHeight);
         y += imgHeight + 14;
       } catch (e) {
-        // Continue if thumbnail fails to render
+        // Continue if screenshot fails to render
       }
     }
 

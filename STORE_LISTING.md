@@ -20,21 +20,21 @@
 
 **Detailed description** (draft — edit freely):
 
-> DezignSnap adds an intelligent visual copilot to your browser. Snip any webpage region (Alt+S) or capture the full screen to get instant, grounded AI answers powered by Groq (Llama 3.2 Vision), Google Gemini (3.6 Flash), OpenAI (GPT-4o), OpenRouter, or private local Ollama.
+> DezignSnap adds an intelligent visual copilot to your browser. Snip any webpage region (Alt+S), capture the full screen, or start a direct AI chat to get instant, grounded answers powered by Groq (Qwen 3.8 27B Vision / Llama 3.3 70B), Google Gemini (2.5 Flash), OpenAI (GPT-4o), OpenRouter, or private local Ollama.
 >
 > Features:
-> - Global hotkey: Alt+S for instant drag-selection snip & zoom
-> - One-click "⚡ Snip & Ask" button on any page
+> - Collapsible floating toolbar: Hide/collapse into a discreet mini pill (`✕`) and restore anytime (`⚡ DezignSnap [+]`)
+> - Horizontal positioning: Dock your toolbar and chat at Left, Center, or Right with 1 click (`⇋`)
+> - Direct AI Chat: Chat with AI immediately without taking screenshots or selecting personas
+> - AI Reasoning Modes: Gemini-style deep reasoning accordion (`<details>`) or ultra-fast direct answer mode
+> - Global hotkey: Alt+S for instant drag-selection snip & zoom; Alt+A for full page solve
 > - Right-click context menu ("⚡ Ask AI about selection") for quick text queries
-> - Choose from 5 engines: Groq, Gemini, OpenAI, OpenRouter, or local Ollama
+> - Choose from 5 engines: Groq (ultra-fast), Gemini (2.5 Flash), OpenAI (GPT-4o), OpenRouter, or local Ollama
 > - Smart Zoom upscale (1.4x–2.5x) for crystal-clear small text and icon recognition
-> - Custom personas (ELI5, Roast My UI, Target Finder, Translate)
-> - Complete session transcript export to clean A4 PDF with thumbnails
+> - Custom personas (ELI5, Roast My UI, Target Finder, Translate, Bug Hunter)
+> - Complete session transcript export to clean A4 PDF with original high-resolution screenshots
 > - Bring Your Own Key (BYOK) — zero middleman servers; direct browser-to-AI privacy
-> - "End Session" button exports your whole Q&A history as a PDF, including screenshot thumbnails
-> - Works even on sites that block content scripts, via the toolbar popup fallback
-> - Built-in detection for DRM-protected/black screenshots so you know when an answer might be unreliable
-> - You bring your own OpenAI or Gemini API key — no data passes through any server we operate
+> - Viewport-bounded chat interface with smooth internal history scrolling (never overflows window)
 >
 > **Note:** this tool is intended for understanding page content and finding UI options — not for use in
 > exams, quizzes, or other assessments where independent work is expected.

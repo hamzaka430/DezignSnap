@@ -1,132 +1,275 @@
 /* ==========================================================================
-   Page Helper AI / Snip & Ask — Warm Slate & Cream Palette
+   Page Helper AI / DezignSnap — Warm Slate & Cream Palette
    Palette: #222831 (Dark Slate) | #393E46 (Slate Charcoal) | #948979 (Warm Taupe) | #DFD0B8 (Warm Cream)
    ========================================================================== */
 
-#ph-ui-root {
-  all: initial;
-  display: block;
+/* Universal Reset inside DezignSnap namespace */
+#ph-hud-container,
+#ph-ai-panel,
+#ph-select-overlay {
+  box-sizing: border-box;
 }
 
-/* Floating Action: Solve with AI */
-#ph-ai-btn {
+#ph-hud-container *,
+#ph-ai-panel *,
+#ph-select-overlay * {
+  box-sizing: border-box;
+}
+
+/* ==========================================================================
+   Unified Floating HUD Container
+   ========================================================================== */
+
+#ph-hud-container {
   all: initial;
   position: fixed;
-  bottom: 24px;
-  right: 24px;
   z-index: 2147483647;
-  background: linear-gradient(135deg, #DFD0B8 0%, #948979 100%);
-  color: #222831;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  font-size: 13.5px;
+  transition: bottom 0.22s ease, left 0.22s ease, right 0.22s ease, opacity 0.2s ease, transform 0.22s ease;
+  user-select: none;
+}
+
+/* Position Modes */
+#ph-hud-container.ph-pos-right {
+  bottom: 20px;
+  right: 20px;
+  left: auto;
+  transform: none;
+}
+
+#ph-hud-container.ph-pos-center {
+  bottom: 20px;
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%);
+}
+
+#ph-hud-container.ph-pos-left {
+  bottom: 20px;
+  left: 20px;
+  right: auto;
+  transform: none;
+}
+
+/* Expanded HUD Bar */
+#ph-hud-bar {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: rgba(34, 40, 49, 0.96);
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 137, 121, 0.55);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.6), 0 0 16px rgba(223, 208, 184, 0.16);
+  backdrop-filter: blur(14px);
+  animation: phHudPopIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+#ph-hud-container.ph-collapsed #ph-hud-bar {
+  display: none !important;
+}
+
+/* Collapsed Mini-Badge */
+#ph-hud-collapsed-badge {
+  display: none;
+}
+
+#ph-hud-container.ph-collapsed #ph-hud-collapsed-badge {
+  display: block !important;
+  animation: phHudPopIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ph-hud-badge-btn {
+  all: initial;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: rgba(34, 40, 49, 0.94);
+  color: #DFD0B8;
+  font-family: inherit;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.3px;
-  padding: 11px 18px;
-  border-radius: 999px;
-  cursor: pointer;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45), 0 0 12px rgba(223, 208, 184, 0.25);
-  border: 1px solid rgba(223, 208, 184, 0.7);
-  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
-  backdrop-filter: blur(8px);
-}
-#ph-ai-btn:hover {
-  background: #DFD0B8;
-  color: #1a1e24;
-  box-shadow: 0 8px 25px rgba(223, 208, 184, 0.45), 0 0 20px rgba(223, 208, 184, 0.4);
-  transform: translateY(-2px) scale(1.02);
-}
-#ph-ai-btn:active {
-  transform: translateY(0) scale(0.98);
-}
-#ph-ai-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  filter: grayscale(0.5);
-}
-
-/* Floating Action: Select Area (Smart Zoom Snip) */
-#ph-region-btn {
-  all: initial;
-  position: fixed;
-  bottom: 154px;
-  right: 24px;
-  z-index: 2147483647;
-  background: rgba(34, 40, 49, 0.95);
-  color: #DFD0B8;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  font-size: 11.5px;
-  font-weight: 700;
-  letter-spacing: 0.2px;
   padding: 8px 14px;
   border-radius: 999px;
+  border: 1px solid rgba(223, 208, 184, 0.6);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.55), 0 0 12px rgba(223, 208, 184, 0.2);
   cursor: pointer;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
-  border: 1px solid #948979;
-  transition: all 0.2s ease;
-  backdrop-filter: blur(8px);
+  transition: all 0.18s ease;
+  backdrop-filter: blur(12px);
 }
-#ph-region-btn:hover {
+
+.ph-hud-badge-btn:hover {
   background: #393E46;
   color: #ffffff;
   border-color: #DFD0B8;
-  box-shadow: 0 0 15px rgba(223, 208, 184, 0.35);
-  transform: translateY(-2px);
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 8px 24px rgba(223, 208, 184, 0.35);
 }
 
-/* Floating Action: End Session */
-#ph-end-btn {
+.ph-hud-badge-btn:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.ph-expand-icon {
+  font-size: 13px;
+  color: #DFD0B8;
+  font-weight: 800;
+}
+
+/* Brand Dot / Label inside HUD */
+.ph-hud-brand {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 6px 0 4px;
+  color: #DFD0B8;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+  border-right: 1px solid rgba(148, 137, 121, 0.4);
+}
+
+.ph-brand-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #DFD0B8;
+  box-shadow: 0 0 8px #DFD0B8;
+}
+
+/* Action Buttons inside HUD */
+.ph-hud-btn {
   all: initial;
-  position: fixed;
-  bottom: 74px;
-  right: 24px;
-  z-index: 2147483647;
-  background: rgba(34, 40, 49, 0.95);
-  color: #c5baaa;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 13px;
+  border-radius: 999px;
+  font-family: inherit;
   font-size: 12px;
   font-weight: 600;
-  padding: 8px 15px;
-  border-radius: 999px;
+  letter-spacing: 0.2px;
   cursor: pointer;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
-  border: 1px solid rgba(148, 137, 121, 0.6);
-  transition: all 0.2s ease;
-  backdrop-filter: blur(8px);
-}
-#ph-end-btn:hover {
-  background: #393E46;
-  color: #DFD0B8;
-  border-color: #948979;
-  box-shadow: 0 0 12px rgba(148, 137, 121, 0.35);
-  transform: translateY(-2px);
-}
-#ph-end-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+  color: #e5ded5;
+  background: rgba(57, 62, 70, 0.65);
+  border: 1px solid rgba(148, 137, 121, 0.5);
+  transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
 }
 
-/* Response Modal Panel */
+.ph-hud-btn:hover {
+  background: #393E46;
+  color: #ffffff;
+  border-color: #DFD0B8;
+  transform: translateY(-1.5px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+}
+
+.ph-hud-btn:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.ph-hud-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Primary Highlight Action (Snip Area) */
+.ph-hud-btn-primary {
+  background: linear-gradient(135deg, #DFD0B8 0%, #948979 100%);
+  color: #222831;
+  font-weight: 700;
+  border: 1px solid #DFD0B8;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35), 0 0 10px rgba(223, 208, 184, 0.25);
+}
+
+.ph-hud-btn-primary:hover {
+  background: #DFD0B8;
+  color: #1a1e24;
+  box-shadow: 0 4px 16px rgba(223, 208, 184, 0.5);
+}
+
+/* Icon Buttons (Position switch, Collapse) */
+.ph-hud-icon-btn {
+  all: initial;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  color: #948979;
+  background: rgba(57, 62, 70, 0.4);
+  border: 1px solid rgba(148, 137, 121, 0.35);
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.ph-hud-icon-btn:hover {
+  color: #DFD0B8;
+  background: #393E46;
+  border-color: #DFD0B8;
+  transform: scale(1.1);
+}
+
+.ph-hud-icon-btn:active {
+  transform: scale(0.95);
+}
+
+/* ==========================================================================
+   AI Response & Chat Panel
+   ========================================================================== */
+
 #ph-ai-panel {
   all: initial;
   position: fixed;
-  bottom: 196px;
-  right: 24px;
   z-index: 2147483647;
-  width: 360px;
-  max-height: 480px;
+  width: 400px;
+  max-width: calc(100vw - 36px);
+  max-height: min(600px, 80vh);
+  height: auto;
   background: rgba(34, 40, 49, 0.98);
   border: 1px solid #948979;
-  border-radius: 14px;
-  box-shadow: 0 16px 45px rgba(0, 0, 0, 0.75), 0 0 20px rgba(223, 208, 184, 0.15);
+  border-radius: 16px;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.8), 0 0 24px rgba(223, 208, 184, 0.15);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  backdrop-filter: blur(16px);
-  animation: phFadeSlideIn 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+  backdrop-filter: blur(18px);
+  animation: phFadeSlideIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: bottom 0.22s ease, left 0.22s ease, right 0.22s ease, transform 0.22s ease;
 }
+
 #ph-ai-panel.ph-hidden {
-  display: none;
+  display: none !important;
+}
+
+/* Panel Alignment matching HUD position */
+#ph-ai-panel.ph-pos-right {
+  bottom: 74px;
+  right: 20px;
+  left: auto;
+  transform: none;
+}
+
+#ph-ai-panel.ph-pos-center {
+  bottom: 74px;
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%);
+}
+
+#ph-ai-panel.ph-pos-left {
+  bottom: 74px;
+  left: 20px;
+  right: auto;
+  transform: none;
 }
 
 @keyframes phFadeSlideIn {
@@ -140,6 +283,18 @@
   }
 }
 
+@keyframes phHudPopIn {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Panel Header */
 .ph-panel-header {
   display: flex;
   justify-content: space-between;
@@ -149,57 +304,105 @@
   padding: 10px 14px;
   font-size: 13px;
   font-weight: 700;
-  letter-spacing: 0.4px;
+  letter-spacing: 0.3px;
   border-bottom: 1px solid rgba(148, 137, 121, 0.4);
-}
-#ph-panel-close {
-  all: initial;
-  cursor: pointer;
-  color: #DFD0B8;
-  font-size: 14px;
-  padding: 2px 6px;
-  border-radius: 4px;
-  transition: all 0.15s ease;
-}
-#ph-panel-close:hover {
-  color: #ffffff;
-  background: rgba(223, 208, 184, 0.18);
+  flex-shrink: 0;
+  user-select: none;
 }
 
+.ph-panel-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.ph-panel-header-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ph-header-btn {
+  all: initial;
+  cursor: pointer;
+  color: #c5baaa;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: rgba(34, 40, 49, 0.6);
+  border: 1px solid rgba(148, 137, 121, 0.4);
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.ph-header-btn:hover {
+  color: #ffffff;
+  background: rgba(223, 208, 184, 0.2);
+  border-color: #DFD0B8;
+}
+
+.ph-header-btn.ph-active-mode {
+  background: rgba(223, 208, 184, 0.25);
+  color: #DFD0B8;
+  border-color: #DFD0B8;
+}
+
+.ph-close-btn {
+  font-size: 13px;
+  padding: 2px 7px;
+}
+
+.ph-close-btn:hover {
+  background: rgba(239, 68, 68, 0.3);
+  color: #ff8585;
+  border-color: #ef4444;
+}
+
+/* Panel Body & Strictly Contained Scroll Container */
 #ph-panel-body {
-  padding: 12px 14px;
+  padding: 14px;
   font-size: 13.5px;
   line-height: 1.55;
   color: #f0ede6;
   overflow-y: auto;
-  flex: 1;
-  min-height: 80px;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  flex: 1 1 auto;
+  max-height: calc(80vh - 135px);
+  min-height: 90px;
 }
 
-/* Scrollbar */
+/* Custom Scrollbar */
 #ph-panel-body::-webkit-scrollbar {
   width: 6px;
 }
+
 #ph-panel-body::-webkit-scrollbar-track {
   background: #222831;
 }
+
 #ph-panel-body::-webkit-scrollbar-thumb {
   background: #393E46;
   border-radius: 4px;
 }
+
 #ph-panel-body::-webkit-scrollbar-thumb:hover {
   background: #948979;
 }
 
+/* Chat Bubbles */
 .ph-bubble {
   margin-bottom: 12px;
   white-space: pre-wrap;
   word-break: break-word;
 }
+
 .ph-bubble-user {
   background: linear-gradient(135deg, #393E46 0%, #2b313a 100%);
   color: #DFD0B8;
-  padding: 8px 12px;
+  padding: 9px 13px;
   border-radius: 12px 12px 3px 12px;
   font-size: 12.5px;
   font-weight: 600;
@@ -208,19 +411,22 @@
   border: 1px solid #948979;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
 }
+
 .ph-bubble-ai {
   background: #28303a;
   border: 1px solid rgba(148, 137, 121, 0.4);
-  padding: 10px 12px;
+  padding: 11px 13px;
   border-radius: 12px 12px 12px 3px;
   color: #f5f2eb;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
 }
+
 .ph-bubble-text {
   margin-top: 6px;
   font-size: 13.5px;
   color: #f0ede6;
 }
+
 .ph-bubble-loading {
   color: #DFD0B8;
   font-style: italic;
@@ -229,6 +435,7 @@
   align-items: center;
   gap: 8px;
 }
+
 .ph-bubble-error {
   color: #ff8585;
   background: rgba(57, 62, 70, 0.7);
@@ -236,6 +443,93 @@
   padding: 9px 12px;
   border-radius: 8px;
   font-size: 12.5px;
+}
+
+/* Welcome Prompt in Direct Chat */
+.ph-welcome-bubble {
+  background: rgba(57, 62, 70, 0.45);
+  border: 1px dashed rgba(148, 137, 121, 0.6);
+  color: #DFD0B8;
+  padding: 12px 14px;
+  border-radius: 10px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
+
+/* ==========================================================================
+   Thinking Mode Accordion (Gemini Style)
+   ========================================================================== */
+
+.ph-thinking-box {
+  background: rgba(34, 40, 49, 0.7);
+  border: 1px solid rgba(148, 137, 121, 0.45);
+  border-radius: 9px;
+  margin-bottom: 10px;
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.ph-thinking-box[open] {
+  border-color: rgba(223, 208, 184, 0.5);
+  background: rgba(34, 40, 49, 0.9);
+}
+
+.ph-thinking-summary {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 11px;
+  cursor: pointer;
+  color: #DFD0B8;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  user-select: none;
+  background: rgba(57, 62, 70, 0.4);
+  transition: background 0.15s ease;
+}
+
+.ph-thinking-summary:hover {
+  background: rgba(57, 62, 70, 0.7);
+  color: #ffffff;
+}
+
+.ph-thinking-icon {
+  font-size: 12px;
+}
+
+.ph-thinking-badge {
+  margin-left: auto;
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: rgba(223, 208, 184, 0.18);
+  color: #DFD0B8;
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid rgba(223, 208, 184, 0.3);
+}
+
+.ph-thinking-content {
+  padding: 10px 12px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #c5baaa;
+  border-top: 1px solid rgba(148, 137, 121, 0.3);
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 220px;
+  overflow-y: auto;
+  background: rgba(24, 29, 36, 0.6);
+}
+
+.ph-thinking-content::-webkit-scrollbar {
+  width: 4px;
+}
+.ph-thinking-content::-webkit-scrollbar-thumb {
+  background: #393E46;
+  border-radius: 2px;
 }
 
 /* Confidence Badges */
@@ -251,16 +545,19 @@
   border-radius: 999px;
   margin-bottom: 4px;
 }
+
 .ph-badge-high {
   background: rgba(34, 197, 94, 0.15);
   color: #4ade80;
   border: 1px solid rgba(74, 222, 128, 0.4);
 }
+
 .ph-badge-medium {
   background: rgba(223, 208, 184, 0.18);
   color: #DFD0B8;
   border: 1px solid rgba(223, 208, 184, 0.5);
 }
+
 .ph-badge-low {
   background: rgba(239, 68, 68, 0.15);
   color: #fca5a5;
@@ -278,17 +575,23 @@
   line-height: 1.45;
 }
 
-/* Follow-up Row */
+/* ==========================================================================
+   Input / Follow-up Row
+   ========================================================================== */
+
 #ph-followup-row {
   display: flex;
   gap: 8px;
   padding: 10px 12px;
   border-top: 1px solid rgba(148, 137, 121, 0.4);
   background: #222831;
+  flex-shrink: 0;
 }
+
 #ph-followup-row.ph-hidden {
-  display: none;
+  display: none !important;
 }
+
 #ph-followup-input {
   all: unset;
   flex: 1;
@@ -301,13 +604,16 @@
   background: #1c2128;
   transition: all 0.2s ease;
 }
+
 #ph-followup-input:focus {
   border-color: #DFD0B8;
   box-shadow: 0 0 10px rgba(223, 208, 184, 0.3);
 }
+
 #ph-followup-input::placeholder {
   color: #948979;
 }
+
 #ph-followup-send {
   all: initial;
   cursor: pointer;
@@ -320,12 +626,16 @@
   border: 1px solid #DFD0B8;
   transition: all 0.15s ease;
 }
+
 #ph-followup-send:hover {
   background: #DFD0B8;
   box-shadow: 0 0 12px rgba(223, 208, 184, 0.45);
 }
 
-/* Snip & Ask Selection Overlay — No backdrop blur so webpage stays crystal sharp! */
+/* ==========================================================================
+   Snip & Ask Selection Overlay — Unblurred & Crystal Sharp
+   ========================================================================== */
+
 #ph-select-overlay {
   all: initial;
   position: fixed;
@@ -335,6 +645,7 @@
   background: rgba(34, 40, 49, 0.42);
   backdrop-filter: none;
 }
+
 #ph-select-box {
   all: initial;
   position: fixed;
@@ -344,6 +655,7 @@
   z-index: 2147483647;
   pointer-events: none;
 }
+
 #ph-select-box.ph-hidden {
-  display: none;
+  display: none !important;
 }

@@ -2,7 +2,7 @@
 
 ## 1. PROJECT OVERVIEW
 - **Application Name**: Page Helper AI
-- **Tagline**: Instant on-page AI visual assistant powered by vision LLMs (OpenAI GPT-4o & Google Gemini 3.6 Flash).
+- **Tagline**: Instant on-page AI visual assistant powered by vision LLMs (Groq, OpenAI GPT-4o & Google Gemini 2.5 Flash).
 - **Core Problem**: Users frequently encounter complex web interfaces, dense dashboards, foreign-language webpages, intricate configuration screens, or obscure buttons. Reading lengthy documentation or manually searching for an option takes significant time and creates user friction.
 - **Intended Target Audience**:
   - Power web users navigating complex SaaS applications, enterprise tools, and analytics dashboards.
@@ -27,8 +27,11 @@
   - `chrome.storage.local` with `unlimitedStorage` permission.
   - Stores user API keys, active provider selection, customizable instruction preset arrays, active preset pointers, and multi-turn session transcript history with compressed base64 JPEG thumbnails.
 - **Third-Party APIs & External Integrations**:
+  - **Groq API**: `https://api.groq.com/openai/v1/chat/completions` using `qwen/qwen3.8-27b` (multimodal vision + text) and `llama-3.3-70b-versatile` (pure text).
+  - **Google Gemini API**: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent` using `gemini-2.5-flash` (multi-modal vision, auto-discovery fallback via ModelService).
   - **OpenAI API**: `https://api.openai.com/v1/chat/completions` using model `gpt-4o` (multi-modal vision).
-  - **Google Gemini API**: `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent` using model `gemini-3.6-flash` (multi-modal vision).
+  - **OpenRouter API**: `https://openrouter.ai/api/v1/chat/completions`.
+  - **Ollama**: `http://localhost:11434/v1/chat/completions` using `llama3.2-vision`.
   - **jsPDF Client Library**: `lib/jspdf.umd.min.js` (v2.x UMD build) for generating client-side downloadable PDF transcripts.
 - **Hosting & Deployment**:
   - Client runtime packaged as `.zip` (`page-helper-ai-v2.1.0.zip`) for Google Chrome Web Store Developer Dashboard.
@@ -72,7 +75,7 @@
    - Allows users to create, edit, delete, and switch between customized system prompts (e.g., General Page Explainer, Bug Finder, Data Extractor).
    - Status: Working ✅
 7. **Dual AI Provider Engine (OpenAI & Gemini)**:
-   - Seamless toggling between GPT-4o and Gemini 3.6 Flash with automatic payload structuring and retry handling.
+   - Seamless toggling between GPT-4o, Groq, and Gemini 2.5 Flash with automatic payload structuring and retry handling.
    - Status: Working ✅
 8. **Session Export to PDF**:
    - Client-side A4 document generation with formatted Q&A turns, timestamps, page titles, URLs, and compressed JPEG thumbnails via jsPDF.
@@ -208,4 +211,4 @@
 ---
 
 ## 12. EXECUTIVE SUMMARY
-Page Helper AI is a production-grade, Manifest V3 Chrome Extension providing private, on-demand visual intelligence across any webpage. Built entirely in vanilla modern JavaScript, the extension captures visible browser tabs, enables high-precision cropped area analysis with automatic upscaling, and dispatches multi-turn visual queries directly to OpenAI (GPT-4o) or Google Gemini (3.6 Flash). The application operates on a strict "Bring Your Own Key" (BYOK) architecture with zero intermediary servers, ensuring user privacy and zero maintenance overhead. Complete with automated confidence scoring, DRM capture detection, preset management, and one-click PDF transcript export, Page Helper AI offers an elegant, self-contained AI assistant ready for the Chrome Web Store.
+Page Helper AI is a production-grade, Manifest V3 Chrome Extension providing private, on-demand visual intelligence across any webpage. Built entirely in vanilla modern JavaScript, the extension captures visible browser tabs, enables high-precision cropped area analysis with automatic upscaling, and dispatches multi-turn visual queries directly to OpenAI (GPT-4o), Groq (Qwen 3.8 / Llama 3.3), or Google Gemini (2.5 Flash). The application operates on a strict "Bring Your Own Key" (BYOK) architecture with zero intermediary servers, ensuring user privacy and zero maintenance overhead. Complete with automated confidence scoring, DRM capture detection, preset management, and one-click PDF transcript export, Page Helper AI offers an elegant, self-contained AI assistant ready for the Chrome Web Store.

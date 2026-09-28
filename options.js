@@ -1,5 +1,8 @@
 const groqKeyInput = document.getElementById("groqKeyInput");
 const geminiKeyInput = document.getElementById("geminiKeyInput");
+const geminiModelSelect = document.getElementById("geminiModelSelect");
+const geminiCustomModelWrap = document.getElementById("geminiCustomModelWrap");
+const geminiCustomModelInput = document.getElementById("geminiCustomModelInput");
 const openaiKeyInput = document.getElementById("openaiKeyInput");
 const openrouterKeyInput = document.getElementById("openrouterKeyInput");
 const ollamaEndpointInput = document.getElementById("ollamaEndpointInput");
@@ -20,6 +23,10 @@ const historyCount = document.getElementById("historyCount");
 const clearHistoryBtn = document.getElementById("clearHistoryBtn");
 const exportPdfBtn = document.getElementById("exportPdfBtn");
 
+const hudPositionSelect = document.getElementById("hudPositionSelect");
+const aiModeSelect = document.getElementById("aiModeSelect");
+const prefStatus = document.getElementById("prefStatus");
+
 const radioCards = document.querySelectorAll(".radio-card");
 
 init();
@@ -28,22 +35,28 @@ async function init() {
   const {
     openaiApiKey = "",
     geminiApiKey = "",
+    geminiModel = "gemini-2.5-flash",
     groqApiKey = "",
     openrouterApiKey = "",
     ollamaEndpoint = "http://localhost:11434",
     ollamaModel = "llama3.2-vision",
     activeProvider = "groq",
+    hudPosition = "right",
+    aiMode = "direct",
     instructionPresets = [],
     activePresetId,
     sessionHistory = [],
   } = await chrome.storage.local.get([
     "openaiApiKey",
     "geminiApiKey",
+    "geminiModel",
     "groqApiKey",
     "openrouterApiKey",
     "ollamaEndpoint",
     "ollamaModel",
     "activeProvider",
+    "hudPosition",
+    "aiMode",
     "instructionPresets",
     "activePresetId",
     "sessionHistory",
@@ -51,14 +64,83 @@ async function init() {
 
   groqKeyInput.value = groqApiKey;
   geminiKeyInput.value = geminiApiKey;
+
+  let cleanGeminiModel = geminiModel;
+  if (!cleanGeminiModel || cleanGeminiModel === "gemini-1.5-flash" || cleanGeminiModel === "gemini-2.0-flash") {
+    cleanGeminiModel = "gemini-2.5-flash";
+    await chrome.storage.local.set({ geminiModel: cleanGeminiModel });
+  }
+
+  if (geminiModelSelect) {
+    if (["gemini-2.5-flash", "gemini-3.5-flash", "gemini-2.5-pro"].includes(cleanGeminiModel)) {
+      geminiModelSelect.value = cleanGeminiModel;
+      if (geminiCustomModelWrap) geminiCustomModelWrap.style.display = "none";
+    } else {
+      geminiModelSelect.value = "custom";
+      if (geminiCustomModelWrap) geminiCustomModelWrap.style.display = "block";
+      if (geminiCustomModelInput) geminiCustomModelInput.value = cleanGeminiModel;
+    }
+
+    geminiModelSelect.addEventListener("change", async () => {
+      const selected = geminiModelSelect.value;
+      if (selected === "custom") {
+        if (geminiCustomModelWrap) geminiCustomModelWrap.style.display = "block";
+        const customVal = geminiCustomModelInput ? geminiCustomModelInput.value.trim() : "";
+        if (customVal) await chrome.storage.local.set({ geminiModel: customVal });
+      } else {
+        if (geminiCustomModelWrap) geminiCustomModelWrap.style.display = "none";
+        await chrome.storage.local.set({ geminiModel: selected });
+        showStatus(`Gemini model set to ${selected} ✨`, true);
+      }
+    });
+
+    if (geminiCustomModelInput) {
+      geminiCustomModelInput.addEventListener("input", async () => {
+        const customVal = geminiCustomModelInput.value.trim();
+        if (customVal && geminiModelSelect.value === "custom") {
+          await chrome.storage.local.set({ geminiModel: customVal });
+        }
+      });
+    }
+  }
+
   openaiKeyInput.value = openaiApiKey;
   openrouterKeyInput.value = openrouterApiKey;
   ollamaEndpointInput.value = ollamaEndpoint;
   ollamaModelInput.value = ollamaModel;
 
+  if (hudPositionSelect) hudPositionSelect.value = hudPosition;
+  if (aiModeSelect) aiModeSelect.value = aiMode;
+
   setActiveProviderCard(activeProvider);
   renderPresets(instructionPresets, activePresetId);
   historyCount.textContent = sessionHistory.length;
+}
+
+if (hudPositionSelect) {
+  hudPositionSelect.addEventListener("change", async () => {
+    const val = hudPositionSelect.value;
+    await chrome.storage.local.set({ hudPosition: val });
+    showPrefStatus(`Floating toolbar position saved to ${val.toUpperCase()} 📍`, true);
+  });
+}
+
+if (aiModeSelect) {
+  aiModeSelect.addEventListener("change", async () => {
+    const val = aiModeSelect.value;
+    await chrome.storage.local.set({ aiMode: val });
+    showPrefStatus(`AI mode set to ${val === "thinking" ? "Deep Thinking & Explanation 🧠" : "Direct Answer ⚡"}`, true);
+  });
+}
+
+function showPrefStatus(text, ok) {
+  if (!prefStatus) return;
+  prefStatus.textContent = text;
+  prefStatus.style.background = "rgba(57, 62, 70, 0.95)";
+  prefStatus.style.color = ok ? "#DFD0B8" : "#ff8585";
+  prefStatus.style.border = ok ? "1px solid #948979" : "1px solid #e06c75";
+  prefStatus.classList.remove("hidden");
+  setTimeout(() => prefStatus.classList.add("hidden"), 3000);
 }
 
 function setActiveProviderCard(provider) {
@@ -96,8 +178,12 @@ saveGroqKeyBtn.addEventListener("click", async () => {
 saveGeminiKeyBtn.addEventListener("click", async () => {
   const key = geminiKeyInput.value.trim();
   if (!key) return showStatus("Gemini API key cannot be empty.", false);
-  await chrome.storage.local.set({ geminiApiKey: key });
-  showStatus("Gemini API key saved successfully ✅", true);
+  let model = geminiModelSelect ? geminiModelSelect.value : "gemini-2.5-flash";
+  if (model === "custom" && geminiCustomModelInput) {
+    model = geminiCustomModelInput.value.trim() || "gemini-2.5-flash";
+  }
+  await chrome.storage.local.set({ geminiApiKey: key, geminiModel: model });
+  showStatus("Gemini configuration saved successfully ✅", true);
 });
 
 saveOpenAIKeyBtn.addEventListener("click", async () => {
