@@ -2,48 +2,61 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'none'; object-src 'none';" />
   <title>Welcome to DezignSnap — Setup Guide &amp; Operations Manual</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: #222831;
-      color: #f5f2eb;
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: #f4ede4;
+      background-image:
+        radial-gradient(ellipse at 15% 0%, #fff0e6 0%, transparent 60%),
+        radial-gradient(ellipse at 85% 10%, #e9d8ff 0%, transparent 55%),
+        radial-gradient(ellipse at 50% 90%, #e6f4ea 0%, transparent 60%);
+      background-attachment: fixed;
+      color: #1d1d1d;
       line-height: 1.6;
-      padding: 50px 20px;
+      padding: 50px 20px 70px;
+      -webkit-font-smoothing: antialiased;
     }
     .wrap {
-      max-width: 720px;
+      max-width: 760px;
       margin: 0 auto;
     }
     .hero {
       text-align: center;
-      margin-bottom: 36px;
+      margin-bottom: 38px;
     }
     .logo {
-      width: 76px;
-      height: 76px;
+      width: 80px;
+      height: 80px;
       margin-bottom: 16px;
-      border-radius: 16px;
-      box-shadow: 0 0 25px rgba(223, 208, 184, 0.25);
-      border: 1.5px solid rgba(223, 208, 184, 0.4);
+      border-radius: 20px;
+      box-shadow: 0 8px 24px rgba(74, 21, 75, 0.2);
+      border: 1.5px solid rgba(74, 21, 75, 0.25);
     }
     h1 {
-      color: #DFD0B8;
-      font-size: 28px;
+      color: #4a154b;
+      font-size: 30px;
       font-weight: 800;
-      letter-spacing: 0.5px;
+      letter-spacing: -0.02em;
       margin-bottom: 8px;
     }
     .brand-glow {
-      color: #DFD0B8;
-      text-shadow: 0 0 12px rgba(223, 208, 184, 0.4);
+      color: #4a154b;
+      background: #f9f0ff;
+      border: 1px solid rgba(74, 21, 75, 0.2);
+      padding: 2px 10px;
+      border-radius: 90px;
+      font-size: 16px;
+      vertical-align: middle;
     }
     p.lead {
-      font-size: 15px;
-      color: #c5baaa;
-      max-width: 580px;
+      font-size: 15.5px;
+      color: #555555;
+      max-width: 600px;
       margin: 0 auto 24px;
+      line-height: 1.6;
     }
     .badge-bar {
       display: flex;
@@ -53,27 +66,40 @@
       margin-bottom: 32px;
     }
     .pill {
-      background: rgba(57, 62, 70, 0.7);
-      border: 1px solid #948979;
-      color: #DFD0B8;
-      font-size: 11.5px;
+      background: #f9f0ff;
+      border: 1px solid rgba(74, 21, 75, 0.2);
+      color: #4a154b;
+      font-size: 12px;
       font-weight: 700;
-      padding: 4px 10px;
-      border-radius: 999px;
+      padding: 5px 14px;
+      border-radius: 90px;
+      transition: all 0.2s ease;
+    }
+    .pill:hover {
+      background: #4a154b;
+      color: #ffffff;
+      transform: translateY(-1px);
     }
 
     .card {
-      background: rgba(44, 52, 64, 0.95);
-      border: 1px solid #393E46;
-      border-radius: 14px;
-      padding: 24px;
-      margin-bottom: 22px;
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+      background: #ffffff;
+      border: 1px solid rgba(74, 21, 75, 0.12);
+      border-radius: 18px;
+      padding: 26px;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 20px rgba(74, 21, 75, 0.05);
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .card:hover {
+      border-color: rgba(74, 21, 75, 0.25);
+      box-shadow: 0 8px 28px rgba(74, 21, 75, 0.08);
     }
     h2 {
-      color: #DFD0B8;
+      color: #4a154b;
       font-size: 18px;
-      margin-bottom: 16px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      margin-bottom: 18px;
       display: flex;
       align-items: center;
       gap: 10px;
@@ -82,110 +108,114 @@
     .step {
       display: flex;
       gap: 16px;
-      margin-bottom: 20px;
+      margin-bottom: 22px;
     }
     .step:last-child { margin-bottom: 0; }
     .step-num {
       flex-shrink: 0;
       width: 32px;
       height: 32px;
-      background: linear-gradient(135deg, #DFD0B8 0%, #948979 100%);
-      color: #222831;
-      border: 1px solid #DFD0B8;
+      background: #4a154b;
+      color: #ffffff;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
       font-weight: 800;
       font-size: 14px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 3px 10px rgba(74, 21, 75, 0.25);
     }
     .step-body h3 {
       font-size: 15px;
-      color: #ffffff;
+      font-weight: 700;
+      color: #1d1d1d;
       margin-bottom: 4px;
     }
     .step-body p {
       font-size: 13.5px;
-      color: #c5baaa;
-      line-height: 1.55;
+      color: #555555;
+      line-height: 1.6;
     }
     .step-body a {
-      color: #DFD0B8;
-      text-decoration: underline;
+      color: #1264a3;
+      text-decoration: none;
       font-weight: 600;
     }
-    .step-body a:hover { color: #ffffff; }
+    .step-body a:hover { text-decoration: underline; }
 
     .code-box {
-      background: #171b21;
-      border: 1px solid #393E46;
-      border-radius: 8px;
-      padding: 10px 14px;
-      font-family: monospace;
+      background: #2a082b;
+      border: 1px solid #592466;
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-family: "Consolas", monospace;
       font-size: 12.5px;
-      color: #DFD0B8;
-      margin: 8px 0;
+      color: #f9f0ff;
+      margin: 10px 0;
       user-select: all;
     }
 
     .cta-center {
       text-align: center;
-      margin: 36px 0 20px;
+      margin: 40px 0 24px;
     }
     a.cta {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      background: linear-gradient(135deg, #DFD0B8 0%, #948979 100%);
-      color: #222831;
+      background: #4a154b;
+      color: #ffffff;
       text-decoration: none;
-      padding: 13px 30px;
-      border-radius: 10px;
+      padding: 13px 32px;
+      border-radius: 90px;
       font-weight: 800;
       font-size: 15px;
-      letter-spacing: 0.4px;
-      border: 1px solid #DFD0B8;
-      box-shadow: 0 6px 25px rgba(0, 0, 0, 0.4);
-      transition: all 0.2s ease;
+      letter-spacing: -0.01em;
+      border: 1.5px solid #4a154b;
+      box-shadow: 0 4px 18px rgba(74, 21, 75, 0.25);
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     }
     a.cta:hover {
-      background: #DFD0B8;
-      box-shadow: 0 0 25px rgba(223, 208, 184, 0.45);
+      background: #611f69;
+      border-color: #611f69;
+      box-shadow: 0 8px 24px rgba(74, 21, 75, 0.32);
       transform: translateY(-2px);
     }
 
     footer {
       text-align: center;
       font-size: 13px;
-      color: #948979;
-      margin-top: 30px;
+      color: #696969;
+      margin-top: 36px;
     }
-    footer a { color: #DFD0B8; text-decoration: none; }
+    footer a { color: #4a154b; text-decoration: none; font-weight: 600; }
+    footer a:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
   <div class="wrap">
     <div class="hero">
-      <img class="logo" src="icons/icon128.png" alt="DezignSnap logo" />
-      <h1>DezignSnap <span class="brand-glow">PRO</span></h1>
+      <img class="hero-brand-banner" src="assests/06-combination-mark.svg" alt="DezignSnap Master Brand" style="max-width: 440px; width: 100%; height: auto; border-radius: 16px; box-shadow: 0 10px 32px rgba(74, 21, 75, 0.16); margin-bottom: 20px; border: 1.5px solid rgba(74, 21, 75, 0.12);" />
       <p class="lead">
         Your high-performance on-page AI visual assistant. Grounded screen intelligence powered by Groq, Gemini, OpenAI, OpenRouter, or local Ollama.
       </p>
 
       <div class="badge-bar">
-        <span class="pill">⚡ Groq Qwen 3.8</span>
-        <span class="pill">✨ Gemini 2.5 Flash</span>
-        <span class="pill">🧠 GPT-4o</span>
-        <span class="pill">🌐 OpenRouter</span>
-        <span class="pill">💻 Local Ollama</span>
-        <span class="pill">⌨️ Alt+S Snipping</span>
+        <span class="pill">Groq Qwen 3.8</span>
+        <span class="pill">Gemini 2.5 Flash</span>
+        <span class="pill">GPT-4o</span>
+        <span class="pill">OpenRouter</span>
+        <span class="pill">Local Ollama</span>
+        <span class="pill">Alt+S Snipping</span>
       </div>
     </div>
 
     <!-- QUICK SETUP -->
     <div class="card">
-      <h2>🚀 Quick Setup in 4 Steps</h2>
+      <h2>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color: #4a154b;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        Quick Setup in 4 Steps
+      </h2>
 
       <div class="step">
         <div class="step-num">1</div>
@@ -207,7 +237,7 @@
         <div class="step-body">
           <h3>Pin &amp; Configure</h3>
           <p>
-            1. Pin the extension 📌 to your Chrome toolbar.<br />
+            1. Pin the extension to your Chrome toolbar.<br />
             2. Click the icon, open <strong>Settings</strong>, and save your API key.
           </p>
         </div>
@@ -228,7 +258,7 @@
         <div class="step-body">
           <h3>Start Snipping!</h3>
           <p>
-            Press <strong>Alt + S</strong> or click <strong>🎯 Snip Area</strong> on any page, drag a rectangle over anything you want explained, and get instant answers!
+            Press <strong>Alt + S</strong> or click <strong>Snip Area</strong> on any page, drag a rectangle over anything you want explained, and get instant answers!
           </p>
         </div>
       </div>
@@ -236,29 +266,40 @@
 
     <!-- LOCAL OLLAMA SETUP -->
     <div class="card">
-      <h2>💻 Local AI Setup (Ollama 100% Private)</h2>
-      <p style="color:#c5baaa; font-size:13.5px; margin-bottom:12px;">
+      <h2>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color: #4a154b;"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        Local AI Setup (Ollama 100% Private)
+      </h2>
+      <p style="color:#555555; font-size:13.5px; margin-bottom:12px;">
         To run local vision models without sending any screenshots over the internet, configure Ollama to accept browser requests by starting it with origins enabled:
       </p>
       <div class="code-box">set OLLAMA_ORIGINS=* &amp;&amp; ollama serve</div>
-      <p style="color:#c5baaa; font-size:13px; margin-top:8px;">
+      <p style="color:#555555; font-size:13px; margin-top:8px;">
         Then pull a vision model in your terminal: <code>ollama pull llama3.2-vision</code>, select Ollama in settings, and you are ready!
       </p>
     </div>
 
     <!-- FEATURES & TIPS -->
     <div class="card">
-      <h2>✨ Standout Features &amp; Tips</h2>
-      <div style="font-size:13.5px; color:#c5baaa; line-height: 1.7;">
-        <p>• <strong>Right-Click Text Ask:</strong> Highlight any sentence or code snippet on a page, right-click, and select <em>"⚡ Ask AI about selection"</em>.</p>
-        <p>• <strong>Custom Personas:</strong> Create custom modes in settings like <em>"Explain Like I'm 5"</em>, <em>"Roast My UI"</em>, or <em>"Target Finder"</em>.</p>
-        <p>• <strong>Smart Zoom Upscale:</strong> Selected regions are automatically cropped and upscaled 1.4x–2.5x via offscreen canvas for supreme OCR clarity.</p>
+      <h2>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color: #4a154b;"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        Standout Features &amp; Tips
+      </h2>
+      <div style="font-size:13.5px; color:#555555; line-height: 1.7;">
+        <p>• <strong>Zero-Sycophancy MCQ Solver:</strong> Evaluates quizzes from scratch, objectively proving the right choice without assuming on-screen markings are correct.</p>
+        <p>• <strong>Right-Click Text Ask:</strong> Highlight any sentence or code snippet on a page, right-click, and select <em>"Ask AI about selection"</em>.</p>
+        <p>• <strong>Custom Personas:</strong> Create custom modes in settings like <em>"Quiz &amp; MCQ Solver"</em>, <em>"Roast My UI"</em>, or <em>"Bug Hunter"</em>.</p>
+        <p>• <strong>Smart Zoom Upscale:</strong> Selected regions are automatically cropped and upscaled 1.4x–2.5x via offscreen canvas for supreme optical clarity.</p>
+        <p>• <strong>Ultra-Stealth Dock:</strong> Toolbar collapses to a sleek vertical edge strip and auto-collapses after 1 minute of inactivity.</p>
         <p>• <strong>PDF Session Transcript:</strong> Export your full research Q&amp;A history with screenshots in one click.</p>
       </div>
     </div>
 
     <div class="cta-center">
-      <a class="cta" href="options.html" target="_blank">⚙️ Open Settings &amp; Start Snipping →</a>
+      <a class="cta" href="options.html" target="_blank">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Open Settings &amp; Start Snipping &rarr;
+      </a>
     </div>
 
     <footer>

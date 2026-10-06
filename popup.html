@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'none'; object-src 'none';" />
   <title>DezignSnap — AI Visual Assistant</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
@@ -9,14 +10,16 @@
   <div class="container">
     <header>
       <div class="logo-wrap">
-        <img src="icons/icon32.png" width="22" height="22" alt="DezignSnap logo" />
+        <img src="assests/03-pictorial-mark.svg" width="24" height="24" alt="DezignSnap logo" class="popup-brand-icon" />
         <h1>DezignSnap <span class="brand-badge">PRO</span></h1>
       </div>
-      <button id="openOptionsBtn" title="Settings & Providers">⚙️ Setup</button>
+      <button id="openOptionsBtn" title="Settings &amp; Providers" aria-label="Settings">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:3px;" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Settings
+      </button>
     </header>
 
     <div id="keyWarning" class="warning hidden">
-      ⚠️ <span id="warningText">No API key set for active provider.</span> <a href="#" id="setupLink">Configure Key</a>
+      <span class="warning-dot"></span> <span id="warningText">No API key set for active provider.</span> <a href="#" id="setupLink">Configure Key</a>
     </div>
 
     <div class="form-group">
@@ -25,22 +28,22 @@
         <span id="providerStatusText" style="color: #4ade80; text-transform:none; font-weight:normal;">Ready</span>
       </label>
       <select id="providerSelect">
-        <option value="groq">⚡ Groq (Qwen 3.8 27B Vision - Ultra Fast)</option>
-        <option value="gemini">✨ Google Gemini (2.5 Flash)</option>
-        <option value="openai">🧠 OpenAI (GPT-4o)</option>
-        <option value="openrouter">🌐 OpenRouter (Multi-model)</option>
-        <option value="ollama">💻 Ollama (Local AI - 100% Free)</option>
+        <option value="groq">Groq (Qwen 3.8 27B Vision - Ultra Fast)</option>
+        <option value="gemini">Google Gemini (2.5 Flash)</option>
+        <option value="openai">OpenAI (GPT-4o)</option>
+        <option value="openrouter">OpenRouter (Multi-Model)</option>
+        <option value="ollama">Ollama (Local AI - 100% Free)</option>
       </select>
     </div>
 
     <div class="form-group">
       <label for="aiModeSelect">
         <span>AI Mode</span>
-        <span id="aiModeStatusText" style="color: #DFD0B8; text-transform:none; font-weight:normal;">Direct</span>
+        <span id="aiModeStatusText" style="color: #4a154b; text-transform:none; font-weight:normal;">Direct</span>
       </label>
       <select id="aiModeSelect">
-        <option value="direct">⚡ Direct Answer (Fastest)</option>
-        <option value="thinking">🧠 Deep Thinking &amp; Explanation (Gemini Style)</option>
+        <option value="direct">Direct Answer (Fastest)</option>
+        <option value="thinking">Deep Thinking &amp; Explanation (Gemini Style)</option>
       </select>
     </div>
 
@@ -55,6 +58,17 @@
       </select>
     </div>
 
+    <div class="form-group stealth-group" style="display:flex;align-items:center;justify-content:space-between;padding:4px 0 8px;">
+      <div>
+        <label for="stealthModeToggle" style="margin:0;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:6px;font-size:12px;color:#1d1d1d;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+          Screen Share Stealth [Alt+H]
+        </label>
+        <span style="font-size:11px;color:#696969;display:block;">Hides on-screen toggle completely</span>
+      </div>
+      <input type="checkbox" id="stealthModeToggle" style="width:16px;height:16px;cursor:pointer;accent-color:#4a154b;" />
+    </div>
+
     <div class="form-group">
       <label for="presetSelect">
         <span>Persona / Mode</span>
@@ -64,15 +78,19 @@
 
     <div class="btn-group">
       <button id="quickSnipBtn" class="btn btn-primary" title="Trigger area selection (Alt+S)">
-        🎯 Snip [Alt+S]
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="1" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="1" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="23" y2="12"/></svg>Snip Area [Alt+S]
       </button>
       <button id="fallbackAskBtn" class="btn btn-secondary" title="Analyze full page (Alt+A)">
-        📸 Ask Page
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>Full Page [Alt+A]
       </button>
     </div>
 
     <button id="directChatBtn" class="btn btn-chat" style="margin-top: 8px; width: 100%;" title="Open AI Chat directly without screenshot">
-      💬 Direct AI Chat (No Screenshot)
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Direct Chat (No Screenshot)
+    </button>
+
+    <button id="openSidePanelBtn" class="btn btn-secondary" style="margin-top: 8px; width: 100%; border-color: rgba(74, 21, 75, 0.3);" title="Open Side Panel (100% Excluded from Chrome Tab Sharing) [Alt+P]">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="15" y1="3" x2="15" y2="21"/></svg>🛡️ Side Panel Mode [Alt+P]
     </button>
 
     <p class="hint">

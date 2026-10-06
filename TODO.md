@@ -1,40 +1,27 @@
 # TODO — DezignSnap
 
-## Completed Tasks ✅
-- [x] **Color Hunt Palette Overhaul**: Re-skinned every page, popup, modal, and HUD using the warm slate and cream palette (`#222831`, `#393E46`, `#948979`, `#DFD0B8`).
-- [x] **Snip Selection Blur Removal**: Eliminated `backdrop-filter: blur(2px)` on `#ph-select-overlay` so webpage content stays sharp during `Alt+S` / Snip Area.
-- [x] **Multi-Engine Support & Groq Upgrade**: Added support for 5 major AI providers:
-  - **Groq** (`qwen/qwen3.8-27b` multimodal vision + `llama-3.3-70b-versatile` text — fixed decommissioned 400 error)
-  - **Google Gemini** (`gemini-2.5-flash` with resilient multi-tier fallback and dynamic ModelService auto-discovery)
-  - **OpenAI** (`gpt-4o` multi-modal)
-  - **OpenRouter** (unified API access)
-  - **Ollama** (Local AI, 100% private, free offline vision via `llama3.2-vision`)
-- [x] **Collapsible & Expandable Floating HUD**: Added collapse (`✕`) to sleek mini-pill and expand (`⚡ DezignSnap [+]`) toggle that syncs across web pages.
-- [x] **Horizontal HUD & Panel Positioning**: Support `Left`, `Center`, and `Right` positioning modes with 1-click on-toolbar cycling (`⇋`) and settings dropdowns.
-- [x] **Direct AI Chat (No Screenshot Needed)**: Launch fast text Q&A directly without taking screenshots or selecting personas.
-- [x] **AI Reasoning Modes (Direct Answer vs. Deep Thinking)**: Gemini-style deep reasoning accordion (`<details>`) alongside ultra-fast direct answer mode.
-- [x] **Strict Viewport Bounding & Smooth History Scroll**: Floating chat panel never spills out of the window; past messages scroll cleanly.
-- [x] **Original Quality Screenshot Preservation**: Uncompressed high-res snapshots stored for crystal-clear PDF exports and session reviews.
-- [x] **Quick Text Ask (Context Menu)**: Added `"contextMenus"` right-click handler: *"⚡ Ask AI about selection"* on any highlighted webpage text.
-- [x] **Global Keyboard Shortcuts**: Registered Chrome commands for:
-  - `Alt+S`: Instant Area Snip & Ask
-  - `Alt+A`: Full visible page capture and analyze
-- [x] **Pre-configured Personas & Modes**:
-  - General Page Helper
-  - Explain Like I'm 5 (ELI5)
-  - Roast My UI / Code
-  - Target Option Finder
-  - Translate & Summarize
-  - Bug & Edge Case Hunter
-- [x] **Operations Manual & Setup Guide**: Built comprehensive 4-step quick setup and Ollama CORS manual into `welcome.html` and `options.html`.
-- [x] **Branded Session PDF Reports**: Client-side A4 report generator with executive slate and taupe typography and embedded high-res screenshots.
-- [x] **Security Hardening**: Enforced `e.isTrusted` checks, attribute escaping, URL scheme validation, and in-flight request debouncing.
+## Completed Tasks
+- [x] **Brand Assets & Vector Marks Integration**: Integrated premier brand assets from `assests/` (`03-pictorial-mark.svg`) across floating HUD bar, collapsed stealth dock badge, action popup, settings, session PDF report, welcome guide, and web portal.
+- [x] **Emoji Elimination & Crisp Vector Icons**: Cleaned out raw emojis across all pages, buttons, status badges, and selectors. Replaced with purposeful, minimalist inline SVG icons adhering to the Ponytail principle (zero external icon fonts or CDN bloat).
+- [x] **Sidebar Toggle & Dock Controls**: Styled collapse and expand controls based on modern sidebar panel icons with outline (idle) and solid (hover/active) states. Docks flush to screen margin with 1-click expand and smooth hover preview.
+- [x] **Aubergine & Cream Design System**: Re-skinned every page, popup, modal, and HUD using the curated palette (`#4a154b`, `#611f69`, `#f4ede4`, `#f9f0ff`, `#1d1d1d`) with 90px pill buttons.
+- [x] **Shadow DOM Bidirectional Isolation**: Encapsulated floating HUD and chat panel into a closed Shadow Root, guaranteeing complete immunity from host page CSS conflicts.
+- [x] **Snip Selection Blur Removal**: Crystal-clear crosshair overlay `#ph-select-overlay` for pixel-perfect area capture.
+- [x] **Multi-Engine BYOK Architecture**: Groq (Qwen 3.8 27B Vision / Llama 3.3 70B), Gemini 2.5 Flash, GPT-4o, OpenRouter, and 100% offline Ollama (`llama3.2-vision`).
+- [x] **Horizontal HUD & Panel Positioning**: Support `Left`, `Center`, and `Right` positioning modes with 1-click on-toolbar cycling and settings dropdown.
+- [x] **Direct AI Chat (No Screenshot Needed)**: Instant text mode without requiring screenshots.
+- [x] **AI Reasoning Modes (Direct Answer vs. Deep Thinking)**: Collapsible reasoning accordions alongside ultra-fast direct answers.
+- [x] **Zero-Sycophancy First-Principles Problem & MCQ Solver**: Evaluates options independently from scratch; never assumes marked buttons on screen are correct.
+- [x] **Decoupled Memory & Active Vision Isolation**: Preserves full 50-turn conversational history while feeding a clean, rolling 1-image context to the AI.
+- [x] **Side Toggle Edge Dock & 1-Minute Auto-Collapse**: Docks flush against screen boundary as a sleek sidebar toggle tab; auto-collapses after 60 seconds of inactivity.
+- [x] **Branded Session PDF Reports & Client-Side Export**: High-resolution thumbnails and clean A4 formatting via offline jsPDF.
+- [x] **Chrome Web Store Submission Package Built**: Packaged lean `dezignsnap-v2.1.1.zip` (210 KB) strictly adhering to Manifest V3 guidelines with all brand icons, CSP compliance, and permission justifications.
+- [x] **Zero CSP Console Warnings**: Completely eliminated `frame-ancestors` meta tag warnings across all extension pages.
+- [x] **Multi-Model Resilient Fallback Engine**: Groq `qwen/qwen3.8-27b` default with auto-discovery and 404 recovery; Gemini 2.5 Flash with ModelService discovery.
+- [x] **Screen Share Stealth & Anti-Capture Shield**: Real-time WebRTC `getDisplayMedia` interception auto-hides HUD/toggles during active screen share in Google Meet/Teams/Zoom Web. Global `Alt+H` panic shortcut and "Screen Share Stealth" toggle completely hide on-screen docks and HUD for 100% capture immunity during desktop or tab sharing; `Escape` key dismisses answer panel in 0ms.
 
-## In Progress / Next Up 🔄
-- [ ] **Shadow DOM Migration**: Encapsulate injected floating HUD elements into a closed Shadow Root to avoid host page CSS pollution.
-- [ ] **Streaming Responses (SSE)**: Stream token-by-token output in the floating panel for perceived zero-latency.
-
-## Suggested Next Steps
-1. Test in browser (`chrome://extensions`) in Developer Mode and reload.
-2. Verify `Alt+S` shortcut triggers area selection on active tab.
-3. Test right-click context menu on highlighted text.
+## Ready to Publish Checklist
+1. Open the [Chrome Web Store Developer Dashboard](https://chrome.google.com/webstore/devconsole).
+2. Click **"New item"** and upload [`dezignsnap-v2.1.1.zip`](file:///h:/Extension/page-helper-extension/dezignsnap-v2.1.1.zip).
+3. Copy metadata, single-purpose statement, and permission justifications directly from [`STORE_LISTING.md`](file:///h:/Extension/page-helper-extension/STORE_LISTING.md).
+4. Upload promotional screenshots (1280x800) and click **"Submit for review"**.

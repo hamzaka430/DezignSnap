@@ -9,7 +9,7 @@
 - **Project Type**: Client-Side Chrome Extension (Manifest V3) with Vision AI integration.
 - **Main Purpose**: Visual AI on-page assistant capturing webpage screenshots or cropped regions and delivering grounded explanations or UI navigation guidance.
 - **Integrations in Use**:
-  - Groq REST API (`api.groq.com/openai/v1/chat/completions` with `qwen/qwen3.8-27b` & `llama-3.3-70b-versatile`)
+  - Groq REST API (`api.groq.com/openai/v1/chat/completions` with `qwen/qwen3.8-27b` multimodal & auto-discovery)
   - Google Gemini REST API (`generativelanguage.googleapis.com` with `gemini-2.5-flash`)
   - OpenAI REST API (`api.openai.com/v1/chat/completions` with `gpt-4o`)
   - OpenRouter & local Ollama APIs

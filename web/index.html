@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DezignSnap — AI Visual Screen Assistant Chrome Extension</title>
+  <meta name="description" content="Capture webpage screenshots or snip areas for instant visual AI answers powered by Groq, Gemini, GPT-4o, and local Ollama. Zero sycophancy, 100% private BYOK." />
+  <link rel="icon" type="image/png" href="../icons/icon32.png" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <!-- NAVIGATION -->
+  <header class="navbar" id="navbar">
+    <div class="nav-container">
+      <a href="#hero" class="brand-link" aria-label="DezignSnap Home">
+        <img src="../assests/03-pictorial-mark.svg" alt="DezignSnap Logo" class="brand-icon" />
+        <span class="brand-name">DezignSnap <span class="brand-badge">PRO</span></span>
+      </a>
+
+      <nav class="nav-links" aria-label="Main Navigation">
+        <a href="#features">Features</a>
+        <a href="#mcq-solver">MCQ Solver</a>
+        <a href="#install">Install Guide</a>
+        <a href="#shortcuts">Shortcuts</a>
+        <a href="#faq">FAQ</a>
+      </nav>
+
+      <div class="nav-actions">
+        <a href="#install" class="btn btn-sm btn-primary">Add to Chrome</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- HERO SECTION -->
+    <section class="hero-section" id="hero">
+      <div class="container hero-container">
+        <div class="hero-pill-badge">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: #4a154b;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          <span>Next-Gen Visual Intelligence Extension (MV3)</span>
+        </div>
+
+        <h1 class="hero-title">
+          Grounded Visual AI Answers <br />
+          <span class="gradient-text">Directly On Any Webpage</span>
+        </h1>
+
+        <p class="hero-subtitle">
+          Snip any chart, quiz question, code error, or UI layout. Get verified, first-principles answers with zero sycophancy powered by Groq, Gemini 2.5 Flash, GPT-4o, or private offline Ollama.
+        </p>
+
+        <div class="hero-cta-group">
+          <a href="#install" class="btn btn-lg btn-primary" id="hero-store-btn">
+            <svg class="icon-svg" viewBox="0 0 24 24" fill="currentColor" width="20" height="20" aria-hidden="true">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+            </svg>
+            Add to Chrome — Official Store
+          </a>
+          <a href="#mcq-solver" class="btn btn-lg btn-secondary">
+            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="20" height="20" aria-hidden="true">
+              <circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/>
+            </svg>
+            Try Live Simulator
+          </a>
+        </div>
+
+        <div class="engine-badge-cluster">
+          <span class="engine-tag">Groq Qwen 27B Vision</span>
+          <span class="engine-tag">Gemini 2.5 Flash</span>
+          <span class="engine-tag">OpenAI GPT-4o</span>
+          <span class="engine-tag">OpenRouter</span>
+          <span class="engine-tag">100% Offline Ollama</span>
+          <span class="engine-tag">Zero-Data-Collection BYOK</span>
+        </div>
+
+        <!-- LIVE INTERACTIVE SIMULATOR MOCKUP -->
+        <div class="mockup-window" aria-label="Interactive DezignSnap Preview">
+          <div class="mockup-header">
+            <div class="mockup-dots">
+              <span class="dot red"></span>
+              <span class="dot yellow"></span>
+              <span class="dot green"></span>
+            </div>
+            <div class="mockup-url-bar">
+              <svg class="url-lock" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px; vertical-align: middle;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              <span class="url-text">https://developer.mozilla.org/en-US/docs/Web/CSS/backdrop-filter</span>
+            </div>
+          </div>
+          <div class="mockup-viewport">
+            <div class="mockup-content">
+              <div class="mockup-sample-card">
+                <span class="sample-tag">Sample Certification Test Question</span>
+                <h4>Which CSS property enables glassmorphism blur beneath an element?</h4>
+                <div class="mockup-mcq-options">
+                  <div class="mcq-opt">A) <code>filter: blur(10px)</code> (Blurs the element itself)</div>
+                  <div class="mcq-opt correct">B) <code>backdrop-filter: blur(10px)</code> (Correct answer)</div>
+                  <div class="mcq-opt">C) <code>background-filter: blur(10px)</code> (Invalid CSS)</div>
+                  <div class="mcq-opt">D) <code>box-blur: 10px</code> (Invalid CSS)</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Injected HUD in mockup -->
+            <div class="mockup-hud">
+              <div class="hud-top">
+                <span class="hud-brand">DezignSnap</span>
+                <span class="hud-engine">Gemini 2.5</span>
+              </div>
+              <div class="hud-response">
+                <p><strong>Verified Correct Answer: Option B</strong></p>
+                <p class="hud-explanation">
+                  <code>backdrop-filter</code> applies graphical effects like blurring to the area behind an element. <code>filter</code> only applies to the element itself.
+                </p>
+                <div class="hud-meta">
+                  <span class="conf-pill">High Confidence (100%)</span>
+                  <span class="hud-time">420ms</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROBLEM & SOLUTION SECTION -->
+    <section class="section values-section" id="why-dezignsnap">
+      <div class="container">
+        <div class="section-header text-center">
+          <span class="section-kicker">Engineered For Truth</span>
+          <h2 class="section-title">Why Typical AI Extensions Fail (And How DezignSnap Solves It)</h2>
+          <p class="section-desc">
+            Most browser AI tools blindly agree with whatever is on your screen, suffer from hallucinations as conversation grows, and inject bulky toolbars that block your view.
+          </p>
+        </div>
+
+        <div class="comparison-grid">
+          <div class="comp-card comp-bad">
+            <div class="comp-badge bad">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px; vertical-align: middle;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              Other AI Extensions
+            </div>
+            <ul class="comp-list">
+              <li><strong>Sycophantic:</strong> If a test question has a wrong answer selected on screen, the AI assumes it is right and reinforces the mistake.</li>
+              <li><strong>Memory Degradation:</strong> Sends 20+ past images in API payloads, hallucinating across older screenshots and burning tokens.</li>
+              <li><strong>Clunky Toolbars:</strong> Giant persistent banners that block web controls and accidentally get captured in screenshots.</li>
+              <li><strong>Middleman Proxies:</strong> Routes your screen data through third-party servers, compromising privacy.</li>
+            </ul>
+          </div>
+
+          <div class="comp-card comp-good">
+            <div class="comp-badge good">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px; vertical-align: middle;"><polyline points="20 6 9 17 4 12"/></svg>
+              DezignSnap
+            </div>
+            <ul class="comp-list">
+              <li><strong>Zero Sycophancy:</strong> Evaluates every question from first principles. Explains why the correct choice is true and others are false.</li>
+              <li><strong>Isolated Active Vision:</strong> Keeps full 50-turn chat history for your review & PDF export, but feeds a clean, isolated 1-image context to the AI.</li>
+              <li><strong>Ultra-Stealth Edge Dock:</strong> Collapses to a razor-thin 6px line on the screen edge. Auto-collapses after 1 minute of inactivity.</li>
+              <li><strong>100% BYOK & Local:</strong> Direct client-to-API requests using your personal keys, or 100% offline with local Ollama. Zero middlemen.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CORE FEATURES SECTION -->
+    <section class="section features-section" id="features">
+      <div class="container">
+        <div class="section-header text-center">
+          <span class="section-kicker">Power Features</span>
+          <h2 class="section-title">Precision Tools Built For Developers & Researchers</h2>
+          <p class="section-desc">
+            Everything you need to extract knowledge, solve complex problems, and export findings with zero friction.
+          </p>
+        </div>
+
+        <div class="feature-grid">
+          <!-- Feature 1 -->
+          <div class="feature-card">
+            <div class="feature-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+            </div>
+            <h3 class="feature-title">Verified First-Principles MCQ Solver</h3>
+            <p class="feature-text">
+              Built-in strict solver protocol that refuses to guess. Evaluates quizzes, code questions, and diagrams from scratch, providing option-by-option justification.
+            </p>
+          </div>
+
+          <!-- Feature 2 -->
+          <div class="feature-card">
+            <div class="feature-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M18 22V8a2 2 0 0 0-2-2H2"/></svg>
+            </div>
+            <h3 class="feature-title">Smart Area Snip (Alt+S)</h3>
+            <p class="feature-text">
+              Drag to select any region. DezignSnap crops the bounding box and upscales it 1.4x–2.5x via offscreen canvas for crystal-clear optical character recognition.
+            </p>
+          </div>
+
+          <!-- Feature 3 -->
+          <div class="feature-card">
+            <div class="feature-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            </div>
+            <h3 class="feature-title">Direct AI Chat (No Snip Required)</h3>
+            <p class="feature-text">
+              Have a quick text query or want to follow up? Type directly in the floating chat interface without needing to capture another screenshot.
+            </p>
+          </div>
+
+          <!-- Feature 4 -->
+          <div class="feature-card">
+            <div class="feature-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="3.5" width="19" height="17" rx="3.5"/><line x1="8.5" y1="3.5" x2="8.5" y2="20.5"/><polyline points="15.5 8.5 11.5 12 15.5 15.5"/></svg>
+            </div>
+            <h3 class="feature-title">Sleek Side Toggle &amp; Auto-Collapse</h3>
+            <p class="feature-text">
+              Click the collapse toggle to tuck DezignSnap into a sleek side dock tab flush with your screen border. If inactive for 1 minute, it auto-collapses safely.
+            </p>
+          </div>
+
+          <!-- Feature 5 -->
+          <div class="feature-card">
+            <div class="feature-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg>
+            </div>
+            <h3 class="feature-title">Multi-Engine Freedom (BYOK)</h3>
+            <p class="feature-text">
+              Switch effortlessly between Groq (ultra-fast sub-second latency), Gemini 2.5 Flash, GPT-4o, OpenRouter, or private local Ollama.
+            </p>
+          </div>
+
+          <!-- Feature 6 -->
+          <div class="feature-card">
+            <div class="feature-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+            </div>
+            <h3 class="feature-title">Session Transcripts &amp; PDF Reports</h3>
+            <p class="feature-text">
+              Continuous 50-message conversational memory per tab. Generate beautiful client-side A4 PDF reports with full-resolution screenshot evidence in 1 click.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- INTERACTIVE MCQ DEMO SECTION -->
+    <section class="section mcq-section" id="mcq-solver">
+      <div class="container">
+        <div class="section-header text-center">
+          <span class="section-kicker">Interactive Proof</span>
+          <h2 class="section-title">See First-Principles Verification In Action</h2>
+          <p class="section-desc">
+            Try clicking different options below to see how DezignSnap analyzes each choice objectively rather than blindly validating whatever is clicked.
+          </p>
+        </div>
+
+        <div class="interactive-demo-card">
+          <div class="demo-tabs" role="tablist">
+            <button class="demo-tab active" role="tab" aria-selected="true" data-mode="mcq">Quiz / MCQ Solver</button>
+            <button class="demo-tab" role="tab" aria-selected="false" data-mode="code">Code Bug Hunter</button>
+            <button class="demo-tab" role="tab" aria-selected="false" data-mode="ui">UI &amp; Layout Inspector</button>
+          </div>
+
+          <div class="demo-display" id="demoDisplay">
+            <div class="demo-scenario">
+              <span class="scenario-label">SCENARIO: Frontend Performance Question</span>
+              <p class="scenario-question"><strong>Which Web Vital metric measures visual stability during page load?</strong></p>
+              <div class="scenario-choices">
+                <button class="choice-btn" data-choice="LCP">A) LCP (Largest Contentful Paint)</button>
+                <button class="choice-btn correct-choice" data-choice="CLS">B) CLS (Cumulative Layout Shift)</button>
+                <button class="choice-btn" data-choice="INP">C) INP (Interaction to Next Paint)</button>
+                <button class="choice-btn" data-choice="TTFB">D) TTFB (Time to First Byte)</button>
+              </div>
+            </div>
+
+            <div class="demo-analysis" id="demoAnalysis">
+              <div class="analysis-header">
+                <span class="analysis-badge">DezignSnap First-Principles Verification</span>
+                <span class="analysis-conf">Confidence: 100%</span>
+              </div>
+              <div class="analysis-body" id="analysisBody">
+                <p><strong>Verified Correct Answer: Option B (CLS - Cumulative Layout Shift)</strong></p>
+                <ul class="analysis-points">
+                  <li><strong>Why B is correct:</strong> CLS specifically measures unexpected layout shifts that occur as elements load asynchronously, quantifying visual stability.</li>
+                  <li><strong>Why A is incorrect:</strong> LCP measures perceived loading speed (when the primary page content finishes rendering).</li>
+                  <li><strong>Why C is incorrect:</strong> INP measures page responsiveness to user interactions (clicks, taps, keystrokes).</li>
+                  <li><strong>Why D is incorrect:</strong> TTFB measures server response time for the initial document payload.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- INSTALLATION PROCEDURE (CHROME WEB STORE) -->
+    <section class="section install-section" id="install">
+      <div class="container">
+        <div class="section-header text-center">
+          <span class="section-kicker">Official Distribution</span>
+          <h2 class="section-title">Get DezignSnap For Google Chrome</h2>
+          <p class="section-desc">
+            Available exclusively via the official Chrome Web Store. 1-click installation with automatic background updates, zero malware risk, and Google Web Store verification.
+          </p>
+        </div>
+
+        <div class="install-single-wrap">
+          <div class="install-card install-card-featured">
+            <div class="install-card-header">
+              <span class="install-method-badge">Official Store Release</span>
+              <h3>1-Click Installation Guide</h3>
+              <p>Get up and running in under 60 seconds with verified security.</p>
+            </div>
+
+            <div class="install-steps">
+              <div class="inst-step">
+                <div class="inst-num">1</div>
+                <div class="inst-info">
+                  <strong>Click "Add to Chrome"</strong>
+                  <p>Visit the official DezignSnap Chrome Web Store listing page.</p>
+                </div>
+              </div>
+              <div class="inst-step">
+                <div class="inst-num">2</div>
+                <div class="inst-info">
+                  <strong>Confirm Installation</strong>
+                  <p>Click <em>"Add extension"</em> on the browser prompt to activate on-page visual intelligence.</p>
+                </div>
+              </div>
+              <div class="inst-step">
+                <div class="inst-num">3</div>
+                <div class="inst-info">
+                  <strong>Pin &amp; Connect Key</strong>
+                  <p>Pin the DezignSnap icon to your toolbar, open Settings, and enter your Groq, Gemini, or OpenAI API key (or use local Ollama).</p>
+                </div>
+              </div>
+            </div>
+
+            <a href="https://chrome.google.com/webstore" target="_blank" rel="noopener" class="btn btn-lg btn-primary btn-block" style="justify-content: center; margin-bottom: 16px;">
+              <svg class="icon-svg" viewBox="0 0 24 24" fill="currentColor" width="20" height="20" aria-hidden="true" style="margin-right: 8px;">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+              </svg>
+              Add to Chrome — Official Web Store
+            </a>
+
+            <div class="install-trust-note">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color: #4a154b; flex-shrink: 0;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              <span>100% Private BYOK Model • Direct Client-to-API Calls • Free Core Tool</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- KEYBOARD SHORTCUTS SECTION -->
+    <section class="section shortcuts-section" id="shortcuts">
+      <div class="container">
+        <div class="section-header text-center">
+          <span class="section-kicker">Hotkeys &amp; Gestures</span>
+          <h2 class="section-title">Navigate at the Speed of Thought</h2>
+        </div>
+
+        <div class="shortcuts-grid">
+          <div class="shortcut-card">
+            <div class="shortcut-keys"><kbd>Alt</kbd> + <kbd>S</kbd></div>
+            <div class="shortcut-desc">
+              <strong>Interactive Area Snip</strong>
+              <p>Instantly brings up the crystal-clear crosshair selector. Drag over any area to zoom &amp; analyze.</p>
+            </div>
+          </div>
+
+          <div class="shortcut-card">
+            <div class="shortcut-keys"><kbd>Alt</kbd> + <kbd>A</kbd></div>
+            <div class="shortcut-desc">
+              <strong>Full Page Solve</strong>
+              <p>Captures the entire visible browser window and dispatches it directly to the active AI engine.</p>
+            </div>
+          </div>
+
+          <div class="shortcut-card">
+            <div class="shortcut-keys"><kbd>Right Click</kbd></div>
+            <div class="shortcut-desc">
+              <strong>Quick Text Ask</strong>
+              <p>Highlight any sentence or code block, right click, and choose <em>"Ask AI about selection"</em>.</p>
+            </div>
+          </div>
+
+          <div class="shortcut-card">
+            <div class="shortcut-keys"><kbd>Esc</kbd></div>
+            <div class="shortcut-desc">
+              <strong>Instant Dismiss</strong>
+              <p>Cancels any active area selection or closes the floating HUD immediately without reloading.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ SECTION -->
+    <section class="section faq-section" id="faq">
+      <div class="container faq-container">
+        <div class="section-header text-center">
+          <span class="section-kicker">Answers &amp; Details</span>
+          <h2 class="section-title">Frequently Asked Questions</h2>
+        </div>
+
+        <div class="faq-accordion">
+          <details class="faq-item">
+            <summary class="faq-question">
+              How is DezignSnap licensed and priced?
+              <span class="faq-chevron">▾</span>
+            </summary>
+            <div class="faq-answer">
+              <p>DezignSnap is available exclusively through the official Chrome Web Store. The core extension operates on a Bring-Your-Own-Key (BYOK) model, enabling you to use free-tier API keys from Groq or Google AI Studio (Gemini 2.5 Flash), or run 100% free and offline using local Ollama. As our user community grows, optional premium plans and hosted AI credits will be introduced for users who prefer ready-to-use access without managing their own API keys.</p>
+            </div>
+          </details>
+
+          <details class="faq-item">
+            <summary class="faq-question">
+              How does the side toggle dock work?
+              <span class="faq-chevron">▾</span>
+            </summary>
+            <div class="faq-answer">
+              <p>When you click the side toggle button on the floating toolbar, DezignSnap docks flush against the edge of your screen as a sleek side toggle tab. Clicking or hovering over it smoothly reveals and expands the toolbar. If you leave the toolbar open and don't interact with it for 1 minute, it automatically auto-collapses to keep your screen clutter-free.</p>
+            </div>
+          </details>
+
+          <details class="faq-item">
+            <summary class="faq-question">
+              Does DezignSnap store or see my screenshots?
+              <span class="faq-chevron">▾</span>
+            </summary>
+            <div class="faq-answer">
+              <p>Never. There are zero middleman servers. When you snip an area, your browser makes a direct API call to your chosen provider (Groq, Google Gemini, OpenAI, or local Ollama). We collect zero personal data, run zero telemetry, and maintain zero tracking cookies.</p>
+            </div>
+          </details>
+
+          <details class="faq-item">
+            <summary class="faq-question">
+              Can I analyze local PDF files or images from my hard drive?
+              <span class="faq-chevron">▾</span>
+            </summary>
+            <div class="faq-answer">
+              <p>Yes. Go to <code>chrome://extensions</code>, click <em>Details</em> on DezignSnap, and switch the <em>"Allow access to file URLs"</em> toggle to ON. You can then open any local PDF or image file directly in Chrome and snip it with <kbd>Alt+S</kbd>.</p>
+            </div>
+          </details>
+
+          <details class="faq-item">
+            <summary class="faq-question">
+              How do I configure local Ollama for 100% offline usage?
+              <span class="faq-chevron">▾</span>
+            </summary>
+            <div class="faq-answer">
+              <p>Launch Ollama with origins enabled so Chrome extensions can communicate with it: <code>set OLLAMA_ORIGINS=* &amp;&amp; ollama serve</code>. Then pull a vision model such as <code>ollama pull llama3.2-vision</code>, select Ollama in DezignSnap settings, and you have complete offline visual intelligence!</p>
+            </div>
+          </details>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container footer-container">
+      <div class="footer-brand">
+        <div class="footer-logo">
+          <img src="../assests/01-wordmark-dark.svg" alt="DezignSnap" style="height: 38px; width: auto; border-radius: 8px; box-shadow: 0 4px 14px rgba(74, 21, 75, 0.25);" />
+        </div>
+        <p class="footer-tagline">Grounded visual screen intelligence without sycophancy.</p>
+        <p class="footer-copy">&copy; 2026 DezignSnap • Built by Muhammad Hamza • Published by <a href="https://dezignwise.com" target="_blank" rel="noopener">Dezignwise</a></p>
+      </div>
+
+      <div class="footer-nav">
+        <div class="footer-col">
+          <h4>Navigation</h4>
+          <a href="#features">Features</a>
+          <a href="#mcq-solver">MCQ Solver</a>
+          <a href="#install">Install Guide</a>
+          <a href="#shortcuts">Shortcuts</a>
+        </div>
+        <div class="footer-col">
+          <h4>Legal &amp; Privacy</h4>
+          <a href="../privacy-policy.html">Privacy Policy</a>
+          <a href="https://dezignsnap-privacy.hamzaka549.workers.dev/privacy-policy" target="_blank" rel="noopener">Canonical Policy</a>
+          <a href="../welcome.html">Setup Guide</a>
+        </div>
+        <div class="footer-col">
+          <h4>Connect</h4>
+          <a href="https://chrome.google.com/webstore" target="_blank" rel="noopener">Chrome Web Store</a>
+          <a href="mailto:hamzaka@dezignwise.com">Support Email</a>
+          <a href="https://dezignwise.com" target="_blank" rel="noopener">Dezignwise Home</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

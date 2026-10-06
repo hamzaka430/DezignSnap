@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'none'; object-src 'none';" />
+  <title>DezignSnap — Side Panel AI Assistant</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    body {
+      width: 100%;
+      height: 100vh;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      background: #ffffff;
+      overflow: hidden;
+    }
+    .sp-layout {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .sp-header {
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(74, 21, 75, 0.12);
+      background: #ffffff radial-gradient(circle at 100% 0%, rgba(255, 240, 230, 0.6) 0%, rgba(233, 216, 255, 0.4) 50%, rgba(255, 255, 255, 0) 80%);
+      flex-shrink: 0;
+    }
+    .sp-top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .sp-shield-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      border-radius: 90px;
+      background: rgba(74, 21, 75, 0.08);
+      color: #4a154b;
+      font-size: 10.5px;
+      font-weight: 600;
+      letter-spacing: 0.2px;
+      border: 1px solid rgba(74, 21, 75, 0.15);
+    }
+    .sp-actions-bar {
+      display: flex;
+      gap: 8px;
+    }
+    .sp-actions-bar .btn {
+      flex: 1;
+      padding: 8px 12px;
+      font-size: 12.5px;
+      border-radius: 90px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      cursor: pointer;
+    }
+    .sp-chat-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background: #fdfbf7;
+    }
+    .sp-welcome {
+      background: #f9f0ff;
+      border: 1px solid rgba(74, 21, 75, 0.12);
+      border-radius: 14px;
+      padding: 14px;
+      font-size: 13px;
+      color: #1d1d1d;
+      line-height: 1.5;
+    }
+    .sp-welcome strong {
+      color: #4a154b;
+    }
+    .sp-bubble {
+      max-width: 90%;
+      padding: 10px 14px;
+      border-radius: 14px;
+      font-size: 13px;
+      line-height: 1.55;
+      word-break: break-word;
+    }
+    .sp-bubble-user {
+      align-self: flex-end;
+      background: #4a154b;
+      color: #ffffff;
+      border-bottom-right-radius: 4px;
+    }
+    .sp-bubble-ai {
+      align-self: flex-start;
+      background: #ffffff;
+      color: #1d1d1d;
+      border: 1px solid rgba(74, 21, 75, 0.14);
+      border-bottom-left-radius: 4px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .sp-thinking-box {
+      margin-bottom: 10px;
+      background: #f9f0ff;
+      border: 1px solid rgba(74, 21, 75, 0.15);
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 12px;
+    }
+    .sp-thinking-box summary {
+      cursor: pointer;
+      font-weight: 600;
+      color: #4a154b;
+      user-select: none;
+    }
+    .sp-thinking-content {
+      margin-top: 6px;
+      color: #555;
+      white-space: pre-wrap;
+      font-family: inherit;
+    }
+    .sp-footer {
+      padding: 10px 14px;
+      background: #ffffff;
+      border-top: 1px solid rgba(74, 21, 75, 0.12);
+      flex-shrink: 0;
+    }
+    .sp-input-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .sp-input {
+      flex: 1;
+      padding: 9px 14px;
+      border-radius: 90px;
+      border: 1px solid rgba(74, 21, 75, 0.25);
+      font-size: 13px;
+      outline: none;
+    }
+    .sp-input:focus {
+      border-color: #4a154b;
+      box-shadow: 0 0 0 2px rgba(74, 21, 75, 0.15);
+    }
+    .sp-send-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #4a154b;
+      color: #ffffff;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .sp-send-btn:hover {
+      background: #611f69;
+    }
+    .sp-conf-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 90px;
+      font-size: 10.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .sp-conf-high { background: #e6f4ea; color: #137333; }
+    .sp-conf-medium { background: #fef7e0; color: #b06000; }
+    .sp-conf-low { background: #fce8e6; color: #c5221f; }
+  </style>
+</head>
+<body>
+  <div class="sp-layout">
+    <!-- Header -->
+    <header class="sp-header">
+      <div class="sp-top-bar">
+        <div class="logo-wrap">
+          <img src="assests/03-pictorial-mark.svg" width="22" height="22" alt="DezignSnap" />
+          <h1>DezignSnap <span class="brand-badge">SIDE PANEL</span></h1>
+        </div>
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <button id="spPopoutBtn" title="Pop out as Detached Window (Excluded from Window Sharing)" class="ghost" style="padding: 4px 8px; font-size: 11px; border-radius: 90px; border: 1px solid rgba(74,21,75,0.2);">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="vertical-align:-1px;margin-right:2px;"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>Pop Out
+          </button>
+          <button id="spNewChatBtn" title="Clear chat session" class="ghost" style="padding: 4px 8px; font-size: 11px; border-radius: 90px; border: 1px solid rgba(74,21,75,0.2);">
+            + New
+          </button>
+        </div>
+      </div>
+
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+        <span class="sp-shield-badge">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          100% Screen Share Immune (Tab Share Excluded)
+        </span>
+        <select id="spAiModeSelect" style="padding: 2px 8px; font-size: 11px; border-radius: 90px; border: 1px solid rgba(74,21,75,0.2); background:#fff; color:#4a154b; outline:none; cursor:pointer;">
+          <option value="direct">Direct Mode</option>
+          <option value="thinking">Deep Thinking</option>
+        </select>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="sp-actions-bar">
+        <button id="spSnipBtn" class="btn btn-primary" title="Select area on webpage (Alt+S)">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="1" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="1" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="23" y2="12"/></svg>
+          Snip Area [Alt+S]
+        </button>
+        <button id="spFullBtn" class="btn btn-secondary" title="Capture & analyze entire page (Alt+A)">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          Full Page [Alt+A]
+        </button>
+      </div>
+    </header>
+
+    <!-- Chat Messages Viewport -->
+    <div id="spChatBody" class="sp-chat-container">
+      <div class="sp-welcome">
+        <strong>🛡️ Capture-Proof Side Panel Active</strong><br />
+        This panel is rendered outside the webpage viewport. When sharing a Chrome Tab in Google Meet, Teams, or Zoom, <strong>the meeting stream CANNOT capture this Side Panel</strong>! You can read answers and work without interruption.
+      </div>
+    </div>
+
+    <!-- Input Footer -->
+    <footer class="sp-footer">
+      <div class="sp-input-wrap">
+        <input type="text" id="spInput" class="sp-input" placeholder="Ask a question or follow-up..." />
+        <button id="spSendBtn" class="sp-send-btn" title="Send (Enter)" aria-label="Send">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </button>
+      </div>
+    </footer>
+  </div>
+
+  <script src="sidepanel.js"></script>
+</body>
+</html>

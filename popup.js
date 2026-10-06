@@ -11,6 +11,8 @@ const presetSelect = document.getElementById("presetSelect");
 const quickSnipBtn = document.getElementById("quickSnipBtn");
 const fallbackAskBtn = document.getElementById("fallbackAskBtn");
 const directChatBtn = document.getElementById("directChatBtn");
+const openSidePanelBtn = document.getElementById("openSidePanelBtn");
+const stealthModeToggle = document.getElementById("stealthModeToggle");
 const fallbackAnswer = document.getElementById("fallbackAnswer");
 const statusMsg = document.getElementById("statusMsg");
 
@@ -25,6 +27,7 @@ async function init() {
     activeProvider = "groq",
     aiMode = "direct",
     hudPosition = "right",
+    stealthMode = false,
     instructionPresets = [],
     activePresetId,
   } = await chrome.storage.local.get([
@@ -35,6 +38,7 @@ async function init() {
     "activeProvider",
     "aiMode",
     "hudPosition",
+    "stealthMode",
     "instructionPresets",
     "activePresetId",
   ]);
@@ -43,6 +47,7 @@ async function init() {
   if (aiModeSelect) aiModeSelect.value = aiMode;
   if (aiModeStatusText) aiModeStatusText.textContent = aiMode === "thinking" ? "Deep Thinking" : "Direct";
   if (hudPositionSelect) hudPositionSelect.value = hudPosition;
+  if (stealthModeToggle) stealthModeToggle.checked = !!stealthMode;
 
   updateKeyWarning(activeProvider, { openaiApiKey, geminiApiKey, groqApiKey, openrouterApiKey });
   renderPresetOptions(instructionPresets, activePresetId);
@@ -101,7 +106,7 @@ providerSelect.addEventListener("change", async () => {
     "openrouterApiKey",
   ]);
   updateKeyWarning(selectedProvider, keys);
-  showStatus(`Engine switched to ${selectedProvider.toUpperCase()} ✅`);
+  showStatus(`Engine set to ${selectedProvider.toUpperCase()}`);
 });
 
 if (aiModeSelect) {
@@ -109,7 +114,7 @@ if (aiModeSelect) {
     const val = aiModeSelect.value;
     await chrome.storage.local.set({ aiMode: val });
     if (aiModeStatusText) aiModeStatusText.textContent = val === "thinking" ? "Deep Thinking" : "Direct";
-    showStatus(`Mode: ${val === "thinking" ? "🧠 Thinking" : "⚡ Direct"} ✅`);
+    showStatus(`Mode: ${val === "thinking" ? "Thinking" : "Direct"}`);
   });
 }
 
@@ -117,13 +122,21 @@ if (hudPositionSelect) {
   hudPositionSelect.addEventListener("change", async () => {
     const val = hudPositionSelect.value;
     await chrome.storage.local.set({ hudPosition: val });
-    showStatus(`Toolbar position: ${val.toUpperCase()} ✅`);
+    showStatus(`Toolbar position: ${val.toUpperCase()}`);
+  });
+}
+
+if (stealthModeToggle) {
+  stealthModeToggle.addEventListener("change", async () => {
+    const val = stealthModeToggle.checked;
+    await chrome.storage.local.set({ stealthMode: val });
+    showStatus(`Stealth Mode: ${val ? "ON (Hidden from screen share)" : "OFF"}`);
   });
 }
 
 presetSelect.addEventListener("change", async () => {
   await chrome.storage.local.set({ activePresetId: presetSelect.value });
-  showStatus("Persona updated ✅");
+  showStatus("Persona updated");
 });
 
 openOptionsBtn.addEventListener("click", () => chrome.runtime.openOptionsPage());
@@ -152,27 +165,38 @@ if (directChatBtn) {
   });
 }
 
+// Open Side Panel (100% immune to tab sharing)
+if (openSidePanelBtn) {
+  openSidePanelBtn.addEventListener("click", () => {
+    chrome.runtime.sendMessage({ type: "OPEN_SIDE_PANEL" });
+    window.close();
+  });
+}
+
 // Full page analyze
 fallbackAskBtn.addEventListener("click", () => {
   fallbackAskBtn.disabled = true;
-  const original = fallbackAskBtn.textContent;
-  fallbackAskBtn.textContent = "⏳ Thinking...";
+  const original = fallbackAskBtn.innerHTML;
+  fallbackAskBtn.textContent = "Analyzing...";
   fallbackAnswer.classList.add("hidden");
 
   chrome.runtime.sendMessage({ type: "SOLVE_WITH_AI_ACTIVE_TAB" }, (response) => {
     fallbackAskBtn.disabled = false;
-    fallbackAskBtn.textContent = original;
+    fallbackAskBtn.innerHTML = original;
     fallbackAnswer.classList.remove("hidden");
 
     if (chrome.runtime.lastError) {
       fallbackAnswer.textContent = "Error: " + chrome.runtime.lastError.message;
+      fallbackAnswer.scrollTop = 0;
       return;
     }
     if (response && response.success) {
       const confidenceLabel = response.confidence ? ` [${response.confidence} confidence]` : "";
       fallbackAnswer.textContent = response.answer + confidenceLabel;
+      fallbackAnswer.scrollTop = 0;
     } else {
       fallbackAnswer.textContent = "Error: " + (response?.error || "Something went wrong.");
+      fallbackAnswer.scrollTop = 0;
     }
   });
 });

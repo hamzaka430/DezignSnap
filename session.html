@@ -2,149 +2,179 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'none'; object-src 'none';" />
   <title>Session Export — DezignSnap</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: #222831;
-      color: #f5f2eb;
-      max-width: 760px;
-      margin: 40px auto;
-      padding: 0 20px;
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: #f4ede4;
+      background-image:
+        radial-gradient(ellipse at 15% 0%, #fff0e6 0%, transparent 60%),
+        radial-gradient(ellipse at 85% 10%, #e9d8ff 0%, transparent 55%),
+        radial-gradient(ellipse at 50% 90%, #e6f4ea 0%, transparent 60%);
+      background-attachment: fixed;
+      color: #1d1d1d;
+      max-width: 820px;
+      margin: 44px auto;
+      padding: 0 20px 60px;
       line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
     }
     header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 24px;
-      padding-bottom: 16px;
-      border-bottom: 1px solid rgba(148, 137, 121, 0.4);
+      margin-bottom: 26px;
+      padding-bottom: 18px;
+      border-bottom: 1.5px solid rgba(74, 21, 75, 0.12);
     }
     h1 {
-      color: #DFD0B8;
+      color: #4a154b;
       font-size: 24px;
       font-weight: 800;
-      letter-spacing: 0.4px;
+      letter-spacing: -0.02em;
     }
     .badge {
-      background: linear-gradient(135deg, #DFD0B8 0%, #948979 100%);
-      color: #222831;
+      background: #4a154b;
+      color: #ffffff;
       font-size: 11px;
       font-weight: 700;
-      padding: 3px 8px;
-      border-radius: 4px;
-      border: 1px solid #DFD0B8;
+      padding: 4px 12px;
+      border-radius: 90px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
     }
     #status {
-      background: rgba(44, 52, 64, 0.95);
-      border: 1px solid #393E46;
-      border-radius: 10px;
-      padding: 16px;
+      background: #ffffff;
+      border: 1px solid rgba(74, 21, 75, 0.12);
+      border-radius: 14px;
+      padding: 16px 20px;
       margin-bottom: 20px;
-      font-weight: 700;
-      color: #DFD0B8;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+      font-weight: 600;
+      font-size: 14px;
+      color: #4a154b;
+      box-shadow: 0 4px 18px rgba(74, 21, 75, 0.05);
     }
     .actions {
       display: flex;
       gap: 12px;
-      margin-bottom: 24px;
+      margin-bottom: 26px;
+      flex-wrap: wrap;
     }
     button {
-      background: linear-gradient(135deg, #DFD0B8 0%, #948979 100%);
-      color: #222831;
-      border: 1px solid #DFD0B8;
-      padding: 11px 18px;
-      border-radius: 8px;
+      background: #4a154b;
+      color: #ffffff;
+      border: 1.5px solid #4a154b;
+      padding: 11px 22px;
+      border-radius: 90px;
       font-size: 13.5px;
       font-weight: 700;
       cursor: pointer;
-      transition: all 0.2s ease;
-      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 4px 14px rgba(74, 21, 75, 0.2);
     }
     button:hover {
-      background: #DFD0B8;
-      box-shadow: 0 0 16px rgba(223, 208, 184, 0.45);
+      background: #611f69;
+      border-color: #611f69;
+      box-shadow: 0 6px 18px rgba(74, 21, 75, 0.28);
+      transform: translateY(-1px);
+    }
+    button:active {
+      transform: translateY(0);
     }
     button.danger {
-      background: #393E46;
-      border: 1px solid #e06c75;
-      color: #ff9999;
+      background: #fdf2f2;
+      border: 1.5px solid #fecaca;
+      color: #d9383a;
       box-shadow: none;
     }
     button.danger:hover {
-      background: #e06c75;
+      background: #d9383a;
+      border-color: #d9383a;
       color: #ffffff;
-      box-shadow: 0 0 14px rgba(224, 108, 117, 0.4);
+      box-shadow: 0 4px 14px rgba(217, 56, 58, 0.25);
     }
     .entry {
-      background: rgba(44, 52, 64, 0.95);
-      border: 1px solid #393E46;
-      border-radius: 12px;
-      padding: 18px;
-      margin-bottom: 16px;
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
-      transition: border-color 0.2s ease;
+      background: #ffffff;
+      border: 1px solid rgba(74, 21, 75, 0.12);
+      border-radius: 16px;
+      padding: 22px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 20px rgba(74, 21, 75, 0.05);
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
     }
     .entry:hover {
-      border-color: #948979;
+      border-color: rgba(74, 21, 75, 0.25);
+      box-shadow: 0 6px 24px rgba(74, 21, 75, 0.08);
     }
     .entry .meta {
       font-size: 12px;
-      color: #DFD0B8;
-      margin-bottom: 10px;
-      font-weight: 600;
+      color: #4a154b;
+      margin-bottom: 12px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
     }
     .turn {
       font-size: 13.5px;
-      margin-bottom: 8px;
+      margin-bottom: 10px;
       white-space: pre-wrap;
       word-break: break-word;
+      line-height: 1.6;
     }
     .turn strong {
-      color: #ffffff;
+      color: #4a154b;
     }
     .turn.user-turn {
-      color: #DFD0B8;
+      color: #1d1d1d;
+      padding: 8px 12px;
+      background: #fbf9fc;
+      border-radius: 10px;
+      border-left: 3px solid #4a154b;
     }
     .turn.ai-turn {
-      color: #f5f2eb;
-      background: #1c2128;
-      border: 1px solid #393E46;
-      padding: 10px 14px;
-      border-radius: 8px;
-      margin-top: 6px;
+      color: #1d1d1d;
+      background: #f9f0ff;
+      border: 1px solid rgba(74, 21, 75, 0.12);
+      padding: 12px 16px;
+      border-radius: 12px;
+      margin-top: 8px;
     }
     .conf-badge {
       display: inline-block;
       font-size: 10px;
       font-weight: 800;
-      padding: 2px 6px;
-      border-radius: 4px;
-      margin-left: 6px;
+      padding: 2px 8px;
+      border-radius: 90px;
+      margin-left: 8px;
       text-transform: uppercase;
+      letter-spacing: 0.04em;
     }
-    .conf-high { background: rgba(34, 197, 94, 0.2); color: #4ade80; border: 1px solid #22c55e; }
-    .conf-medium { background: rgba(223, 208, 184, 0.2); color: #DFD0B8; border: 1px solid #DFD0B8; }
-    .conf-low { background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid #ef4444; }
+    .conf-high { background: #e6f4ea; color: #137333; border: 1px solid #ceead6; }
+    .conf-medium { background: #f9f0ff; color: #4a154b; border: 1px solid #d9bdde; }
+    .conf-low { background: #fce8e6; color: #c5221f; border: 1px solid #fad2cf; }
   </style>
 </head>
 <body>
   <header>
-    <div style="display: flex; align-items: center; gap: 12px;">
-      <img src="icons/icon48.png" width="32" height="32" style="border-radius: 8px; border: 1px solid rgba(223, 208, 184, 0.4);" alt="DezignSnap logo" />
+    <div style="display: flex; align-items: center; gap: 14px;">
+      <img src="assests/07-emblem.svg" width="38" height="38" style="border-radius: 8px; filter: drop-shadow(0 2px 8px rgba(74, 21, 75, 0.25));" alt="DezignSnap Certified Emblem" />
       <h1>Session Export &amp; PDF Report</h1>
     </div>
     <span class="badge">DezignSnap</span>
   </header>
 
-  <div id="status">⏳ Compiling your session PDF transcript...</div>
+  <div id="status">Compiling your session PDF transcript...</div>
 
   <div class="actions">
-    <button id="downloadAgainBtn">⬇️ Download PDF Again</button>
-    <button id="clearBtn" class="danger">🗑️ Clear History &amp; Start New</button>
+    <button id="downloadAgainBtn" style="display: inline-flex; align-items: center; gap: 8px;">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Download PDF Again
+    </button>
+    <button id="clearBtn" class="danger" style="display: inline-flex; align-items: center; gap: 8px;">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+      Clear History &amp; Start New
+    </button>
   </div>
 
   <div id="entries"></div>

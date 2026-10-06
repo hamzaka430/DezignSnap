@@ -1,50 +1,52 @@
-# Implementation Plan: DezignSnap Brand Assets & Gemini Model 404 Fix
+# Implementation Plan: Design System Transformation, Ultra-Stealth Edge Dock & Web Portal
 
 ## Overview
-1. Integrate the new brand assets from `brand_assests/` (`icon16.png`, `icon32.png`, `icon48.png`, `icon128.png`, and `dezignsnap-logo.png`) into `icons/` and UI surfaces (`manifest.json`, `popup.html`, `options.html`, `welcome.html`, `session.html`, `index.html`).
-2. Fix the Gemini 404 error (`models/gemini-1.5-flash is not found for API version v1beta`) by upgrading default models to `gemini-2.5-flash` and implementing an intelligent auto-discovery fallback mechanism that queries `v1beta/models` if a 404 occurs, ensuring future-proof reliability.
-3. Update documentation and UI labels across the extension.
+Implement the complete Slack/Aubergine design language specified in `design.md` across all extension UI surfaces, engineer an ultra-stealth vertical edge-tab dock with auto-collapse after 1 minute, and build a full-featured marketing & installation web portal in `web/`.
 
 ## Architecture Decisions
-1. **Brand Assets Integration**:
-   - Replace old low-resolution placeholder icons in `icons/` with the high-resolution branded icons from `brand_assests/`:
-     - `icon16.png` (16x16)
-     - `icon32.png` (32x32)
-     - `icon48.png` (48x48)
-     - `icon128.png` (128x128)
-     - `dezignsnap-logo.png` (brand logo banner)
-   - Add `dezignsnap-logo.png` to `icons/` and display it in `session.html` header, `options.html` header, and `welcome.html`.
-2. **Gemini Model 404 Fix**:
-   - Update default Gemini model in `background.js` from `gemini-2.0-flash` (shut down in 2026) to `gemini-2.5-flash`.
-   - Remove obsolete fallback to `gemini-1.5-flash` (also deprecated/shut down).
-   - Implement an intelligent auto-fallback:
-     - Primary model: configured model or `gemini-2.5-flash`.
-     - Secondary fallback: `gemini-3.5-flash`.
-     - If both return 404, call `https://generativelanguage.googleapis.com/v1beta/models?key=...` via `fetch` to retrieve the current active list of models supporting `generateContent` and pick the best available Flash model automatically.
-   - Add a Gemini model selection / override field in `options.html` and `options.js` so users can easily select or type newer models (e.g. `gemini-2.5-flash`, `gemini-3.5-flash`, `gemini-3.8-flash`).
-3. **UI and Documentation Sync**:
-   - Update `popup.html` and `options.html` engine labels to reflect the current Gemini models.
-   - Update `GEMINI.md`, `PROJECT_CONTEXT.md`, `README.md`, `STORE_LISTING.md`, and `TODO.md`.
+1. **Design System Tokens (`design.md`)**:
+   - **Primary Palette**: Aubergine (`#4a154b`), Aubergine Press (`#611f69`), Aubergine Tint (`#592466`).
+   - **Canvas & Surfaces**: Canvas White (`#ffffff`), Canvas Cream (`#f4ede4`), Canvas Lavender (`#f9f0ff`), Hairline (`#e6e6e6`).
+   - **Text**: Ink (`#1d1d1d`), Ink Mute (`#696969`), On Primary (`#ffffff`), On Aubergine Mute (`#d9bdde`), Link Blue (`#1264a3`).
+   - **Atmospheric Backgrounds**: Pastel-mesh gradient stack (peach `#fff0e6` + lavender `#e9d8ff` + dusty green `#e6f4ea` radial gradients).
+   - **Components**: Pill buttons (`border-radius: 90px`), cards (`16px` radius with `1px #e6e6e6` border), Inter font stack with tight display tracking (`-0.768px`).
+
+2. **Ultra-Stealth Vertical Edge-Tab & 1-Minute Auto-Collapse (`content.js` & `content.css`)**:
+   - When collapsed, replace floating badge with a slim vertical edge sliver (`#ph-hud-edge-tab`) docked flush against the screen boundary (`right: 0` or `left: 0`).
+   - On hover over the sliver, smoothly slide out the pill trigger button.
+   - **Auto-Collapse Inactivity Timer**: If the expanded toolbar is open on the page with no user interaction for 60 seconds (1 minute), automatically transition it into the sleek edge tab. Any mouse movement over the HUD resets the 60s timer.
+
+3. **Extension UI Surfaces Overhaul**:
+   - `content.css`: Floating HUD, Edge Dock, and AI Chat panel in Aubergine, Canvas Lavender, and Cream.
+   - `styles.css` & `popup.html`: Quick popup toolbar restyled in Aubergine & Cream.
+   - `options.css` & `options.html`: Settings page transformed with Aubergine hero, Cream cards, and pastel-mesh header.
+   - `session.html` & `welcome.html`: Session transcript, PDF viewer, and onboarding onboarding guide restyled.
+   - `privacy-policy.html`: Clean editorial Aubergine & Cream styling.
+
+4. **Product Marketing & Installation Web Portal (`web/`)**:
+   - Create `web/index.html`, `web/styles.css`, and `web/app.js`.
+   - Include Hero with pastel-mesh gradient and floating 3:2 product UI mockup.
+   - Interactive feature showcase (MCQ First-Principles Solver, Smart Snip, Direct Chat).
+   - Step-by-step Installation Guide for official Chrome Web Store.
+   - Direct action links, keyboard shortcut cheat-sheet (`Alt+S`, `Alt+A`), FAQ, and Aubergine closing band.
 
 ## Task List
 
-### Phase 1: Brand Assets Integration
-- [ ] Task 1.1: Copy new icons and logo from `brand_assests/` into `icons/`.
-- [ ] Task 1.2: Update UI pages (`options.html`, `welcome.html`, `session.html`, `popup.html`, `index.html`) to display the new brand icons and logo banner.
+### Phase 1: Ultra-Stealth Edge Dock & Auto-Collapse in Content Script
+- [ ] Task 1.1: Implement ultra-stealth vertical edge strip and hover expansion in `content.js` and `content.css`.
+- [ ] Task 1.2: Add 1-minute auto-collapse timer with activity reset to `content.js`.
 
-### Checkpoint: Brand Assets
-- [ ] All icon files in `icons/` updated and verified.
-- [ ] UI headers and logos render sharply with correct aspect ratio.
+### Phase 2: Extension UI Design System Overhaul
+- [ ] Task 2.1: Restyle injected HUD and Chat Panel in `content.css` using `design.md` Aubergine and Cream palette.
+- [ ] Task 2.2: Restyle Extension Action Popup (`styles.css`, `popup.html`).
+- [ ] Task 2.3: Restyle Settings/Options Page (`options.css`, `options.html`).
+- [ ] Task 2.4: Restyle Session Exporter, Welcome page, and Privacy Policy.
 
-### Phase 2: Gemini 404 Model Resolution & Resilient Fallback
-- [ ] Task 2.1: Update Gemini configuration in `background.js` with `gemini-2.5-flash` default model and dynamic model discovery fallback.
-- [ ] Task 2.2: Add Gemini model configuration support in `options.html` and `options.js`.
-- [ ] Task 2.3: Update engine badges and labels in `popup.html` and `options.html`.
+### Phase 3: Web Portal Creation (`web/`)
+- [ ] Task 3.1: Build `web/index.html` structure with Hero, Pastel-Mesh background, features, and install guide.
+- [ ] Task 3.2: Build `web/styles.css` adhering strictly to `design.md` tokens.
+- [ ] Task 3.3: Build `web/app.js` with interactive feature tabs and copy-command helpers.
 
-### Checkpoint: Gemini Integration
-- [ ] Gemini API call targets active supported models.
-- [ ] Fallback logic gracefully resolves valid models on 404 instead of crashing on `gemini-1.5-flash`.
-
-### Phase 3: Documentation & Verification
-- [ ] Task 3.1: Update documentation files (`GEMINI.md`, `PROJECT_CONTEXT.md`, `README.md`, `STORE_LISTING.md`, `TODO.md`).
-- [ ] Task 3.2: Run git status, file verification, and end-to-end check.
+### Phase 4: Verification & Publish Readiness
+- [ ] Task 4.1: Run syntax validation across all JS files and test responsiveness.
+- [ ] Task 4.2: Update `PROJECT_CONTEXT.md` and `GEMINI.md`.

@@ -2,69 +2,205 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DezignSnap — Privacy Policy</title>
   <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      max-width: 720px;
-      margin: 40px auto;
-      padding: 0 20px;
-      background: #222831;
-      color: #f5f2eb;
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: #f4ede4;
+      background-image:
+        radial-gradient(ellipse at 15% 0%, #fff0e6 0%, transparent 60%),
+        radial-gradient(ellipse at 85% 10%, #e9d8ff 0%, transparent 55%),
+        radial-gradient(ellipse at 50% 90%, #e6f4ea 0%, transparent 60%);
+      background-attachment: fixed;
+      color: #1d1d1d;
       line-height: 1.7;
+      padding: 44px 20px 70px;
+      -webkit-font-smoothing: antialiased;
     }
-    h1 { color: #DFD0B8; }
-    h2 { color: #DFD0B8; font-size: 17px; margin-top: 28px; }
-    a { color: #DFD0B8; }
-    .updated { color: #948979; font-size: 13px; }
+    .wrap {
+      max-width: 800px;
+      margin: 0 auto;
+      background: #ffffff;
+      border: 1px solid rgba(74, 21, 75, 0.12);
+      border-radius: 20px;
+      padding: 36px 40px;
+      box-shadow: 0 4px 24px rgba(74, 21, 75, 0.06);
+    }
+    h1 {
+      color: #4a154b;
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 6px;
+    }
+    h2 {
+      color: #4a154b;
+      font-size: 18px;
+      font-weight: 700;
+      margin-top: 32px;
+      margin-bottom: 12px;
+      border-bottom: 1.5px solid rgba(74, 21, 75, 0.12);
+      padding-bottom: 6px;
+      letter-spacing: -0.01em;
+    }
+    p, li {
+      font-size: 14.5px;
+      color: #444444;
+      line-height: 1.65;
+    }
+    strong {
+      color: #1d1d1d;
+    }
+    ul, ol {
+      padding-left: 24px;
+      margin: 12px 0;
+    }
+    li {
+      margin-bottom: 8px;
+    }
+    a {
+      color: #1264a3;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+    code {
+      background: #f9f0ff;
+      border: 1px solid rgba(74, 21, 75, 0.18);
+      border-radius: 6px;
+      padding: 2px 7px;
+      font-family: "Consolas", monospace;
+      font-size: 13px;
+      color: #4a154b;
+    }
+    .badge-box {
+      background: #f9f0ff;
+      border: 1px solid rgba(74, 21, 75, 0.18);
+      border-left: 4px solid #4a154b;
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin: 20px 0 24px;
+    }
+    .badge-box strong {
+      color: #4a154b;
+    }
+    .updated {
+      color: #696969;
+      font-size: 13px;
+      margin-bottom: 18px;
+    }
+    .footer {
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 1.5px solid rgba(74, 21, 75, 0.12);
+      font-size: 13px;
+      color: #696969;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
-  <h1>Privacy Policy — DezignSnap</h1>
-  <p class="updated">Last updated: September 2026</p>
+  <div class="wrap">
+    <h1>Privacy Policy — DezignSnap</h1>
+    <p class="updated">Last Updated: October 2026 | Canonical URL: <a href="https://dezignsnap-privacy.hamzaka549.workers.dev/privacy-policy" target="_blank" rel="noopener">https://dezignsnap-privacy.hamzaka549.workers.dev/privacy-policy</a></p>
 
-  <h2>What this extension does</h2>
-  <p>
-    DezignSnap lets you capture a screenshot of the currently visible part of a webpage, select a specific region (Smart Zoom), or highlight text and send it directly to your chosen AI engine (Groq, Google Gemini, OpenAI, OpenRouter, or local Ollama) to receive instant, grounded explanations.
-  </p>
+    <div class="badge-box">
+      <strong>Zero Data Collection &amp; Bring-Your-Own-Key (BYOK) Architecture:</strong><br />
+      DezignSnap is built with privacy as its primary foundation. We do not operate any middleman or proxy servers. We collect zero personal data, sell zero user data, and include no analytics, no tracking, and no telemetry. All network calls occur directly between your browser and your self-selected AI provider API using your personal API key (or stay 100% offline on your device when using local Ollama).
+    </div>
 
-  <h2>What data we collect</h2>
-  <p>
-    <strong>We (the extension developer) do not operate any intermediate servers and do not collect, receive, or store any of your data ourselves.</strong> All data handled by this extension stays either on your device or is dispatched directly from your browser to your selected AI provider (or processed 100% locally when using Ollama).
-  </p>
+    <h2>1. What DezignSnap Does</h2>
+    <p>
+      DezignSnap is an on-page visual assistant Chrome Extension (Manifest V3) that enables users to snip webpage regions, capture visible viewports, or submit highlighted text queries to receive instant visual analysis powered by Google Gemini, OpenAI (GPT-4o), Groq, OpenRouter, or local offline Ollama.
+    </p>
 
-  <h2>What is stored locally on your device</h2>
-  <ul>
-    <li>Your API key(s) for Groq, Gemini, OpenAI, and/or OpenRouter (used only to authenticate requests to the selected provider's API directly from your browser).</li>
-    <li>Which provider engine is currently active.</li>
-    <li>Your saved instruction presets and personas.</li>
-    <li>A local session history of your Q&amp;A exchanges and compressed thumbnails, used only to display your session transcript and generate client-side PDF reports. This can be cleared at any time from Settings.</li>
-  </ul>
-  <p>
-    This data is stored using the browser's built-in extension storage (<code>chrome.storage.local</code>) and is never synced to external analytics or ad trackers.
-  </p>
+    <h2>2. Information We Collect</h2>
+    <p>
+      <strong>We (the extension developer, Muhammad Hamza / Dezignwise) collect NO personal data from you.</strong>
+    </p>
+    <ul>
+      <li><strong>No Personal Identifiers:</strong> We do not ask for or collect names, email addresses, IP addresses, or device IDs.</li>
+      <li><strong>No Browsing History:</strong> We do not track, record, or transmit the websites you visit.</li>
+      <li><strong>No Analytics or Telemetry:</strong> DezignSnap contains no Google Analytics, no telemetry trackers, no cookies, and no third-party tracking scripts.</li>
+      <li><strong>No Advertising:</strong> DezignSnap contains zero advertising code, trackers, or monetization scripts.</li>
+    </ul>
 
-  <h2>What is sent to third parties</h2>
-  <p>
-    When you invoke DezignSnap, the screenshot or selected text and your instruction are sent directly from your browser to your selected provider:
-    <strong>Groq (api.groq.com)</strong>, <strong>Google Gemini (generativelanguage.googleapis.com)</strong>, <strong>OpenAI (api.openai.com)</strong>, or <strong>OpenRouter (openrouter.ai)</strong> using your own API key. If you select <strong>Ollama</strong>, no data leaves your local machine.
-  </p>
-  <p>We do not intercept, log, or have access to your data or tokens at any point.</p>
+    <h2>3. What Is Stored Locally on Your Device</h2>
+    <p>
+      All user configuration data is stored exclusively in your browser's local sandbox storage (<code>chrome.storage.local</code>). It never syncs to external servers:
+    </p>
+    <ul>
+      <li><strong>Your API Key(s):</strong> Stored locally on your device to authorize direct API requests to your chosen provider (Google Gemini, OpenAI, Groq, or OpenRouter). Keys are never transmitted to us or any intermediary.</li>
+      <li><strong>Active Provider &amp; Model Selection:</strong> Which AI engine you have selected.</li>
+      <li><strong>Instruction Presets &amp; Personas:</strong> Custom system prompt templates you create or select (e.g., General Explainer, Quiz &amp; MCQ Solver, ELI5, Roast My UI).</li>
+      <li><strong>UI Preferences:</strong> Toolbar dock position (Left, Center, Right), collapsed/expanded state, and reasoning mode (Direct vs. Thinking).</li>
+      <li><strong>Local Session History:</strong> Q&amp;A history entries with compressed image thumbnails, used solely to display your in-tab chat transcript and generate client-side PDF exports. Stored with a strict FIFO cap and clearable at any time.</li>
+    </ul>
 
-  <h2>Permissions this extension requests, and why</h2>
-  <ul>
-    <li><strong>storage &amp; unlimitedStorage</strong> — to save your API keys, presets, and session thumbnails locally.</li>
-    <li><strong>activeTab</strong> — to allow the extension to capture a screenshot of the tab you are viewing when you trigger an action.</li>
-    <li><strong>contextMenus</strong> — to provide the right-click "⚡ Ask AI about selection" convenience menu for highlighted text.</li>
-    <li><strong>host_permissions</strong> — required to display the floating HUD on pages and communicate directly with AI provider APIs.</li>
-  </ul>
+    <h2>4. What Data Is Shared With Third Parties</h2>
+    <p>
+      Data is transmitted <strong>strictly upon your explicit request</strong> (e.g., clicking the Snip Area button, clicking Full Page Solve, or submitting a question). Data is transmitted directly from your browser to your selected AI provider:
+    </p>
+    <ul>
+      <li><strong>Google Gemini:</strong> Dispatched to <code>generativelanguage.googleapis.com</code> using your Gemini API key. Subject to <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google Privacy Policy</a>.</li>
+      <li><strong>OpenAI:</strong> Dispatched to <code>api.openai.com</code> using your OpenAI secret key. Subject to <a href="https://openai.com/privacy" target="_blank" rel="noopener">OpenAI Privacy Policy</a>.</li>
+      <li><strong>Groq:</strong> Dispatched to <code>api.groq.com</code> using your Groq API key. Subject to <a href="https://groq.com/privacy-policy/" target="_blank" rel="noopener">Groq Privacy Policy</a>.</li>
+      <li><strong>OpenRouter:</strong> Dispatched to <code>openrouter.ai</code> using your OpenRouter key. Subject to OpenRouter Privacy Policy.</li>
+      <li><strong>Local Ollama:</strong> Dispatched to your local computer (<code>http://localhost:11434</code>). <strong>100% private and offline; zero data leaves your machine.</strong></li>
+    </ul>
+    <p>
+      We do not act as a gateway, proxy, or intermediary. We never see, log, or have access to your prompts, screenshots, or responses.
+    </p>
 
-  <h2>Your controls</h2>
-  <p>
-    You can clear your session history at any time from the Settings page. You can remove or replace your API keys at any time. Uninstalling the extension completely purges all local storage.
-  </p>
+    <h2>5. Permissions Requested &amp; Technical Justifications</h2>
+    <ul>
+      <li>
+        <code>host_permissions: &lt;all_urls&gt;</code> — <strong>Required for On-Page Visual Assistant HUD:</strong> DezignSnap injects a floating toolbar and interactive drag-to-snip overlay so you can select and analyze visual content on whatever webpage you choose to inspect. Because users research across arbitrary websites, access to <code>&lt;all_urls&gt;</code> is essential. No background monitoring or auto-capture occurs; screenshots and queries are triggered strictly by explicit user actions.
+      </li>
+      <li>
+        <code>activeTab</code> — <strong>Temporary Screenshot Capture:</strong> Allows the background service worker to capture the visible viewport (<code>captureVisibleTab</code>) solely when you invoke a snip or solve action.
+      </li>
+      <li>
+        <code>storage</code> &amp; <code>unlimitedStorage</code> — <strong>Local Offline Data:</strong> Saves your API keys, preferences, and session Q&amp;A history with image thumbnails locally on your computer. Storing session image thumbnails can exceed default 10MB quotas over extended research sessions, necessitating <code>unlimitedStorage</code>.
+      </li>
+      <li>
+        <code>contextMenus</code> — <strong>Right-Click Convenience:</strong> Provides the right-click <em>"Ask AI about selection"</em> menu item for highlighted text.
+      </li>
+    </ul>
 
-  <h2>Contact</h2>
-  <p>If you have questions, feedback, or concerns regarding this Privacy Policy, please contact Muhammad Hamza (Dezignwise) at <a href="mailto:hamzaka@dezignwise.com">hamzaka@dezignwise.com</a> or visit <a href="https://dezignwise.com" target="_blank" rel="noopener">dezignwise.com</a>.</p>
+    <h2>6. How to Delete Your Data</h2>
+    <p>You have complete control over all data stored by DezignSnap:</p>
+    <ol>
+      <li><strong>Clear Session History:</strong> Open DezignSnap <em>Settings</em> (or right-click the extension icon &rarr; <em>Options</em>), scroll to the <em>Session History &amp; PDF Reports</em> section, and click <strong>"Clear Session History"</strong>. All stored conversation records and thumbnails are permanently erased.</li>
+      <li><strong>Remove API Keys:</strong> Open <em>Settings</em>, clear the API key input fields, and click <em>Save</em>.</li>
+      <li><strong>Complete Data Erasure:</strong> Uninstalling the extension from Chrome (right-click icon &rarr; <em>"Remove from Chrome..."</em>) instantly and permanently purges all local storage, keys, preferences, and cached session data from your device.</li>
+    </ol>
+
+    <h2>7. Security Practices</h2>
+    <p>
+      DezignSnap enforces modern Chrome Extension Manifest V3 security standards:
+    </p>
+    <ul>
+      <li>Strict Content Security Policy (no <code>eval()</code>, no remote scripts, no inline event handlers).</li>
+      <li>Clickjacking defense: all interactive handlers verify <code>event.isTrusted</code> to prevent malicious host scripts from simulating clicks.</li>
+      <li>Isolated world execution: content scripts run in isolated contexts, preventing page scripts from accessing extension state.</li>
+    </ul>
+
+    <h2>8. Contact &amp; Questions</h2>
+    <p>
+      For any questions or inquiries regarding this Privacy Policy, please contact:<br />
+      <strong>Developer:</strong> Muhammad Hamza (Dezignwise)<br />
+      <strong>Email:</strong> <a href="mailto:hamzaka@dezignwise.com">hamzaka@dezignwise.com</a><br />
+      <strong>Website:</strong> <a href="https://dezignwise.com" target="_blank" rel="noopener">https://dezignwise.com</a>
+    </p>
+
+    <div class="footer">
+      &copy; 2026 DezignSnap • Published by Dezignwise • All rights reserved.
+    </div>
+  </div>
 </body>
 </html>

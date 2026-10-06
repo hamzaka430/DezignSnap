@@ -16,13 +16,19 @@ async function init() {
     return;
   }
 
-  renderPreview(cachedHistory);
-  await buildAndDownloadPdf(cachedHistory);
-  statusEl.textContent = `✅ PDF compiled and downloaded (${cachedHistory.length} entries).`;
+  try {
+    await buildAndDownloadPdf(cachedHistory);
+    statusEl.textContent = `PDF compiled and downloaded (${cachedHistory.length} entries).`;
+  } catch (err) {
+    console.error("PDF generation error:", err);
+    statusEl.textContent = `PDF generation error: ${escapeHtml(err.message || String(err))}. You can still view your session transcript below.`;
+  }
 }
 
 function renderPreview(history) {
   entriesEl.innerHTML = "";
+  const VALID_CONFIDENCE = new Set(["high", "medium", "low"]);
+
   history.forEach((e, i) => {
     const div = document.createElement("div");
     div.className = "entry";
@@ -34,8 +40,15 @@ function renderPreview(history) {
         .map((t) => {
           const isUser = t.role === "user";
           const label = isUser ? "You" : "AI";
-          const confClass = t.confidence ? `conf-${t.confidence.toLowerCase()}` : "";
-          const confBadge = t.confidence ? `<span class="conf-badge ${confClass}">${t.confidence} Confidence</span>` : "";
+          const rawConf = String(t.confidence || "").toLowerCase().trim();
+          const isSafeConf = VALID_CONFIDENCE.has(rawConf);
+          const confClass = isSafeConf ? `conf-${rawConf}` : "";
+          const safeConfText = isSafeConf
+            ? rawConf.charAt(0).toUpperCase() + rawConf.slice(1)
+            : escapeHtml(t.confidence);
+          const confBadge = t.confidence
+            ? `<span class="conf-badge ${confClass}">${safeConfText} Confidence</span>`
+            : "";
           return `<div class="turn ${isUser ? "user-turn" : "ai-turn"}"><strong>${label}:</strong> ${escapeHtml(t.text)} ${confBadge}</div>`;
         })
         .join("");
@@ -46,7 +59,7 @@ function renderPreview(history) {
     div.innerHTML = `
       <div class="meta">#${i + 1} • ${escapeHtml(e.pageTitle || e.pageUrl || "Webpage")} • ${date}${e.provider ? " • Engine: " + escapeHtml(e.provider) : ""}</div>
       ${body}
-      ${(e.screenshot || e.thumbnail) ? `<div style="margin-top: 12px;"><img src="${e.screenshot || e.thumbnail}" alt="Screenshot" style="max-width: 100%; max-height: 320px; border-radius: 8px; border: 1px solid #393E46; display: block;" /><span style="font-size: 11px; color: #DFD0B8; margin-top: 4px; display: inline-block;">📸 Original Screenshot Evidence</span></div>` : ""}
+      ${(e.screenshot || e.thumbnail) ? `<div style="margin-top: 14px;"><img src="${e.screenshot || e.thumbnail}" alt="Screenshot" style="max-width: 100%; max-height: 320px; border-radius: 12px; border: 1.5px solid rgba(74, 21, 75, 0.18); display: block;" /><span style="font-size: 11px; font-weight: 700; color: #4a154b; margin-top: 6px; display: inline-flex; align-items: center; gap: 4px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg> Screenshot Evidence</span></div>` : ""}
     `;
     entriesEl.appendChild(div);
   });
@@ -61,8 +74,17 @@ function escapeHtml(str) {
     .replace(/'/g, "&#039;");
 }
 
-downloadAgainBtn.addEventListener("click", () => {
-  if (cachedHistory.length > 0) buildAndDownloadPdf(cachedHistory);
+downloadAgainBtn.addEventListener("click", async () => {
+  if (cachedHistory.length > 0) {
+    statusEl.textContent = "Generating PDF...";
+    try {
+      await buildAndDownloadPdf(cachedHistory);
+      statusEl.textContent = `PDF compiled and downloaded (${cachedHistory.length} entries).`;
+    } catch (err) {
+      console.error("PDF download failed:", err);
+      statusEl.textContent = `PDF generation error: ${escapeHtml(err.message || String(err))}.`;
+    }
+  }
 });
 
 clearBtn.addEventListener("click", async () => {
@@ -83,17 +105,17 @@ async function buildAndDownloadPdf(history) {
 
   // Header Title
   doc.setFontSize(20);
-  doc.setTextColor(34, 40, 49); // Dark Slate (#222831)
+  doc.setTextColor(74, 21, 75); // Aubergine (#4a154b)
   doc.text("DezignSnap — Session Intelligence Report", margin, y);
   y += 22;
 
   doc.setFontSize(10);
-  doc.setTextColor(148, 137, 121); // Warm Taupe (#948979)
+  doc.setTextColor(105, 105, 105); // Ink Mute (#696969)
   doc.text(`Generated: ${new Date().toLocaleString("en-US")}  •  Private Client-Side Export`, margin, y);
   y += 24;
 
   // Header accent bar
-  doc.setDrawColor(148, 137, 121); // Warm Taupe bar
+  doc.setDrawColor(217, 189, 222); // Mauve (#d9bdde) bar
   doc.setLineWidth(1.5);
   doc.line(margin, y, pageWidth - margin, y);
   y += 20;
@@ -104,7 +126,7 @@ async function buildAndDownloadPdf(history) {
 
     // Entry Meta Tag
     doc.setFontSize(10);
-    doc.setTextColor(57, 62, 70); // Slate Charcoal (#393E46)
+    doc.setTextColor(74, 21, 75); // Aubergine (#4a154b)
     const dateStr = new Date(entry.timestamp).toLocaleString("en-US");
     const providerStr = entry.provider ? `  •  Engine: ${entry.provider}` : "";
     doc.text(`Entry #${i + 1}  •  ${dateStr}${providerStr}`, margin, y);

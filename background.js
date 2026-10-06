@@ -20,7 +20,7 @@ const PROVIDER_CONFIGS = {
     label: "Groq (Ultra-Fast)",
     endpoint: "https://api.groq.com/openai/v1/chat/completions",
     defaultModel: "qwen/qwen3.8-27b",
-    textModel: "llama-3.3-70b-versatile",
+    textModel: "qwen/qwen3.8-27b",
     type: "openai_compat",
   },
   openrouter: {
@@ -38,30 +38,42 @@ const PROVIDER_CONFIGS = {
 };
 
 const SYSTEM_PROMPT =
-  "You are a page-understanding and visual intelligence assistant. The user has configured instructions or asked a direct question, " +
-  "and you may be given a screenshot of the webpage (full page or user-dragged region), highlighted text, or a direct question with no image. " +
-  "RULES: " +
-  "1) When a screenshot is provided, only state what is CLEARLY visible — if something is blurry, cut off, or not visible, do not guess; state plainly that it is not visible. If no screenshot is provided, answer the user's question directly with accuracy. " +
-  "2) Do not hallucinate or contradict what the screenshot clearly displays. " +
-  "3) Keep answers crisp, direct, and structured. " +
-  "4) If asked to locate an element/button, state its exact visual position (e.g. 'top-right corner', 'below the navigation header'). " +
-  "5) Before answering, verify that your answer matches the visual or text context. " +
-  "6) At the very end of your response, on a new line, output ONLY this (nothing else on that line): CONFIDENCE: High or CONFIDENCE: Medium or CONFIDENCE: Low. " +
-  "Use High when what you stated is 100% clearly visible or certain. Medium when somewhat ambiguous. Low when guessing or content wasn't clear. " +
-  "Respond in the same language the user's question or instruction is written in.";
+  "You are DezignSnap, an elite visual intelligence and reasoning assistant. " +
+  "You analyze webpages, screenshots, UI, code, and user questions with uncompromising accuracy and first-principles reasoning.\n\n" +
+  "CORE RULES:\n" +
+  "1) INDEPENDENT PROBLEM SOLVING & ZERO SYCOPHANCY:\n" +
+  "   - When analyzing quizzes, tests, exams, multiple-choice questions (MCQs), math, or code problems:\n" +
+  "     * NEVER assume that an option, radio button, or checkbox clicked, highlighted, or selected on the screen is correct. Users often take tests or test your capabilities; on-screen selections are frequently incorrect or distractors!\n" +
+  "     * NEVER say 'I cannot check', 'I cannot verify', or refuse to solve. You have full reasoning capability to compute, calculate, analyze, and verify answers directly.\n" +
+  "     * Solve every problem independently from first principles from scratch.\n" +
+  "     * Evaluate all available options (A, B, C, D, etc.), state the single objectively correct choice and letter, provide rigorous proof/explanation, and explain why the other options are wrong.\n" +
+  "2) OBJECTIVE VERIFICATION & CHALLENGE HANDLING:\n" +
+  "   - If the user asks for the correct answer ('sahi answer do', 'verify again', 'wrong answer', 'check karo', 're-evaluate'), never be defensive and never blindly repeat earlier answers.\n" +
+  "   - Discard previous assumptions, re-examine the question and visual evidence fresh from scratch, and output the rigorously verified ground truth.\n" +
+  "3) VISUAL ACCURACY & UI LOCALIZATION:\n" +
+  "   - When answering visual questions (UI elements, buttons, layout), state exact visual positions (e.g., 'top-right corner', 'below navigation bar') and colors.\n" +
+  "   - Only state what is confirmed by the visual evidence or factual knowledge; do not hallucinate details that do not exist.\n" +
+  "4) CONTEXT MEMORY AWARENESS WITHOUT BIAS:\n" +
+  "   - Previous conversation turns are provided solely for background context and reference. Do not let prior turns or previous mistakes bias or distort your reasoning on the current question.\n" +
+  "5) LANGUAGE & TONE:\n" +
+  "   - Respond naturally in the same language the user asks in (Urdu, English, Roman Urdu, Hindi, etc.).\n" +
+  "   - Be direct, professional, authoritative, and helpful.\n" +
+  "6) CONFIDENCE RATING:\n" +
+  "   - On the very final line of your response, output ONLY: CONFIDENCE: High or CONFIDENCE: Medium or CONFIDENCE: Low.\n" +
+  "   - High = fully verified, certain. Medium = slight ambiguity. Low = blurry/insufficient information.";
 
 function getSystemPrompt(aiMode = "direct") {
   let prompt = SYSTEM_PROMPT;
   if (aiMode === "thinking") {
     prompt +=
-      "\n\nMODE: DEEP THINKING & DETAILED EXPLANATION (like Gemini/DeepSeek).\n" +
-      "Step 1: Write your deep step-by-step reasoning, visual/code inspection, and deductions enclosed strictly inside <thinking>...</thinking> tags.\n" +
-      "Step 2: Immediately following </thinking>, provide your clean, comprehensive, user-friendly final answer and explanation.\n" +
+      "\n\nMODE: DEEP THINKING & FIRST-PRINCIPLES VERIFICATION (like Gemini/DeepSeek).\n" +
+      "Step 1: Inside <thinking>...</thinking> tags, write your deep step-by-step reasoning: analyze the question, independently derive/calculate the solution, test all multiple-choice options, inspect any code/visual details, and verify correctness.\n" +
+      "Step 2: Immediately following </thinking>, provide your clean, definitive, user-friendly final answer with clear structure.\n" +
       "Step 3: Conclude on the final line with CONFIDENCE: High or Medium or Low.";
   } else {
     prompt +=
-      "\n\nMODE: LIGHTNING-FAST DIRECT ANSWER.\n" +
-      "Provide an ultra-direct, immediate, concise answer without meta-commentary or filler preamble.\n" +
+      "\n\nMODE: LIGHTNING-FAST DIRECT & VERIFIED ANSWER.\n" +
+      "Provide an immediate, definitive, verified answer directly from first principles. State the correct answer/option first, followed by clear concise reasoning. No fluff preamble.\n" +
       "Conclude on the final line with CONFIDENCE: High or Medium or Low.";
   }
   return prompt;
@@ -75,8 +87,13 @@ async function getActiveAiMode() {
 const DEFAULT_PRESETS = [
   {
     id: "default",
-    name: "General page helper",
-    text: "Explain what this page is about, or tell me the exact location of the option/button I'm looking for.",
+    name: "General page & problem solver",
+    text: "Analyze what is visible. If this contains a question, quiz, or problem, solve it accurately from first principles, evaluate all choices, and provide the verified correct answer. If looking for an option or UI element, state its exact position.",
+  },
+  {
+    id: "quiz_solver",
+    name: "Quiz & MCQ Solver (Verified)",
+    text: "Accurately solve this multiple-choice question, test, or problem. Independently evaluate every option from first principles. State the exact correct option and letter, prove why it is correct, and explain why the other options are wrong. Never assume any option selected or highlighted on screen is correct.",
   },
   {
     id: "eli5",
@@ -105,30 +122,123 @@ const DEFAULT_PRESETS = [
   },
 ];
 
-// tabId -> { id, provider, apiKey, screenshotDataUrl, thumbnail, pageTitle, pageUrl, startedAt, turns: [{role, text, confidence}] }
+// In-memory cache backed by chrome.storage.session to survive MV3 Service Worker restarts
 const activeConversations = new Map();
 const inFlightTabs = new Set();
+const CONV_SESSION_KEY = "activeConversations_v1";
+
+async function getConversation(tabId) {
+  if (!tabId) return null;
+  if (activeConversations.has(tabId)) {
+    return activeConversations.get(tabId);
+  }
+  try {
+    const result = await chrome.storage.session.get([CONV_SESSION_KEY]);
+    const all = result[CONV_SESSION_KEY] || {};
+    const conv = all[String(tabId)] || null;
+    if (conv) {
+      activeConversations.set(tabId, conv);
+    }
+    return conv;
+  } catch (_) {
+    return null;
+  }
+}
+
+async function setConversation(tabId, conv) {
+  if (!tabId || !conv) return;
+  activeConversations.set(tabId, conv);
+  try {
+    const result = await chrome.storage.session.get([CONV_SESSION_KEY]);
+    const all = result[CONV_SESSION_KEY] || {};
+    // Keep session storage payload compact: cap image size & prune older images
+    const persistedTurns = (conv.turns || []).map((t, idx, arr) => {
+      const isRecentImage = idx >= arr.length - 2;
+      return {
+        role: t.role,
+        text: t.text,
+        confidence: t.confidence,
+        screenshotDataUrl: isRecentImage && t.screenshotDataUrl && t.screenshotDataUrl.length < 1500000 ? t.screenshotDataUrl : null,
+      };
+    });
+    all[String(tabId)] = {
+      ...conv,
+      screenshotDataUrl: conv.screenshotDataUrl && conv.screenshotDataUrl.length < 1500000 ? conv.screenshotDataUrl : null,
+      turns: persistedTurns,
+    };
+    await chrome.storage.session.set({ [CONV_SESSION_KEY]: all });
+  } catch (err) {
+    console.warn("[DezignSnap] Failed to sync conversation to session storage:", err);
+  }
+}
+
+async function deleteConversation(tabId) {
+  if (!tabId) return;
+  activeConversations.delete(tabId);
+  try {
+    const result = await chrome.storage.session.get([CONV_SESSION_KEY]);
+    const all = result[CONV_SESSION_KEY] || {};
+    if (all[String(tabId)]) {
+      delete all[String(tabId)];
+      await chrome.storage.session.set({ [CONV_SESSION_KEY]: all });
+    }
+  } catch (_) {}
+}
 
 chrome.runtime.onInstalled.addListener((details) => {
   // Context menu for quick right-click text queries
   chrome.contextMenus.create({
     id: "ph_ask_text",
-    title: "⚡ Ask AI about '%s'",
+    title: "Ask AI about '%s'",
     contexts: ["selection"],
   });
 
+  // Ensure stored presets do not contain legacy emojis
+  chrome.storage.local.get(["instructionPresets"], (result) => {
+    if (result.instructionPresets && Array.isArray(result.instructionPresets)) {
+      let changed = false;
+      const updated = result.instructionPresets.map((p) => {
+        if (p.id === "quiz_solver" && p.name && p.name.includes("🎯")) {
+          changed = true;
+          return { ...p, name: "Quiz & MCQ Solver (Verified)" };
+        }
+        return p;
+      });
+      if (changed) {
+        chrome.storage.local.set({ instructionPresets: updated });
+      }
+    }
+  });
+
   if (details.reason === "install") {
-    chrome.storage.local.get(["instructionPresets", "activeProvider"], (result) => {
-      if (!result.instructionPresets || result.instructionPresets.length === 0) {
-        chrome.storage.local.set({
-          instructionPresets: DEFAULT_PRESETS,
-          activePresetId: DEFAULT_PRESETS[0].id,
-        });
+    chrome.storage.local.get(
+      ["instructionPresets", "activeProvider", "hudPosition", "hudCollapsed", "aiMode", "sessionHistory"],
+      (result) => {
+        const defaults = {};
+        if (!result.instructionPresets || result.instructionPresets.length === 0) {
+          defaults.instructionPresets = DEFAULT_PRESETS;
+          defaults.activePresetId = DEFAULT_PRESETS[0].id;
+        }
+        if (!result.activeProvider) {
+          defaults.activeProvider = "openai";
+        }
+        if (!result.hudPosition) {
+          defaults.hudPosition = "right";
+        }
+        if (result.hudCollapsed === undefined) {
+          defaults.hudCollapsed = false;
+        }
+        if (!result.aiMode) {
+          defaults.aiMode = "direct";
+        }
+        if (!result.sessionHistory) {
+          defaults.sessionHistory = [];
+        }
+        if (Object.keys(defaults).length > 0) {
+          chrome.storage.local.set(defaults);
+        }
       }
-      if (!result.activeProvider) {
-        chrome.storage.local.set({ activeProvider: "openai" });
-      }
-    });
+    );
     chrome.tabs.create({ url: chrome.runtime.getURL("welcome.html") });
   }
 });
@@ -140,7 +250,7 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
   }
 });
 
-// Handle keyboard shortcuts (Alt+S for snip, Alt+A for full page)
+// Handle keyboard shortcuts (Alt+S for snip, Alt+A for full page, Alt+H for stealth)
 chrome.commands.onCommand.addListener((command) => {
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
     const tab = tabs && tabs[0];
@@ -148,9 +258,13 @@ chrome.commands.onCommand.addListener((command) => {
     if (command === "snip_screen") {
       chrome.tabs.sendMessage(tab.id, { type: "TRIGGER_SNIP" });
     } else if (command === "solve_full_page") {
-      handleSolve(tab, (res) => {
-        chrome.tabs.sendMessage(tab.id, { type: "SHOW_RESULT", result: res });
-      });
+      chrome.tabs.sendMessage(tab.id, { type: "TRIGGER_FULL_SOLVE" });
+    } else if (command === "toggle_stealth") {
+      chrome.tabs.sendMessage(tab.id, { type: "TOGGLE_STEALTH" });
+    } else if (command === "open_side_panel") {
+      if (chrome.sidePanel && chrome.sidePanel.open) {
+        chrome.sidePanel.open({ windowId: tab.windowId }).catch(() => {});
+      }
     }
   });
 });
@@ -186,52 +300,230 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     });
     return true;
   }
+  if (message && message.type === "CLEAR_ACTIVE_CHAT") {
+    const tabId = sender.tab?.id || message.tabId;
+    if (tabId) {
+      deleteConversation(tabId);
+      inFlightTabs.delete(tabId);
+    }
+    if (sendResponse) sendResponse({ success: true });
+    return true;
+  }
   if (message && message.type === "OPEN_SESSION_EXPORT") {
     chrome.tabs.create({ url: chrome.runtime.getURL("session.html") });
+    return true;
+  }
+  if (message && message.type === "OPEN_SIDE_PANEL") {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      const tab = tabs && tabs[0];
+      if (tab && chrome.sidePanel && chrome.sidePanel.open) {
+        chrome.sidePanel.open({ windowId: tab.windowId }).catch(() => {});
+      }
+    });
+    return true;
+  }
+  if (message && message.type === "OPEN_COMPANION_WINDOW") {
+    chrome.windows.create({
+      url: chrome.runtime.getURL("sidepanel.html?detached=true"),
+      type: "popup",
+      width: 440,
+      height: 700,
+      focused: true,
+    });
+    return true;
+  }
+  if (message && message.type === "GET_UI_PREFERENCES") {
+    chrome.storage.local.get(["hudPosition", "hudCollapsed", "aiMode", "stealthMode"], (res) => {
+      sendResponse({
+        hudPosition: res.hudPosition || "right",
+        hudCollapsed: !!res.hudCollapsed,
+        aiMode: res.aiMode || "direct",
+        stealthMode: !!res.stealthMode,
+      });
+    });
+    return true;
+  }
+  if (message && message.type === "SET_UI_PREFERENCES") {
+    const allowed = ["hudPosition", "hudCollapsed", "aiMode", "stealthMode"];
+    const toUpdate = {};
+    if (message.preferences && typeof message.preferences === "object") {
+      for (const key of allowed) {
+        if (key in message.preferences) {
+          toUpdate[key] = message.preferences[key];
+        }
+      }
+    }
+    if (Object.keys(toUpdate).length > 0) {
+      chrome.storage.local.set(toUpdate, () => {
+        if (sendResponse) sendResponse({ success: true });
+      });
+    } else {
+      if (sendResponse) sendResponse({ success: false });
+    }
+    return true;
   }
 });
 
-// Free the in-memory conversation when its tab is closed
+// Broadcast UI preference changes to all open tabs so content scripts stay in sync without reading storage directly
+chrome.storage.onChanged.addListener((changes, area) => {
+  if (area !== "local") return;
+  const changedPrefs = {};
+  if (changes.hudPosition) changedPrefs.hudPosition = changes.hudPosition.newValue;
+  if (changes.hudCollapsed !== undefined) changedPrefs.hudCollapsed = changes.hudCollapsed.newValue;
+  if (changes.aiMode) changedPrefs.aiMode = changes.aiMode.newValue;
+  if (changes.stealthMode !== undefined) changedPrefs.stealthMode = changes.stealthMode.newValue;
+
+  if (Object.keys(changedPrefs).length > 0) {
+    chrome.tabs.query({}, (tabs) => {
+      if (!tabs) return;
+      for (const tab of tabs) {
+        if (tab.id) {
+          chrome.tabs.sendMessage(tab.id, {
+            type: "PREFERENCES_CHANGED",
+            preferences: changedPrefs,
+          }).catch(() => {});
+        }
+      }
+    });
+  }
+});
+
+// Long-lived Port connection for real-time token streaming to content script
+chrome.runtime.onConnect.addListener((port) => {
+  if (port.name !== "ph_streaming") return;
+
+  port.onMessage.addListener(async (msg) => {
+    if (!msg || msg.type !== "START_STREAM") return;
+    const tab = port.sender?.tab;
+    const { action, question, region } = msg.payload || {};
+
+    if (tab && tab.id && inFlightTabs.has(tab.id)) {
+      port.postMessage({ type: "STREAM_ERROR", error: "An AI request is already in progress for this tab." });
+      return;
+    }
+    if (tab && tab.id) inFlightTabs.add(tab.id);
+
+    try {
+      let providerInfo, aiInstruction;
+      if (action === "direct") {
+        providerInfo = await getActiveProviderAndKey();
+        if (providerInfo.provider !== "ollama" && !providerInfo.apiKey) {
+          port.postMessage({
+            type: "STREAM_ERROR",
+            error: `Please set your ${providerInfo.providerLabel} API key in Settings first.`,
+          });
+          return;
+        }
+        aiInstruction = (question || "").trim();
+        if (!aiInstruction) {
+          port.postMessage({ type: "STREAM_ERROR", error: "Please enter a question or message." });
+          return;
+        }
+      } else {
+        const check = await validateBasics(tab);
+        if (!check.ok) {
+          port.postMessage({ type: "STREAM_ERROR", error: check.response.error });
+          return;
+        }
+        providerInfo = check.providerInfo;
+        aiInstruction = check.aiInstruction;
+      }
+
+      let screenshotDataUrl = null;
+      let instruction = aiInstruction;
+      let displayInstruction = aiInstruction;
+
+      if (action === "solve") {
+        screenshotDataUrl = await captureTab(tab.windowId);
+        displayInstruction = "📸 [Full Page Screenshot] " + aiInstruction;
+      } else if (action === "snip" && region) {
+        const fullShot = await captureTab(tab.windowId);
+        screenshotDataUrl = await cropAndUpscale(fullShot, region);
+        instruction = `${aiInstruction}\n\n(Note: this screenshot is ONLY the specific area the user selected and zoomed into.)`;
+        displayInstruction = "[Selected Area Snip] " + aiInstruction;
+      } else if (action === "direct") {
+        screenshotDataUrl = null;
+        instruction = (question || "").trim();
+        displayInstruction = instruction;
+      }
+
+      await executeConversationTurn({
+        tab,
+        providerInfo,
+        screenshotDataUrl,
+        instruction,
+        displayInstruction,
+        aiMode: msg.aiMode,
+        onChunk: (chunk, isThinking) => {
+          try {
+            port.postMessage({ type: "STREAM_CHUNK", chunk, isThinking: !!isThinking });
+          } catch (_) {}
+        },
+        sendResponse: (finalRes) => {
+          try {
+            if (finalRes && finalRes.success) {
+              port.postMessage({
+                type: "STREAM_DONE",
+                answer: finalRes.answer,
+                confidence: finalRes.confidence,
+                instructionUsed: finalRes.instructionUsed,
+                conversationId: finalRes.conversationId,
+              });
+            } else {
+              port.postMessage({ type: "STREAM_ERROR", error: finalRes?.error || "Analysis failed." });
+            }
+          } catch (_) {}
+        },
+      });
+    } catch (err) {
+      try {
+        port.postMessage({ type: "STREAM_ERROR", error: err.message || String(err) });
+      } catch (_) {}
+    } finally {
+      if (tab && tab.id) inFlightTabs.delete(tab.id);
+    }
+  });
+});
+
+// Free the conversation when its tab is closed
 chrome.tabs.onRemoved.addListener((tabId) => {
-  activeConversations.delete(tabId);
+  deleteConversation(tabId);
   inFlightTabs.delete(tabId);
 });
 
-async function handleSolve(tab, aiMode, sendResponse) {
+async function withInFlightLock(tab, sendResponse, fn) {
   if (tab && tab.id && inFlightTabs.has(tab.id)) {
-    sendResponse({ success: false, error: "An AI analysis is already running for this tab. Please wait a moment." });
+    if (sendResponse) sendResponse({ success: false, error: "An AI request is already in progress for this tab. Please wait a moment." });
     return;
   }
   if (tab && tab.id) inFlightTabs.add(tab.id);
-
   try {
-    const check = await validateBasics(tab);
-    if (!check.ok) return sendResponse(check.response);
-    const { providerInfo, aiInstruction } = check;
-
-    const dataUrl = await captureTab(tab.windowId);
-    await runFreshConversation({
-      tab,
-      providerInfo,
-      screenshotDataUrl: dataUrl,
-      instruction: aiInstruction,
-      aiMode,
-      sendResponse,
-    });
+    await fn();
   } catch (err) {
-    sendResponse({ success: false, error: err.message || String(err) });
+    if (sendResponse) sendResponse({ success: false, error: err.message || String(err) });
   } finally {
     if (tab && tab.id) inFlightTabs.delete(tab.id);
   }
 }
 
-async function handleSolveRegion(tab, region, aiMode, sendResponse) {
-  if (tab && tab.id && inFlightTabs.has(tab.id)) {
-    sendResponse({ success: false, error: "An AI analysis is already running for this tab. Please wait a moment." });
-    return;
-  }
+async function handleSolve(tab, aiMode, sendResponse) {
+  return withInFlightLock(tab, sendResponse, async () => {
+    const check = await validateBasics(tab);
+    if (!check.ok) return sendResponse(check.response);
+    const dataUrl = await captureTab(tab.windowId);
+    await executeConversationTurn({
+      tab,
+      providerInfo: check.providerInfo,
+      screenshotDataUrl: dataUrl,
+      instruction: check.aiInstruction,
+      displayInstruction: "📸 [Full Page Screenshot] " + check.aiInstruction,
+      aiMode,
+      sendResponse,
+    });
+  });
+}
 
-  // Strict region validation against malformed or malicious payloads
+async function handleSolveRegion(tab, region, aiMode, sendResponse) {
   if (
     !region ||
     typeof region.x !== "number" ||
@@ -249,38 +541,26 @@ async function handleSolveRegion(tab, region, aiMode, sendResponse) {
     return;
   }
 
-  if (tab && tab.id) inFlightTabs.add(tab.id);
-
-  try {
+  return withInFlightLock(tab, sendResponse, async () => {
     const check = await validateBasics(tab);
     if (!check.ok) return sendResponse(check.response);
-    const { providerInfo, aiInstruction } = check;
-
     const fullShot = await captureTab(tab.windowId);
     const croppedDataUrl = await cropAndUpscale(fullShot, region);
-    const focusedInstruction = `${aiInstruction}\n\n(Note: this screenshot is ONLY the specific area the user selected and zoomed into.)`;
+    const focusedInstruction = `${check.aiInstruction}\n\n(Note: this screenshot is ONLY the specific area the user selected and zoomed into.)`;
 
-    await runFreshConversation({
+    await executeConversationTurn({
       tab,
-      providerInfo,
+      providerInfo: check.providerInfo,
       screenshotDataUrl: croppedDataUrl,
       instruction: focusedInstruction,
-      displayInstruction: aiInstruction,
+      displayInstruction: "[Selected Area Snip] " + check.aiInstruction,
       aiMode,
       sendResponse,
     });
-  } catch (err) {
-    sendResponse({ success: false, error: err.message || String(err) });
-  } finally {
-    if (tab && tab.id) inFlightTabs.delete(tab.id);
-  }
+  });
 }
 
 async function handleDirectChat(tab, question, aiMode, sendResponse) {
-  if (tab && tab.id && inFlightTabs.has(tab.id)) {
-    sendResponse({ success: false, error: "An AI request is already in progress for this tab. Please wait a moment." });
-    return;
-  }
   const trimmed = (question || "").trim();
   if (!trimmed) {
     sendResponse({ success: false, error: "Please enter a question or message." });
@@ -293,62 +573,17 @@ async function handleDirectChat(tab, question, aiMode, sendResponse) {
     return;
   }
 
-  if (tab && tab.id) inFlightTabs.add(tab.id);
-
-  try {
-    const turns = [{ role: "user", text: trimmed }];
-    const mode = aiMode || (await getActiveAiMode());
-    let raw;
-    let modelToUse = providerInfo.model;
-    if (providerInfo.provider === "groq" && providerInfo.textModel) {
-      modelToUse = providerInfo.textModel; // ultra-fast text model for direct questions on Groq
-    }
-
-    if (providerInfo.type === "gemini") {
-      raw = await askGeminiMultiTurn(providerInfo.apiKey, null, turns, modelToUse, 1, mode);
-    } else {
-      raw = await askOpenAICompatibleMultiTurn({
-        endpoint: providerInfo.endpoint,
-        model: modelToUse,
-        apiKey: providerInfo.apiKey,
-        screenshotDataUrl: null,
-        turns,
-        isOllama: providerInfo.provider === "ollama",
-        aiMode: mode,
-      });
-    }
-
-    const { text, confidence } = parseConfidence(raw);
-    const conv = {
-      id: "conv_" + Date.now() + "_" + Math.random().toString(36).slice(2, 8),
+  return withInFlightLock(tab, sendResponse, async () => {
+    await executeConversationTurn({
+      tab,
       providerInfo,
       screenshotDataUrl: null,
-      thumbnail: null,
-      pageTitle: tab?.title || "Direct AI Chat",
-      pageUrl: tab?.url || "",
-      startedAt: Date.now(),
-      lastUpdated: Date.now(),
-      turns: [
-        { role: "user", text: trimmed },
-        { role: "assistant", text, confidence: confidence || "High" },
-      ],
-    };
-
-    if (tab && tab.id) activeConversations.set(tab.id, conv);
-    await upsertSessionHistoryFromConv(conv, tab || {});
-
-    sendResponse({
-      success: true,
-      answer: text,
-      confidence: confidence || "High",
-      instructionUsed: trimmed,
-      conversationId: conv.id,
+      instruction: trimmed,
+      displayInstruction: trimmed,
+      aiMode,
+      sendResponse,
     });
-  } catch (err) {
-    sendResponse({ success: false, error: err.message || String(err) });
-  } finally {
-    if (tab && tab.id) inFlightTabs.delete(tab.id);
-  }
+  });
 }
 
 async function handleTextQuery(tab, selectedText) {
@@ -365,57 +600,28 @@ async function handleTextQuery(tab, selectedText) {
       return;
     }
 
-    const prompt = `Selected text from the webpage:\n"${selectedText}"\n\nPlease explain what this means, define any unfamiliar terms, or answer any question it raises concisely.`;
-    const turns = [{ role: "user", text: prompt }];
+    const MAX_SELECTED_TEXT = 1000;
+    const rawText = String(selectedText || "");
+    const sanitizedText = rawText.slice(0, MAX_SELECTED_TEXT);
+    const prompt = [
+      "The user selected the following text from a webpage. Analyze it as requested.",
+      "---BEGIN SELECTED TEXT---",
+      sanitizedText,
+      "---END SELECTED TEXT---",
+      "",
+      "Please explain what this means, define any unfamiliar terms, or answer any question it raises concisely.",
+    ].join("\n");
     const mode = await getActiveAiMode();
 
-    let raw;
-    let modelToUse = providerInfo.model;
-    if (providerInfo.provider === "groq" && providerInfo.textModel) {
-      modelToUse = providerInfo.textModel;
-    }
-
-    if (providerInfo.type === "gemini") {
-      raw = await askGeminiMultiTurn(providerInfo.apiKey, null, turns, modelToUse, 1, mode);
-    } else {
-      raw = await askOpenAICompatibleMultiTurn({
-        endpoint: providerInfo.endpoint,
-        model: modelToUse,
-        apiKey: providerInfo.apiKey,
-        screenshotDataUrl: null,
-        turns,
-        isOllama: providerInfo.provider === "ollama",
-        aiMode: mode,
-      });
-    }
-
-    const { text, confidence } = parseConfidence(raw);
-    const conv = {
-      id: "conv_" + Date.now() + "_" + Math.random().toString(36).slice(2, 8),
+    await executeConversationTurn({
+      tab,
       providerInfo,
       screenshotDataUrl: null,
-      thumbnail: null,
-      pageTitle: tab.title || "",
-      pageUrl: tab.url || "",
-      startedAt: Date.now(),
-      lastUpdated: Date.now(),
-      turns: [
-        { role: "user", text: `Selected text: "${selectedText}"` },
-        { role: "assistant", text, confidence: confidence || "High" },
-      ],
-    };
-
-    activeConversations.set(tab.id, conv);
-    await upsertSessionHistoryFromConv(conv, tab);
-
-    chrome.tabs.sendMessage(tab.id, {
-      type: "SHOW_RESULT",
-      result: {
-        success: true,
-        answer: text,
-        confidence: confidence || "High",
-        instructionUsed: `Selected text: "${selectedText}"`,
-        conversationId: conv.id,
+      instruction: prompt,
+      displayInstruction: `Selected: "${sanitizedText.length < rawText.length ? sanitizedText + "..." : sanitizedText}"`,
+      aiMode: mode,
+      sendResponse: (res) => {
+        chrome.tabs.sendMessage(tab.id, { type: "SHOW_RESULT", result: res });
       },
     });
   } catch (err) {
@@ -427,65 +633,37 @@ async function handleTextQuery(tab, selectedText) {
 }
 
 async function handleFollowup(tab, question, aiMode, sendResponse) {
-  try {
-    if (!tab || !tab.id) {
-      sendResponse({ success: false, error: "Could not identify the tab." });
-      return;
-    }
-    if (inFlightTabs.has(tab.id)) {
-      sendResponse({ success: false, error: "An AI request is already in progress for this tab. Please wait." });
-      return;
-    }
-    const conv = activeConversations.get(tab.id);
-    if (!conv) {
-      sendResponse({ success: false, error: "Start with 'Snip & Ask', 'Select Area', or 'Direct Chat' first, then ask a follow-up." });
-      return;
-    }
-    const trimmedQuestion = (question || "").trim();
-    if (!trimmedQuestion) {
-      sendResponse({ success: false, error: "Please enter a follow-up question." });
-      return;
-    }
-    if (trimmedQuestion.length > 2000) {
-      sendResponse({ success: false, error: "Follow-up question exceeds maximum allowed length (2,000 characters)." });
-      return;
-    }
-
-    inFlightTabs.add(tab.id);
-    conv.turns.push({ role: "user", text: trimmedQuestion });
-
-    const mode = aiMode || (await getActiveAiMode());
-    let raw;
-    try {
-      if (conv.providerInfo.type === "gemini") {
-        raw = await askGeminiMultiTurn(conv.providerInfo.apiKey, conv.screenshotDataUrl, conv.turns, conv.providerInfo.model, 1, mode);
-      } else {
-        raw = await askOpenAICompatibleMultiTurn({
-          endpoint: conv.providerInfo.endpoint,
-          model: conv.providerInfo.model,
-          apiKey: conv.providerInfo.apiKey,
-          screenshotDataUrl: conv.screenshotDataUrl,
-          turns: conv.turns,
-          isOllama: conv.providerInfo.provider === "ollama",
-          aiMode: mode,
-        });
-      }
-    } catch (err) {
-      conv.turns.pop(); // roll back the failed turn so the user can retry cleanly
-      throw err;
-    }
-
-    const { text, confidence } = parseConfidence(raw);
-    conv.turns.push({ role: "assistant", text, confidence });
-    conv.lastUpdated = Date.now();
-
-    await upsertSessionHistoryFromConv(conv, tab);
-    sendResponse({ success: true, answer: text, confidence, conversationId: conv.id });
-  } catch (err) {
-    sendResponse({ success: false, error: err.message || String(err) });
-  } finally {
-    if (tab && tab.id) inFlightTabs.delete(tab.id);
+  if (!tab || !tab.id) {
+    sendResponse({ success: false, error: "Could not identify the tab." });
+    return;
   }
+  const trimmedQuestion = (question || "").trim();
+  if (!trimmedQuestion) {
+    sendResponse({ success: false, error: "Please enter a follow-up question." });
+    return;
+  }
+  if (trimmedQuestion.length > 2000) {
+    sendResponse({ success: false, error: "Follow-up question exceeds maximum allowed length (2,000 characters)." });
+    return;
+  }
+
+  const providerInfo = await getActiveProviderAndKey();
+  if (providerInfo.provider !== "ollama" && !providerInfo.apiKey) {
+    sendResponse({ success: false, error: `Please set your ${providerInfo.providerLabel} API key in Settings first.` });
+    return;
+  }
+
+  return withInFlightLock(tab, sendResponse, async () => {
+    await executeConversationTurn({
+      tab,
+      providerInfo,
+      screenshotDataUrl: null,
+      instruction: trimmedQuestion,
+      displayInstruction: trimmedQuestion,
+      aiMode,
+      sendResponse,
+    });
+  });
 }
 
 async function validateBasics(tab) {
@@ -525,24 +703,101 @@ async function validateBasics(tab) {
   return { ok: true, providerInfo, aiInstruction };
 }
 
-async function runFreshConversation({ tab, providerInfo, screenshotDataUrl, instruction, displayInstruction, aiMode, sendResponse }) {
-  const blankCheck = await detectBlankOrBlackCapture(screenshotDataUrl);
-  const turns = [{ role: "user", text: instruction }];
+const REQUEST_WINDOW_MS = 60000;
+const MAX_REQUESTS_PER_WINDOW = 20;
+const requestTimestamps = [];
+
+function checkRateLimit() {
+  const now = Date.now();
+  while (requestTimestamps.length && requestTimestamps[0] < now - REQUEST_WINDOW_MS) {
+    requestTimestamps.shift();
+  }
+  if (requestTimestamps.length >= MAX_REQUESTS_PER_WINDOW) {
+    const oldestMs = requestTimestamps[0];
+    const waitSec = Math.ceil((oldestMs + REQUEST_WINDOW_MS - now) / 1000);
+    throw new Error(
+      `Rate limit reached (${MAX_REQUESTS_PER_WINDOW} requests/min). Please wait ${waitSec}s before sending another request.`
+    );
+  }
+  requestTimestamps.push(now);
+}
+
+const MAX_CONVERSATION_TURNS = 50;
+
+async function executeConversationTurn({
+  tab,
+  providerInfo,
+  screenshotDataUrl = null,
+  instruction,
+  displayInstruction,
+  aiMode,
+  sendResponse,
+  onChunk = null,
+}) {
+  checkRateLimit();
+  const blankCheck = screenshotDataUrl ? await detectBlankOrBlackCapture(screenshotDataUrl) : { suspicious: false };
   const mode = aiMode || (await getActiveAiMode());
 
-  let raw;
-  if (providerInfo.type === "gemini") {
-    raw = await askGeminiMultiTurn(providerInfo.apiKey, screenshotDataUrl, turns, providerInfo.model, 1, mode);
-  } else {
-    raw = await askOpenAICompatibleMultiTurn({
-      endpoint: providerInfo.endpoint,
-      model: providerInfo.model,
-      apiKey: providerInfo.apiKey,
+  let conv = tab && tab.id ? await getConversation(tab.id) : null;
+  if (!conv) {
+    conv = {
+      id: "conv_" + Date.now() + "_" + Math.random().toString(36).slice(2, 8),
+      providerInfo,
       screenshotDataUrl,
-      turns,
-      isOllama: providerInfo.provider === "ollama",
-      aiMode: mode,
-    });
+      thumbnail: screenshotDataUrl ? await makeThumbnail(screenshotDataUrl) : null,
+      pageTitle: tab?.title || "DezignSnap Session",
+      pageUrl: tab?.url || "",
+      startedAt: Date.now(),
+      lastUpdated: Date.now(),
+      turns: [],
+    };
+  } else {
+    conv.providerInfo = providerInfo;
+    if (screenshotDataUrl) {
+      conv.screenshotDataUrl = screenshotDataUrl;
+      conv.thumbnail = await makeThumbnail(screenshotDataUrl);
+    }
+  }
+
+  const userTurn = {
+    role: "user",
+    text: displayInstruction || instruction,
+    screenshotDataUrl: screenshotDataUrl || null,
+  };
+  conv.turns.push(userTurn);
+
+  if (conv.turns.length > MAX_CONVERSATION_TURNS) {
+    conv.turns = conv.turns.slice(-MAX_CONVERSATION_TURNS);
+  }
+
+  let raw;
+  try {
+    let modelToUse = providerInfo.model;
+    if (providerInfo.provider === "groq" && !screenshotDataUrl) {
+      if (providerInfo.textModel && providerInfo.textModel !== "llama-3.3-70b-versatile") {
+        modelToUse = providerInfo.textModel;
+      } else {
+        modelToUse = providerInfo.model || "qwen/qwen3.8-27b";
+      }
+    }
+
+    if (providerInfo.type === "gemini") {
+      raw = await askGeminiMultiTurn(providerInfo.apiKey, conv.screenshotDataUrl, conv.turns, modelToUse, 1, mode, onChunk);
+    } else {
+      raw = await askOpenAICompatibleMultiTurn({
+        endpoint: providerInfo.endpoint,
+        model: modelToUse,
+        apiKey: providerInfo.apiKey,
+        screenshotDataUrl: conv.screenshotDataUrl,
+        turns: conv.turns,
+        isOllama: providerInfo.provider === "ollama",
+        aiMode: mode,
+        onChunk,
+      });
+    }
+  } catch (err) {
+    conv.turns.pop(); // roll back failed turn
+    throw err;
   }
 
   const { text, confidence } = parseConfidence(raw);
@@ -551,37 +806,38 @@ async function runFreshConversation({ tab, providerInfo, screenshotDataUrl, inst
     ? `⚠️ Warning: ${blankCheck.percent}% of this screenshot is a single (${blankCheck.reason}) color — this may be DRM-protected video or otherwise "screenshot-proof" content that couldn't be captured. The answer below was generated by the AI but may be inaccurate since it didn't receive the real content:\n\n${text}`
     : text;
 
-  const conv = {
-    id: "conv_" + Date.now() + "_" + Math.random().toString(36).slice(2, 8),
-    providerInfo,
-    screenshotDataUrl,
-    thumbnail: await makeThumbnail(screenshotDataUrl),
-    pageTitle: tab.title || "",
-    pageUrl: tab.url || "",
-    startedAt: Date.now(),
-    lastUpdated: Date.now(),
-    turns: [
-      { role: "user", text: displayInstruction || instruction },
-      { role: "assistant", text: finalAnswer, confidence },
-    ],
-  };
+  conv.turns.push({
+    role: "assistant",
+    text: finalAnswer,
+    confidence: confidence || "High",
+  });
 
-  activeConversations.set(tab.id, conv);
-  await upsertSessionHistoryFromConv(conv, tab);
+  if (conv.turns.length > MAX_CONVERSATION_TURNS) {
+    conv.turns = conv.turns.slice(-MAX_CONVERSATION_TURNS);
+  }
+  conv.lastUpdated = Date.now();
+
+  if (tab && tab.id) await setConversation(tab.id, conv);
+  await upsertSessionHistoryFromConv(conv, tab || {});
 
   sendResponse({
     success: true,
     answer: finalAnswer,
-    confidence,
+    confidence: confidence || "High",
     instructionUsed: displayInstruction || instruction,
     conversationId: conv.id,
   });
 }
 
+const MAX_SESSION_HISTORY = 50;
+
 async function upsertSessionHistoryFromConv(conv, tab) {
   const { sessionHistory = [] } = await chrome.storage.local.get(["sessionHistory"]);
   const idx = sessionHistory.findIndex((e) => e.id === conv.id);
   const lastAssistant = [...conv.turns].reverse().find((t) => t.role === "assistant");
+
+  // Strip full-res screenshots to prevent chrome.storage quota overflow.
+  // Thumbnail (~20-40KB JPEG) is preserved for session report preview & PDF export.
   const entry = {
     id: conv.id,
     timestamp: conv.startedAt,
@@ -589,14 +845,24 @@ async function upsertSessionHistoryFromConv(conv, tab) {
     pageTitle: tab?.title || conv.pageTitle || "",
     pageUrl: tab?.url || conv.pageUrl || "",
     provider: conv.providerInfo ? conv.providerInfo.providerLabel : "AI",
-    turns: conv.turns,
+    turns: (conv.turns || []).map((t) => ({
+      role: t.role,
+      text: t.text,
+      confidence: t.confidence || undefined,
+    })),
     instruction: conv.turns[0]?.text || "",
     answer: lastAssistant?.text || "",
     thumbnail: conv.thumbnail || null,
-    screenshot: conv.screenshotDataUrl || null, // Preserve original uncompressed image
   };
-  if (idx >= 0) sessionHistory[idx] = entry;
-  else sessionHistory.push(entry);
+
+  if (idx >= 0) {
+    sessionHistory[idx] = entry;
+  } else {
+    sessionHistory.push(entry);
+    if (sessionHistory.length > MAX_SESSION_HISTORY) {
+      sessionHistory.splice(0, sessionHistory.length - MAX_SESSION_HISTORY);
+    }
+  }
   await chrome.storage.local.set({ sessionHistory });
 }
 
@@ -648,7 +914,12 @@ async function getActiveProviderAndKey() {
       model = "gemini-2.5-flash";
     }
   }
-  else if (activeProvider === "groq") apiKey = groqApiKey.trim();
+  else if (activeProvider === "groq") {
+    apiKey = groqApiKey.trim();
+    if (model === "llama-3.3-70b-versatile" || model === "llama-3.2-11b-vision-preview" || model === "llama-3.2-90b-vision-preview") {
+      model = "qwen/qwen3.8-27b";
+    }
+  }
   else if (activeProvider === "openrouter") apiKey = openrouterApiKey.trim();
   else if (activeProvider === "ollama") {
     apiKey = "ollama";
@@ -668,16 +939,38 @@ async function getActiveProviderAndKey() {
 }
 
 async function getActiveInstruction() {
-  const { instructionPresets = [], activePresetId, aiInstruction } = await chrome.storage.local.get([
+  let { instructionPresets = [], activePresetId, aiInstruction } = await chrome.storage.local.get([
     "instructionPresets",
     "activePresetId",
     "aiInstruction",
   ]);
-  if (instructionPresets.length > 0) {
-    const preset = instructionPresets.find((p) => p.id === activePresetId) || instructionPresets[0];
-    return preset ? preset.text : null;
+
+  let updated = false;
+  if (!instructionPresets || instructionPresets.length === 0) {
+    instructionPresets = DEFAULT_PRESETS;
+    activePresetId = DEFAULT_PRESETS[0].id;
+    updated = true;
+  } else {
+    // If old default text is present, upgrade to smart problem solver
+    const defPreset = instructionPresets.find((p) => p.id === "default");
+    if (defPreset && defPreset.text.includes("Explain what this page is about, or tell me the exact location")) {
+      defPreset.name = "General page & problem solver";
+      defPreset.text = DEFAULT_PRESETS[0].text;
+      updated = true;
+    }
+    // Add quiz_solver if missing from presets
+    if (!instructionPresets.some((p) => p.id === "quiz_solver")) {
+      instructionPresets.splice(1, 0, DEFAULT_PRESETS[1]);
+      updated = true;
+    }
   }
-  return aiInstruction || null;
+
+  if (updated) {
+    await chrome.storage.local.set({ instructionPresets, activePresetId: activePresetId || instructionPresets[0].id });
+  }
+
+  const preset = instructionPresets.find((p) => p.id === activePresetId) || instructionPresets[0];
+  return preset ? preset.text : (aiInstruction || null);
 }
 
 async function detectBlankOrBlackCapture(dataUrl) {
@@ -725,7 +1018,8 @@ function isRestrictedUrl(url) {
 
 function captureTab(windowId) {
   return new Promise((resolve, reject) => {
-    chrome.tabs.captureVisibleTab(windowId, { format: "png" }, (dataUrl) => {
+    // Use JPEG at 85% quality: visually lossless, ~8-10x smaller payload than raw PNG
+    chrome.tabs.captureVisibleTab(windowId, { format: "jpeg", quality: 85 }, (dataUrl) => {
       if (chrome.runtime.lastError || !dataUrl) {
         const msg = chrome.runtime.lastError?.message || "";
         reject(new Error(msg ? `Could not capture screenshot: ${msg}` : "Could not capture screenshot."));
@@ -747,8 +1041,14 @@ async function cropAndUpscale(dataUrl, region) {
   const sh = Math.min(Math.round(region.height * dpr), bitmap.height - sy);
 
   const upscale = sw < 400 ? 2.5 : 1.4;
-  const outW = Math.max(1, Math.round(sw * upscale));
-  const outH = Math.max(1, Math.round(sh * upscale));
+  const rawOutW = Math.round(sw * upscale);
+  const rawOutH = Math.round(sh * upscale);
+
+  // Cap output resolution — max dimension 1920px for optimal speed & AI token efficiency
+  const MAX_DIM = 1920;
+  const scale = Math.min(1, MAX_DIM / Math.max(rawOutW, rawOutH));
+  const outW = Math.max(1, Math.round(rawOutW * scale));
+  const outH = Math.max(1, Math.round(rawOutH * scale));
 
   const canvas = new OffscreenCanvas(outW, outH);
   const ctx = canvas.getContext("2d");
@@ -756,15 +1056,18 @@ async function cropAndUpscale(dataUrl, region) {
   ctx.imageSmoothingQuality = "high";
   ctx.drawImage(bitmap, sx, sy, sw, sh, 0, 0, outW, outH);
 
-  const outBlob = await canvas.convertToBlob({ type: "image/png" });
+  const outBlob = await canvas.convertToBlob({ type: "image/jpeg", quality: 0.88 });
   return await blobToDataURL(outBlob);
 }
 
 async function blobToDataURL(blob) {
   const buffer = await blob.arrayBuffer();
   const bytes = new Uint8Array(buffer);
+  const CHUNK = 8192;
   let binary = "";
-  for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i]);
+  for (let i = 0; i < bytes.length; i += CHUNK) {
+    binary += String.fromCharCode.apply(null, bytes.subarray(i, i + CHUNK));
+  }
   return `data:${blob.type};base64,${btoa(binary)}`;
 }
 
@@ -792,30 +1095,114 @@ function sleep(ms) {
 
 // ---------- OpenAI Compatible (OpenAI, Groq, OpenRouter, Ollama) ----------
 
-function buildOpenAIMessages(screenshotDataUrl, turns, aiMode = "direct") {
+const MAX_INFERENCE_TURNS = 8;
+
+function getActiveScreenshotTurnIndex(turns, fallbackScreenshotUrl) {
+  // Locate the latest user turn in the inference window that carries a screenshot
+  for (let i = turns.length - 1; i >= 0; i--) {
+    if (turns[i].role === "user" && turns[i].screenshotDataUrl) {
+      return i;
+    }
+  }
+  return fallbackScreenshotUrl && turns.length > 0 && turns[0].role === "user" ? 0 : -1;
+}
+
+function isVerificationOrChallenge(text) {
+  return /(sahi|correct|right|wrong|galat|ghalat|check|verify|recheck|sure\?|dobara|wapas|pakka|answer do|explain again)/i.test(text || "");
+}
+
+function buildOpenAIMessages(fallbackScreenshotUrl, turns, aiMode = "direct") {
   const messages = [{ role: "system", content: getSystemPrompt(aiMode) }];
-  turns.forEach((turn, i) => {
-    if (turn.role === "user" && i === 0) {
-      if (screenshotDataUrl) {
+
+  // Cap inference history to most recent turns to maintain sharp reasoning and prevent compounding old errors
+  const inferenceTurns = turns.slice(-MAX_INFERENCE_TURNS);
+  const activeImageIdx = getActiveScreenshotTurnIndex(inferenceTurns, fallbackScreenshotUrl);
+
+  inferenceTurns.forEach((turn, i) => {
+    let contentText = turn.text || "";
+
+    if (i === inferenceTurns.length - 1 && turn.role === "user" && isVerificationOrChallenge(contentText)) {
+      contentText +=
+        "\n\n[DIRECTIVE: Perform an independent, rigorous first-principles verification. Do NOT repeat or defend any past assistant mistakes. Solve directly, test every option, and provide the proven correct answer.]";
+    }
+
+    if (turn.role === "user") {
+      const isTargetImageTurn = i === activeImageIdx;
+      const img = turn.screenshotDataUrl || (i === 0 ? fallbackScreenshotUrl : null);
+
+      if (isTargetImageTurn && img) {
         messages.push({
           role: "user",
           content: [
-            { type: "text", text: turn.text },
-            { type: "image_url", image_url: { url: screenshotDataUrl } },
+            { type: "text", text: contentText },
+            { type: "image_url", image_url: { url: img, detail: "high" } },
           ],
         });
       } else {
-        messages.push({ role: "user", content: turn.text });
+        messages.push({ role: "user", content: contentText });
       }
     } else {
-      messages.push({ role: turn.role === "assistant" ? "assistant" : "user", content: turn.text });
+      messages.push({ role: "assistant", content: contentText });
     }
   });
+
   return messages;
 }
 
+let cachedDiscoveredGroqVisionModel = null;
+let cachedDiscoveredGroqTextModel = null;
+
+async function discoverActiveGroqModel(apiKey, requiresVision = false) {
+  if (requiresVision && cachedDiscoveredGroqVisionModel) return cachedDiscoveredGroqVisionModel;
+  if (!requiresVision && cachedDiscoveredGroqTextModel) return cachedDiscoveredGroqTextModel;
+
+  try {
+    const res = await fetch("https://api.groq.com/openai/v1/models", {
+      headers: { Authorization: `Bearer ${apiKey}` },
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    const ids = (data.data || []).map((m) => m.id);
+
+    if (requiresVision) {
+      if (ids.includes("qwen/qwen3.8-27b")) {
+        cachedDiscoveredGroqVisionModel = "qwen/qwen3.8-27b";
+        return "qwen/qwen3.8-27b";
+      }
+      const match = ids.find((id) => id.includes("qwen") || id.includes("vision"));
+      if (match) {
+        cachedDiscoveredGroqVisionModel = match;
+        return match;
+      }
+    } else {
+      if (ids.includes("qwen/qwen3.8-27b")) {
+        cachedDiscoveredGroqTextModel = "qwen/qwen3.8-27b";
+        return "qwen/qwen3.8-27b";
+      }
+      if (ids.includes("llama-3.1-8b-instant")) {
+        cachedDiscoveredGroqTextModel = "llama-3.1-8b-instant";
+        return "llama-3.1-8b-instant";
+      }
+      if (ids.includes("openai/gpt-oss-120b")) {
+        cachedDiscoveredGroqTextModel = "openai/gpt-oss-120b";
+        return "openai/gpt-oss-120b";
+      }
+      if (ids.includes("openai/gpt-oss-20b")) {
+        cachedDiscoveredGroqTextModel = "openai/gpt-oss-20b";
+        return "openai/gpt-oss-20b";
+      }
+      const anyChat = ids.find((id) => !id.includes("whisper") && !id.includes("guard"));
+      if (anyChat) {
+        cachedDiscoveredGroqTextModel = anyChat;
+        return anyChat;
+      }
+    }
+  } catch (_) {}
+  return requiresVision ? "qwen/qwen3.8-27b" : "llama-3.1-8b-instant";
+}
+
 async function askOpenAICompatibleMultiTurn(
-  { endpoint, model, apiKey, screenshotDataUrl, turns, isOllama = false, aiMode = "direct" },
+  { endpoint, model, apiKey, screenshotDataUrl, turns, isOllama = false, aiMode = "direct", onChunk = null },
   attempt = 1
 ) {
   const controller = new AbortController();
@@ -834,6 +1221,7 @@ async function askOpenAICompatibleMultiTurn(
         max_tokens: 1536,
         temperature: 0,
         messages: buildOpenAIMessages(screenshotDataUrl, turns, aiMode),
+        stream: !!onChunk,
       }),
     });
   } catch (networkErr) {
@@ -844,12 +1232,12 @@ async function askOpenAICompatibleMultiTurn(
       );
     }
     if (networkErr.name === "AbortError") {
-      if (attempt < 3) return askOpenAICompatibleMultiTurn({ endpoint, model, apiKey, screenshotDataUrl, turns, isOllama, aiMode }, attempt + 1);
+      if (attempt < 3) return askOpenAICompatibleMultiTurn({ endpoint, model, apiKey, screenshotDataUrl, turns, isOllama, aiMode, onChunk }, attempt + 1);
       throw new Error("The request timed out. Please check your network connection and try again.");
     }
     if (attempt < 3) {
       await sleep(500 * attempt);
-      return askOpenAICompatibleMultiTurn({ endpoint, model, apiKey, screenshotDataUrl, turns, isOllama, aiMode }, attempt + 1);
+      return askOpenAICompatibleMultiTurn({ endpoint, model, apiKey, screenshotDataUrl, turns, isOllama, aiMode, onChunk }, attempt + 1);
     }
     throw new Error("Network error: " + networkErr.message);
   }
@@ -864,18 +1252,91 @@ async function askOpenAICompatibleMultiTurn(
     if (response.status === 401) {
       throw new Error(`Your API key for ${model} is invalid or expired. Please check Settings.`);
     }
+    if (response.status === 404) {
+      if (endpoint && endpoint.includes("groq.com")) {
+        // Step 1: If custom or deprecated model was used on Groq, fallback to qwen/qwen3.8-27b
+        if (attempt === 1 && model !== "qwen/qwen3.8-27b") {
+          console.warn(`[DezignSnap] Groq model "${model}" not found (404). Falling back to "qwen/qwen3.8-27b"...`);
+          return askOpenAICompatibleMultiTurn(
+            { endpoint, model: "qwen/qwen3.8-27b", apiKey, screenshotDataUrl, turns, isOllama, aiMode, onChunk },
+            attempt + 1
+          );
+        }
+        // Step 2: Auto-discover active models on user's Groq account
+        if (attempt <= 2) {
+          const discovered = await discoverActiveGroqModel(apiKey, !!screenshotDataUrl);
+          if (discovered && discovered !== model) {
+            console.warn(`[DezignSnap] Auto-discovered active Groq model "${discovered}". Retrying...`);
+            return askOpenAICompatibleMultiTurn(
+              { endpoint, model: discovered, apiKey, screenshotDataUrl, turns, isOllama, aiMode, onChunk },
+              attempt + 1
+            );
+          }
+        }
+      }
+      let msg = "";
+      try {
+        const parsed = JSON.parse(errBody);
+        msg = parsed?.error?.message;
+      } catch (_) {}
+      throw new Error(`Model not found (404): ${msg || "The requested model is not available for your account. Please check Settings."}`);
+    }
     if (response.status === 429) {
       if (attempt < 3) {
         await sleep(1000 * attempt);
-        return askOpenAICompatibleMultiTurn({ endpoint, model, apiKey, screenshotDataUrl, turns, isOllama, aiMode }, attempt + 1);
+        return askOpenAICompatibleMultiTurn({ endpoint, model, apiKey, screenshotDataUrl, turns, isOllama, aiMode, onChunk }, attempt + 1);
       }
       throw new Error("API rate limit or quota exceeded. Please try again shortly or check your billing.");
     }
     if (response.status >= 500 && attempt < 3) {
       await sleep(700 * attempt);
-      return askOpenAICompatibleMultiTurn({ endpoint, model, apiKey, screenshotDataUrl, turns, isOllama, aiMode }, attempt + 1);
+      return askOpenAICompatibleMultiTurn({ endpoint, model, apiKey, screenshotDataUrl, turns, isOllama, aiMode, onChunk }, attempt + 1);
     }
     throw new Error(`API error (${response.status}): ${errBody.slice(0, 200)}`);
+  }
+
+  // Handle streaming SSE chunks when onChunk is provided
+  if (onChunk && response.body && typeof response.body.getReader === "function") {
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let accumulated = "";
+    let buffer = "";
+
+    try {
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop(); // save incomplete line
+
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (!trimmed || !trimmed.startsWith("data:")) continue;
+          const payload = trimmed.slice(5).trim();
+          if (payload === "[DONE]") break;
+          try {
+            const parsed = JSON.parse(payload);
+            const delta = parsed.choices?.[0]?.delta;
+            if (delta) {
+              const reasoning = delta.reasoning_content || "";
+              const content = delta.content || "";
+              if (reasoning) {
+                onChunk(reasoning, true);
+              }
+              if (content) {
+                accumulated += content;
+                onChunk(content, false);
+              }
+            }
+          } catch (_) {}
+        }
+      }
+    } catch (_) {}
+
+    if (accumulated.trim()) {
+      return accumulated;
+    }
   }
 
   const data = await response.json();
@@ -886,24 +1347,57 @@ async function askOpenAICompatibleMultiTurn(
 
 // ---------- Google Gemini (multi-turn) ----------
 
-function buildGeminiContents(screenshotDataUrl, turns) {
-  const base64Data = screenshotDataUrl ? screenshotDataUrl.split(",")[1] : null;
-  return turns.map((turn, i) => {
-    if (turn.role === "user" && i === 0) {
-      const parts = [{ text: turn.text }];
-      if (base64Data) {
-        parts.push({ inline_data: { mime_type: "image/png", data: base64Data } });
-      }
-      return { role: "user", parts };
+function buildGeminiContents(fallbackScreenshotUrl, turns) {
+  const inferenceTurns = turns.slice(-MAX_INFERENCE_TURNS);
+  const activeImageIdx = getActiveScreenshotTurnIndex(inferenceTurns, fallbackScreenshotUrl);
+
+  const contents = [];
+  inferenceTurns.forEach((turn, i) => {
+    const role = turn.role === "assistant" ? "model" : "user";
+    let contentText = turn.text || "";
+
+    if (i === inferenceTurns.length - 1 && role === "user" && isVerificationOrChallenge(contentText)) {
+      contentText +=
+        "\n\n[DIRECTIVE: Perform an independent, rigorous first-principles verification. Do NOT repeat or defend any past assistant mistakes. Solve directly, test every option, and provide the proven correct answer.]";
     }
-    return { role: turn.role === "assistant" ? "model" : "user", parts: [{ text: turn.text }] };
+
+    const parts = [{ text: contentText }];
+
+    if (role === "user" && i === activeImageIdx) {
+      const img = turn.screenshotDataUrl || (i === 0 ? fallbackScreenshotUrl : null);
+      if (img) {
+        const base64Data = img.split(",")[1];
+        const mimeMatch = img.match(/^data:([^;]+);base64,/);
+        const mimeType = mimeMatch ? mimeMatch[1] : "image/jpeg";
+        if (base64Data) {
+          parts.push({ inline_data: { mime_type: mimeType, data: base64Data } });
+        }
+      }
+    }
+
+    if (contents.length > 0 && contents[contents.length - 1].role === role) {
+      // Merge into previous turn to guarantee alternating user/model roles for Gemini API
+      contents[contents.length - 1].parts.push(...parts);
+    } else {
+      contents.push({ role, parts });
+    }
   });
+
+  return contents;
 }
 
 let cachedDiscoveredGeminiModel = null;
 
 async function discoverActiveGeminiModel(apiKey) {
   if (cachedDiscoveredGeminiModel) return cachedDiscoveredGeminiModel;
+  try {
+    const sessionRes = await chrome.storage.session.get(["cachedDiscoveredGeminiModel"]);
+    if (sessionRes && sessionRes.cachedDiscoveredGeminiModel) {
+      cachedDiscoveredGeminiModel = sessionRes.cachedDiscoveredGeminiModel;
+      return cachedDiscoveredGeminiModel;
+    }
+  } catch (_) {}
+
   try {
     const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(apiKey)}`);
     if (!res.ok) return null;
@@ -921,22 +1415,43 @@ async function discoverActiveGeminiModel(apiKey) {
     const selected = flashModel || candidates[0];
     if (selected) {
       cachedDiscoveredGeminiModel = selected;
+      try {
+        await chrome.storage.session.set({ cachedDiscoveredGeminiModel: selected });
+      } catch (_) {}
       return selected;
     }
   } catch (_) {}
   return null;
 }
 
-async function askGeminiMultiTurn(apiKey, screenshotDataUrl, turns, model = "gemini-2.5-flash", attempt = 1, aiMode = "direct") {
+async function askGeminiMultiTurn(apiKey, screenshotDataUrl, turns, model = "gemini-2.5-flash", attempt = 1, aiMode = "direct", onChunk = null) {
   // Normalize deprecated model names
   let effectiveModel = model;
   if (!effectiveModel || effectiveModel === "gemini-1.5-flash" || effectiveModel === "gemini-2.0-flash") {
     effectiveModel = "gemini-2.5-flash";
   }
 
+  // Pre-check payload size against Gemini's 20MB inline base64 ceiling
+  const contents = buildGeminiContents(screenshotDataUrl, turns);
+  let totalInlineBytes = 0;
+  for (const c of contents) {
+    for (const p of c.parts || []) {
+      if (p.inline_data && p.inline_data.data) {
+        totalInlineBytes += Math.round(p.inline_data.data.length * 0.75);
+      }
+    }
+  }
+  const MAX_GEMINI_INLINE_BYTES = 18 * 1024 * 1024; // 18MB safety margin
+  if (totalInlineBytes > MAX_GEMINI_INLINE_BYTES) {
+    throw new Error(
+      "Screenshot payload exceeds Gemini's 18MB inline limit. Please use Select Area to capture a smaller region instead."
+    );
+  }
+
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 30000);
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${effectiveModel}:generateContent?key=${encodeURIComponent(apiKey)}`;
+  const timeoutId = setTimeout(() => controller.abort(), 55000);
+  const streamEndpoint = onChunk ? "streamGenerateContent?alt=sse&" : "generateContent?";
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${effectiveModel}:${streamEndpoint}key=${encodeURIComponent(apiKey)}`;
 
   let response;
   try {
@@ -946,19 +1461,20 @@ async function askGeminiMultiTurn(apiKey, screenshotDataUrl, turns, model = "gem
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         system_instruction: { parts: [{ text: getSystemPrompt(aiMode) }] },
-        contents: buildGeminiContents(screenshotDataUrl, turns),
+        contents,
         generationConfig: { temperature: 0, maxOutputTokens: 2048 },
       }),
     });
   } catch (networkErr) {
     clearTimeout(timeoutId);
     if (networkErr.name === "AbortError") {
-      if (attempt < 3) return askGeminiMultiTurn(apiKey, screenshotDataUrl, turns, effectiveModel, attempt + 1, aiMode);
-      throw new Error("The request timed out. Check your connection and try again.");
+      throw new Error(
+        "The request timed out (55s). If you are sending large screenshots, try using Select Area to send a smaller region instead."
+      );
     }
     if (attempt < 3) {
       await sleep(500 * attempt);
-      return askGeminiMultiTurn(apiKey, screenshotDataUrl, turns, effectiveModel, attempt + 1, aiMode);
+      return askGeminiMultiTurn(apiKey, screenshotDataUrl, turns, effectiveModel, attempt + 1, aiMode, onChunk);
     }
     throw new Error("Network error: " + networkErr.message);
   }

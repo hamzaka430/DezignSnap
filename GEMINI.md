@@ -2,30 +2,38 @@
 
 ## Project Name & Purpose
 - **Name**: DezignSnap
-- **Purpose**: A privacy-focused Chrome Extension (Manifest V3) that captures screenshots (full page or user-dragged region), highlighted text, or direct text queries, providing instant, visually grounded AI answers using **Groq (Qwen 3.8 27B Vision / Llama 3.3 70B)**, **Google Gemini (2.5 Flash)**, **OpenAI (GPT-4o)**, **OpenRouter**, or **Ollama (Local AI)** with Bring-Your-Own-Key (BYOK) architecture.
+- **Purpose**: A privacy-focused Chrome Extension (Manifest V3) that captures screenshots (full page or user-dragged region), highlighted text, or direct text queries, providing instant, visually grounded AI answers using **Groq (Qwen 3.8 27B Vision & Text with auto-discovery)**, **Google Gemini (2.5 Flash)**, **OpenAI (GPT-4o)**, **OpenRouter**, or **Ollama (Local AI)** with Bring-Your-Own-Key (BYOK) architecture.
 
 ## Complete Tech Stack
 - **Platform**: Google Chrome Extension Manifest V3 (MV3).
 - **Core Languages**: Vanilla HTML5, CSS3, ES2022+ JavaScript.
 - **Client Libraries**: `jsPDF` (`lib/jspdf.umd.min.js`) for in-browser PDF compilation.
 - **External AI Providers & Endpoints**:
-  - **Groq**: `https://api.groq.com/openai/v1/chat/completions` (`qwen/qwen3.8-27b` for multimodal vision + text, `llama-3.3-70b-versatile` for pure text)
+  - **Groq**: `https://api.groq.com/openai/v1/chat/completions` (`qwen/qwen3.8-27b` multimodal vision + text with resilient fallback & auto-discovery)
   - **Google Gemini**: `https://generativelanguage.googleapis.com/v1beta/models` (`gemini-2.5-flash` with resilient fallback & auto-discovery via ModelService)
   - **OpenAI**: `https://api.openai.com/v1/chat/completions` (`gpt-4o`)
   - **OpenRouter**: `https://openrouter.ai/api/v1/chat/completions`
   - **Ollama**: `http://localhost:11434/v1/chat/completions` (`llama3.2-vision`)
 - **Storage Layer**: `chrome.storage.local` (with `unlimitedStorage` permission).
 
-## Design System & Color Palette
-- **Canvas Base / Deep Slate**: `#222831` (RGB: 34, 40, 49)
-- **Elevated Surfaces / Slate Charcoal**: `#393E46` (RGB: 57, 62, 70)
-- **Subdued Accent / Warm Taupe**: `#948979` (RGB: 148, 137, 121)
-- **Primary Interactive / Warm Cream**: `#DFD0B8` (RGB: 223, 208, 184)
+## Design System & Color Palette (design.md)
+- **Primary / Slack Aubergine**: `#4a154b` (RGB: 74, 21, 75)
+- **Primary Hover / Deep Aubergine**: `#611f69`
+- **Border Tint / Accent**: `#592466`
+- **Canvas Cream**: `#f4ede4` (RGB: 244, 237, 228)
+- **Canvas Lavender**: `#f9f0ff` (RGB: 249, 240, 255)
+- **Canvas White**: `#ffffff`
+- **Text Ink**: `#1d1d1d` | **Text Mute**: `#696969` | **Mauve**: `#d9bdde`
+- **Atmospheric Mesh Gradient**: `#fff0e6` (peach) + `#e9d8ff` (lavender) + `#e6f4ea` (dusty green) + `#f4ede4` (cream)
+- **Buttons**: Strictly pill-shaped at `border-radius: 90px;`
 
 ## Current Project Status
 - ✅ **Official Brand Assets & Logo**: Custom high-resolution brand icons (`16px`, `32px`, `48px`, `128px`) and horizontal brand logo banner integrated across extension and UI surfaces.
-- ✅ **Color Hunt Palette Redesign**: All pages, popup, floating HUD, and session report styled with `#222831`, `#393E46`, `#948979`, `#DFD0B8`.
-- ✅ **Collapsible & Expandable Floating HUD**: Sleek floating toolbar that can be collapsed into a mini badge (`✕`) and expanded (`⚡ DezignSnap [+]`) across all pages.
+- ✅ **Aubergine & Cream Palette Redesign**: All pages, popup, floating HUD, and session report styled with `#4a154b`, `#f4ede4`, `#f9f0ff`, and `#1d1d1d` with 90px pill buttons.
+- ✅ **Sleek Sidebar Toggle Dock**: Modeled after modern sidebar collapse controls with outline and solid states. Docks flush against the screen boundary as an elegant edge tab that smoothly expands on hover or click.
+- ✅ **1-Minute Inactivity Auto-Collapse**: If the floating toolbar is left open and inactive for 60 seconds, it automatically transitions back to the sleek side toggle dock without disrupting browsing.
+- ✅ **Standalone Web Showcase & Installer Portal (`web/`)**: Complete responsive website in `web/` with interactive zero-sycophancy MCQ simulator, feature deep-dives, exclusive 1-click Chrome Web Store installation, keyboard shortcut guide, and FAQ.
+- ✅ **Distribution & Commercial Model**: Proprietary freemium extension distributed exclusively through Chrome Web Store with Bring-Your-Own-Key (BYOK) privacy; planned optional premium convenience tiers as user base scales.
 - ✅ **Horizontal Positioning Modes**: HUD and chat can be placed at `Right`, `Center`, or `Left` with a 1-click cycle button (`⇋`) or options dropdown.
 - ✅ **Direct AI Chat (No Screenshot Required)**: Instant text-only chat mode with zero preamble, bypassing screenshot capture when desired.
 - ✅ **AI Reasoning Modes (Direct Answer vs. Deep Thinking)**: Gemini/DeepSeek-style thinking mode with collapsible `<details>` thought process accordion, or ultra-fast direct answer mode.
@@ -35,11 +43,18 @@
 - ✅ **Multi-Engine AI Freedom**: Groq, Gemini, OpenAI, OpenRouter, and local Ollama fully integrated.
 - ✅ **Global Hotkey Snipping**: `Alt+S` (Area Snip) and `Alt+A` (Full Page Solve) registered via Chrome commands.
 - ✅ **Quick Text Ask**: Right-click context menu (*"⚡ Ask AI about selection"*) enabled for highlighted text.
-- ✅ **Custom Personas & Modes**: Pre-built modes for ELI5, Roast UI, Target Finder, Translate, and Bug Hunter.
+- ✅ **Custom Personas & Modes**: Pre-built modes for Verified Quiz & MCQ Solver, ELI5, Roast UI, Target Finder, Translate, and Bug Hunter.
 - ✅ **Select Area (Smart Zoom)**: Functional with sub-pixel cropping and 1.4x-2.5x upscale via `OffscreenCanvas`.
 - ✅ **Confidence Meter & Tips**: Parses self-reported confidence from LLM responses; renders color-coded badges and tips.
 - ✅ **Multi-turn Chat & Follow-ups**: In-memory tab conversation state mapped to persistent session history.
+- ✅ **Continuous Chat History & 50-Message Memory**: Screenshots and questions append seamlessly to ongoing chat without wiping history. In-memory context preserves up to 50 messages per active tab with a dedicated "➕ New" button for starting fresh.
+- ✅ **Auto-Scroll to Answer Start**: Automatically positions the top of newly arrived AI responses in full view instead of jumping to the bottom.
 - ✅ **Session History & PDF Export**: Instant client-side generation of formatted A4 reports with embedded high-res thumbnails.
+- ✅ **Zero-Intrusion Snip & Scroll Preservation**: Floating HUD and AI chat panel auto-hide during region drag and full-page capture to prevent covering webpage content or appearing in screenshots. Host page viewport scroll coordinates are locked and preserved so the webpage never jumps or scrolls to the top.
+- ✅ **First-Principles Problem & MCQ Solver (Zero Sycophancy)**: Independent evaluation of all options from scratch; never assumes marked/checked buttons on screen are correct; strictly prohibits "cannot check" refusals.
+- ✅ **Decoupled Memory & Active Vision Isolation**: Keeps full 50-turn chat history for user display and PDF export while feeding a clean, rolling 8-turn context window with single active screenshot to the AI, preventing vision conflation and multi-turn error compounding.
+- ✅ **Challenge & Correction Protocol**: Detects verification requests ("sahi answer do", "verify again", etc.) and forces an objective first-principles re-examination without anchoring to past errors.
+- ✅ **Screen Share Stealth & Anti-Capture Shield**: Real-time WebRTC `getDisplayMedia` interception auto-hides HUD/toggles during active screen share in Google Meet/Teams/Zoom Web. Global `Alt+H` panic shortcut and "Screen Share Stealth" toggle completely hide on-screen docks and HUD for 100% capture immunity during desktop or tab sharing; `Escape` key dismisses answer panel in 0ms.
 - ✅ **Security Hardened**: Protected against synthetic clickjacking (`e.isTrusted`), attribute injection, and request floods.
 
 ## Folder & File Structure
@@ -48,7 +63,7 @@ page-helper-extension/
 ├── manifest.json         # Manifest V3 extension configuration (permissions & commands)
 ├── background.js        # Service worker: AI APIs, hotkeys, context menu, rate limits
 ├── content.js           # Content script (HUD injection, area selection, modal, hotkey listeners)
-├── content.css          # Injected HUD and modal styles (Branded Crimson & Black)
+├── content.css          # Injected HUD and modal styles (Aubergine & Cream palette)
 ├── popup.html / .js     # Action toolbar popup for rapid engine switching and quick snip
 ├── styles.css           # Popup styling
 ├── options.html / .js   # Full options page for API keys, Ollama setup, and persona presets
@@ -56,11 +71,15 @@ page-helper-extension/
 ├── session.html / .js   # Session transcript preview and PDF exporter
 ├── welcome.html         # Onboarding setup guide & operations manual
 ├── privacy-policy.html  # User privacy policy (GDPR/Chrome Web Store compliant)
-├── index.html           # Project landing and marketing showcase
+├── index.html           # Project landing showcase
 ├── STORE_LISTING.md     # Web store metadata, descriptions, and permission guides
 ├── PROJECT_CONTEXT.md   # Master documentation single source of truth
 ├── AGENT.md             # Developer & agent instructions
 ├── TODO.md              # Active backlog & task list
+├── web/                 # Standalone marketing & installation portal
+│   ├── index.html       # Web showcase, interactive demo & install guide
+│   ├── styles.css       # Complete design.md responsive stylesheet
+│   └── app.js           # Zero-sycophancy simulator & copy helpers
 ├── lib/
 │   └── jspdf.umd.min.js # Standalone jsPDF library for offline PDF generation
 └── icons/               # 16, 32, 48, 128px PNG application icons

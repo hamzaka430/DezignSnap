@@ -32,14 +32,16 @@ This is now fixed with a **self-healing injection system** in `content.js`:
 
 The buttons should now reliably persist regardless of how a site manages its DOM.
 
-## 📦 Install (Developer / Unpacked)
+## 📦 Install (Official Chrome Web Store)
 
-1. Go to `chrome://extensions`
-2. Enable **Developer mode** (top-right)
-3. Click **Load unpacked** and select this folder
-4. On first install, a **Welcome page** opens to guide you through setup
+DezignSnap is distributed exclusively through the official **Google Chrome Web Store**. Manual installation and developer-mode loading are not supported for end users.
 
-> Want to publish to the Chrome Web Store? See `STORE_LISTING.md` for the full checklist, listing copy, and permission justifications.
+1. Visit the [DezignSnap Chrome Web Store Page](https://chromewebstore.google.com) (or the official web portal at [`web/index.html`](web/index.html)).
+2. Click **Add to Chrome**.
+3. Confirm the permission prompt.
+4. On install, the **Welcome Guide** opens automatically to guide you through saving your API key and getting started.
+
+> **Licensing & Model**: DezignSnap is a proprietary browser extension (not open source). Core usage is 100% free using your own API keys (BYOK - Bring Your Own Key). As our user base scales, optional premium convenience tiers and hosted AI credit packages will be made available.
 
 ## ⚙️ Setup
 

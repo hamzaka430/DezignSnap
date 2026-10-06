@@ -1,11 +1,11 @@
 {
   "manifest_version": 3,
   "name": "DezignSnap — AI Visual Assistant",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "author": "Muhammad Hamza / Dezignwise",
   "homepage_url": "https://dezignwise.com",
-  "description": "DezignSnap: Snip any webpage area or capture full screens to get instant, grounded AI answers powered by Groq, Gemini, OpenAI, and Ollama.",
-  "permissions": ["storage", "activeTab", "unlimitedStorage", "contextMenus"],
+  "description": "Capture webpage screenshots or snip areas for instant visual AI answers powered by Gemini, OpenAI, Groq, and Ollama.",
+  "permissions": ["storage", "activeTab", "unlimitedStorage", "contextMenus", "sidePanel"],
   "host_permissions": [
     "<all_urls>",
     "https://api.openai.com/*",
@@ -28,7 +28,24 @@
         "mac": "Alt+A"
       },
       "description": "Capture & Solve Full Page"
+    },
+    "toggle_stealth": {
+      "suggested_key": {
+        "default": "Alt+H",
+        "mac": "Alt+H"
+      },
+      "description": "Toggle Screen Share Stealth Mode"
+    },
+    "open_side_panel": {
+      "suggested_key": {
+        "default": "Alt+P",
+        "mac": "Alt+P"
+      },
+      "description": "Open Side Panel (Capture-Proof Mode)"
     }
+  },
+  "side_panel": {
+    "default_path": "sidepanel.html"
   },
   "background": {
     "service_worker": "background.js"
@@ -36,6 +53,11 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
+      "exclude_matches": [
+        "https://accounts.google.com/*",
+        "https://*.paypal.com/*",
+        "https://*.stripe.com/*"
+      ],
       "js": ["content.js"],
       "css": ["content.css"],
       "run_at": "document_idle"
@@ -60,5 +82,11 @@
     "32": "icons/icon32.png",
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
-  }
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["content.css", "icons/*", "assests/*"],
+      "matches": ["<all_urls>"]
+    }
+  ]
 }

@@ -25,6 +25,7 @@ const exportPdfBtn = document.getElementById("exportPdfBtn");
 
 const hudPositionSelect = document.getElementById("hudPositionSelect");
 const aiModeSelect = document.getElementById("aiModeSelect");
+const stealthModeToggle = document.getElementById("stealthModeToggle");
 const prefStatus = document.getElementById("prefStatus");
 
 const radioCards = document.querySelectorAll(".radio-card");
@@ -43,6 +44,7 @@ async function init() {
     activeProvider = "groq",
     hudPosition = "right",
     aiMode = "direct",
+    stealthMode = false,
     instructionPresets = [],
     activePresetId,
     sessionHistory = [],
@@ -57,10 +59,13 @@ async function init() {
     "activeProvider",
     "hudPosition",
     "aiMode",
+    "stealthMode",
     "instructionPresets",
     "activePresetId",
     "sessionHistory",
   ]);
+
+  if (stealthModeToggle) stealthModeToggle.checked = !!stealthMode;
 
   groqKeyInput.value = groqApiKey;
   geminiKeyInput.value = geminiApiKey;
@@ -90,7 +95,7 @@ async function init() {
       } else {
         if (geminiCustomModelWrap) geminiCustomModelWrap.style.display = "none";
         await chrome.storage.local.set({ geminiModel: selected });
-        showStatus(`Gemini model set to ${selected} ✨`, true);
+        showStatus(`Gemini model set to ${selected}.`, true);
       }
     });
 
@@ -112,6 +117,33 @@ async function init() {
   if (hudPositionSelect) hudPositionSelect.value = hudPosition;
   if (aiModeSelect) aiModeSelect.value = aiMode;
 
+  // Ensure default and quiz_solver presets are up to date
+  let presetsUpdated = false;
+  if (instructionPresets && instructionPresets.length > 0) {
+    const defPreset = instructionPresets.find((p) => p.id === "default");
+    if (defPreset && defPreset.text.includes("Explain what this page is about, or tell me the exact location")) {
+      defPreset.name = "General page & problem solver";
+      defPreset.text = "Analyze what is visible. If this contains a question, quiz, or problem, solve it accurately from first principles, evaluate all choices, and provide the verified correct answer. If looking for an option or UI element, state its exact position.";
+      presetsUpdated = true;
+    }
+    const quizPreset = instructionPresets.find((p) => p.id === "quiz_solver");
+    if (quizPreset && quizPreset.name && quizPreset.name.includes("")) {
+      quizPreset.name = "Quiz & MCQ Solver (Verified)";
+      presetsUpdated = true;
+    }
+    if (!instructionPresets.some((p) => p.id === "quiz_solver")) {
+      instructionPresets.splice(1, 0, {
+        id: "quiz_solver",
+        name: "Quiz & MCQ Solver (Verified)",
+        text: "Accurately solve this multiple-choice question, test, or problem. Independently evaluate every option from first principles. State the exact correct option and letter, prove why it is correct, and explain why the other options are wrong. Never assume any option selected or highlighted on screen is correct.",
+      });
+      presetsUpdated = true;
+    }
+    if (presetsUpdated) {
+      await chrome.storage.local.set({ instructionPresets });
+    }
+  }
+
   setActiveProviderCard(activeProvider);
   renderPresets(instructionPresets, activePresetId);
   historyCount.textContent = sessionHistory.length;
@@ -121,7 +153,7 @@ if (hudPositionSelect) {
   hudPositionSelect.addEventListener("change", async () => {
     const val = hudPositionSelect.value;
     await chrome.storage.local.set({ hudPosition: val });
-    showPrefStatus(`Floating toolbar position saved to ${val.toUpperCase()} 📍`, true);
+    showPrefStatus(`Floating toolbar position saved to ${val.toUpperCase()}`, true);
   });
 }
 
@@ -129,16 +161,25 @@ if (aiModeSelect) {
   aiModeSelect.addEventListener("change", async () => {
     const val = aiModeSelect.value;
     await chrome.storage.local.set({ aiMode: val });
-    showPrefStatus(`AI mode set to ${val === "thinking" ? "Deep Thinking & Explanation 🧠" : "Direct Answer ⚡"}`, true);
+    showPrefStatus(`AI mode set to ${val === "thinking" ? "Deep Thinking & Explanation" : "Direct Answer"}`, true);
+  });
+}
+
+if (stealthModeToggle) {
+  stealthModeToggle.addEventListener("change", async () => {
+    const val = stealthModeToggle.checked;
+    await chrome.storage.local.set({ stealthMode: val });
+    showPrefStatus(`Screen Sharing Stealth Mode ${val ? "ENABLED (Dock hidden)" : "DISABLED"}`, true);
   });
 }
 
 function showPrefStatus(text, ok) {
   if (!prefStatus) return;
   prefStatus.textContent = text;
-  prefStatus.style.background = "rgba(57, 62, 70, 0.95)";
-  prefStatus.style.color = ok ? "#DFD0B8" : "#ff8585";
-  prefStatus.style.border = ok ? "1px solid #948979" : "1px solid #e06c75";
+  prefStatus.className = `status ${ok ? "status-success" : "status-error"}`;
+  prefStatus.style.background = "";
+  prefStatus.style.color = "";
+  prefStatus.style.border = "";
   prefStatus.classList.remove("hidden");
   setTimeout(() => prefStatus.classList.add("hidden"), 3000);
 }
@@ -161,7 +202,7 @@ radioCards.forEach((card) => {
     const val = radio.value;
     setActiveProviderCard(val);
     await chrome.storage.local.set({ activeProvider: val });
-    showStatus(`Active engine switched to ${val.toUpperCase()} ⚡`, true);
+    showStatus(`Active engine switched to ${val.toUpperCase()}`, true);
   });
 });
 
@@ -172,7 +213,7 @@ saveGroqKeyBtn.addEventListener("click", async () => {
     return showStatus("Warning: Groq keys typically start with 'gsk_'.", false);
   }
   await chrome.storage.local.set({ groqApiKey: key });
-  showStatus("Groq API key saved successfully ✅", true);
+  showStatus("Groq API key saved successfully.", true);
 });
 
 saveGeminiKeyBtn.addEventListener("click", async () => {
@@ -183,7 +224,7 @@ saveGeminiKeyBtn.addEventListener("click", async () => {
     model = geminiCustomModelInput.value.trim() || "gemini-2.5-flash";
   }
   await chrome.storage.local.set({ geminiApiKey: key, geminiModel: model });
-  showStatus("Gemini configuration saved successfully ✅", true);
+  showStatus("Gemini configuration saved successfully.", true);
 });
 
 saveOpenAIKeyBtn.addEventListener("click", async () => {
@@ -193,28 +234,29 @@ saveOpenAIKeyBtn.addEventListener("click", async () => {
     return showStatus("Warning: OpenAI keys typically start with 'sk-'.", false);
   }
   await chrome.storage.local.set({ openaiApiKey: key });
-  showStatus("OpenAI API key saved successfully ✅", true);
+  showStatus("OpenAI API key saved successfully.", true);
 });
 
 saveOpenRouterKeyBtn.addEventListener("click", async () => {
   const key = openrouterKeyInput.value.trim();
   if (!key) return showStatus("OpenRouter key cannot be empty.", false);
   await chrome.storage.local.set({ openrouterApiKey: key });
-  showStatus("OpenRouter API key saved successfully ✅", true);
+  showStatus("OpenRouter API key saved successfully.", true);
 });
 
 saveOllamaBtn.addEventListener("click", async () => {
   const endpoint = ollamaEndpointInput.value.trim() || "http://localhost:11434";
   const model = ollamaModelInput.value.trim() || "llama3.2-vision";
   await chrome.storage.local.set({ ollamaEndpoint: endpoint, ollamaModel: model });
-  showStatus(`Ollama configuration saved (${model}) ✅`, true);
+  showStatus(`Ollama configuration saved (${model}).`, true);
 });
 
 function showStatus(text, ok) {
   keyStatus.textContent = text;
-  keyStatus.style.background = ok ? "rgba(57, 62, 70, 0.95)" : "rgba(57, 62, 70, 0.95)";
-  keyStatus.style.color = ok ? "#DFD0B8" : "#ff8585";
-  keyStatus.style.border = ok ? "1px solid #948979" : "1px solid #e06c75";
+  keyStatus.className = `status ${ok ? "status-success" : "status-error"}`;
+  keyStatus.style.background = "";
+  keyStatus.style.color = "";
+  keyStatus.style.border = "";
   keyStatus.classList.remove("hidden");
   setTimeout(() => keyStatus.classList.add("hidden"), 3500);
 }
@@ -260,15 +302,41 @@ function renderPresets(presets, activeId) {
       const { instructionPresets = [] } = await chrome.storage.local.get(["instructionPresets"]);
       const preset = instructionPresets.find((p) => p.id === id);
       if (!preset) return;
-      const newName = prompt("Mode name:", preset.name);
-      if (newName === null) return;
-      const newText = prompt("Instruction prompt:", preset.text);
-      if (newText === null) return;
-      preset.name = newName.trim() || preset.name;
-      preset.text = newText.trim() || preset.text;
-      await chrome.storage.local.set({ instructionPresets });
-      const { activePresetId } = await chrome.storage.local.get(["activePresetId"]);
-      renderPresets(instructionPresets, activePresetId);
+
+      const presetEl = e.target.closest(".preset");
+      const bodyEl = presetEl ? presetEl.querySelector(".preset-body") : null;
+      if (!bodyEl) return;
+
+      bodyEl.innerHTML = `
+        <div class="preset-edit-form">
+          <input type="text" class="edit-name-input" value="${escapeHtml(preset.name)}" placeholder="Mode name" />
+          <textarea class="edit-text-input" placeholder="Instruction prompt">${escapeHtml(preset.text)}</textarea>
+          <div class="preset-edit-actions">
+            <button class="save-edit-btn" style="padding: 4px 12px; font-size: 12px;">Save</button>
+            <button class="cancel-edit-btn ghost" style="padding: 4px 12px; font-size: 12px;">Cancel</button>
+          </div>
+        </div>
+      `;
+
+      bodyEl.querySelector(".save-edit-btn").addEventListener("click", async () => {
+        const name = bodyEl.querySelector(".edit-name-input").value.trim();
+        const text = bodyEl.querySelector(".edit-text-input").value.trim();
+        if (!name || !text) {
+          showStatus("Mode name and instruction cannot be empty.", false);
+          return;
+        }
+        preset.name = name;
+        preset.text = text;
+        await chrome.storage.local.set({ instructionPresets });
+        const { activePresetId } = await chrome.storage.local.get(["activePresetId"]);
+        renderPresets(instructionPresets, activePresetId);
+        showStatus(`Mode "${name}" updated.`, true);
+      });
+
+      bodyEl.querySelector(".cancel-edit-btn").addEventListener("click", async () => {
+        const { activePresetId } = await chrome.storage.local.get(["activePresetId"]);
+        renderPresets(instructionPresets, activePresetId);
+      });
     });
   });
 
@@ -280,15 +348,33 @@ function renderPresets(presets, activeId) {
         "activePresetId",
       ]);
       if (instructionPresets.length <= 1) {
-        alert("At least one mode is required.");
+        showStatus("At least one mode is required.", false);
         return;
       }
-      if (!confirm("Delete this mode?")) return;
-      const updated = instructionPresets.filter((p) => p.id !== id);
-      let newActiveId = activePresetId;
-      if (activePresetId === id) newActiveId = updated[0].id;
-      await chrome.storage.local.set({ instructionPresets: updated, activePresetId: newActiveId });
-      renderPresets(updated, newActiveId);
+
+      const actionsDiv = e.target.closest(".preset-actions");
+      if (!actionsDiv) return;
+      actionsDiv.innerHTML = `
+        <div class="inline-confirm">
+          <span>Delete mode?</span>
+          <button class="confirm-del-btn danger" style="padding: 2px 8px; font-size: 11px;">Yes</button>
+          <button class="cancel-del-btn ghost" style="padding: 2px 8px; font-size: 11px;">No</button>
+        </div>
+      `;
+
+      actionsDiv.querySelector(".confirm-del-btn").addEventListener("click", async () => {
+        const updated = instructionPresets.filter((p) => p.id !== id);
+        let newActiveId = activePresetId;
+        if (activePresetId === id) newActiveId = updated[0].id;
+        await chrome.storage.local.set({ instructionPresets: updated, activePresetId: newActiveId });
+        renderPresets(updated, newActiveId);
+        showStatus("Mode deleted.", true);
+      });
+
+      actionsDiv.querySelector(".cancel-del-btn").addEventListener("click", async () => {
+        const { activePresetId: curActive } = await chrome.storage.local.get(["activePresetId"]);
+        renderPresets(instructionPresets, curActive);
+      });
     });
   });
 }
@@ -297,7 +383,7 @@ addPresetBtn.addEventListener("click", async () => {
   const name = newPresetName.value.trim();
   const text = newPresetText.value.trim();
   if (!name || !text) {
-    alert("Please enter both a mode name and instruction text.");
+    showStatus("Please enter both a mode name and instruction text.", false);
     return;
   }
   const { instructionPresets = [] } = await chrome.storage.local.get(["instructionPresets"]);
@@ -307,13 +393,29 @@ addPresetBtn.addEventListener("click", async () => {
   newPresetName.value = "";
   newPresetText.value = "";
   renderPresets(instructionPresets, id);
-  showStatus(`Mode "${name}" created ✅`, true);
+  showStatus(`Mode "${name}" created.`, true);
 });
 
+let clearHistoryPending = false;
 clearHistoryBtn.addEventListener("click", async () => {
-  if (!confirm("This will permanently clear your session history. Continue?")) return;
+  if (!clearHistoryPending) {
+    clearHistoryPending = true;
+    const origText = clearHistoryBtn.textContent;
+    clearHistoryBtn.textContent = "Click again to confirm";
+    clearHistoryBtn.classList.add("danger");
+    setTimeout(() => {
+      clearHistoryPending = false;
+      clearHistoryBtn.textContent = origText;
+      clearHistoryBtn.classList.remove("danger");
+    }, 4000);
+    return;
+  }
+
+  clearHistoryPending = false;
   await chrome.storage.local.set({ sessionHistory: [] });
   historyCount.textContent = "0";
+  clearHistoryBtn.textContent = "Clear Session History";
+  clearHistoryBtn.classList.remove("danger");
   showStatus("Session history cleared.", true);
 });
 

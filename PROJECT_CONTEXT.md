@@ -1,15 +1,15 @@
-# PROJECT CONTEXT — Page Helper AI
+# PROJECT CONTEXT — DezignSnap
 
 ## 1. PROJECT OVERVIEW
-- **Application Name**: Page Helper AI
-- **Tagline**: Instant on-page AI visual assistant powered by vision LLMs (Groq, OpenAI GPT-4o & Google Gemini 2.5 Flash).
-- **Core Problem**: Users frequently encounter complex web interfaces, dense dashboards, foreign-language webpages, intricate configuration screens, or obscure buttons. Reading lengthy documentation or manually searching for an option takes significant time and creates user friction.
+- **Application Name**: DezignSnap
+- **Tagline**: Grounded visual AI screen assistant powered by vision LLMs (Groq Qwen 27B Vision, Google Gemini 2.5 Flash, OpenAI GPT-4o, OpenRouter, and local offline Ollama).
+- **Core Problem**: Users frequently encounter complex web interfaces, dense dashboards, quiz questions, intricate configuration screens, or obscure buttons. Reading lengthy documentation or manually searching for an option takes significant time and creates user friction.
 - **Intended Target Audience**:
   - Power web users navigating complex SaaS applications, enterprise tools, and analytics dashboards.
-  - Non-technical users needing real-time visual guidance on where to click or how to understand web forms.
-  - Researchers and students analyzing visual data, charts, and dense web articles.
+  - Students and certification examinees seeking grounded first-principles verification on MCQs and practice tests.
+  - Developers and researchers analyzing visual data, charts, frontend layouts, and code errors.
   - International users browsing websites in languages they do not fluently speak.
-- **Core Value Proposition**: "Set an instruction once, get instant visual AI answers on any webpage with zero server latency or middleman data collection." Users bring their own API keys (OpenAI / Gemini), guaranteeing complete privacy, zero subscription lock-in, and direct browser-to-AI communication.
+- **Core Value Proposition**: "Set an instruction once, get instant visual AI answers on any webpage with zero server latency or middleman data collection." Users bring their own API keys (BYOK) or run 100% offline with Ollama, guaranteeing complete privacy, zero subscription lock-in, and direct browser-to-AI communication.
 
 ---
 
@@ -27,15 +27,16 @@
   - `chrome.storage.local` with `unlimitedStorage` permission.
   - Stores user API keys, active provider selection, customizable instruction preset arrays, active preset pointers, and multi-turn session transcript history with compressed base64 JPEG thumbnails.
 - **Third-Party APIs & External Integrations**:
-  - **Groq API**: `https://api.groq.com/openai/v1/chat/completions` using `qwen/qwen3.8-27b` (multimodal vision + text) and `llama-3.3-70b-versatile` (pure text).
-  - **Google Gemini API**: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent` using `gemini-2.5-flash` (multi-modal vision, auto-discovery fallback via ModelService).
+  - **Groq API**: `https://api.groq.com/openai/v1/chat/completions` using `qwen/qwen3.8-27b` (multimodal vision + text) with resilient auto-discovery fallback.
+  - **Google Gemini API**: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={API_KEY}` using `gemini-2.5-flash` (multi-modal vision, auto-discovery fallback via ModelService). *Note on API Design*: The Google Gemini REST API specification requires authentication via the `?key=` URL query parameter rather than an `Authorization: Bearer` header. All transmissions occur over encrypted HTTPS (TLS 1.3), preventing intermediate network inspection.
   - **OpenAI API**: `https://api.openai.com/v1/chat/completions` using model `gpt-4o` (multi-modal vision).
   - **OpenRouter API**: `https://openrouter.ai/api/v1/chat/completions`.
   - **Ollama**: `http://localhost:11434/v1/chat/completions` using `llama3.2-vision`.
   - **jsPDF Client Library**: `lib/jspdf.umd.min.js` (v2.x UMD build) for generating client-side downloadable PDF transcripts.
 - **Hosting & Deployment**:
-  - Client runtime packaged as `.zip` (`page-helper-ai-v2.1.0.zip`) for Google Chrome Web Store Developer Dashboard.
-  - Landing & Privacy Pages hosted at `https://dezignwise.com`.
+  - Client runtime packaged as `.zip` (`dezignsnap-v2.1.1.zip`) for Google Chrome Web Store Developer Dashboard.
+  - Landing page hosted at `https://dezignwise.com`, Privacy Policy hosted via Cloudflare Worker at `https://dezignsnap-privacy.hamzaka549.workers.dev/privacy-policy`.
+  - Standalone web showcase portal in `web/` (`web/index.html`).
 - **Dev Tooling & Build Systems**:
   - Zero-build vanilla architecture (no bundler overhead; native browser ES execution).
   - Git version control (`main` branch).
@@ -85,6 +86,15 @@
    - Status: Working ✅
 10. **Popup Fallback Controller**:
     - Toolbar action popup allowing trigger on sites where content script injection is restricted or disabled.
+    - Status: Working ✅
+11. **Native Chrome Side Panel & Companion Window (`sidepanel.html`)**:
+    - Complete AI workspace operating outside the webpage viewport. 100% immune to Google Meet, Teams, and Zoom Web tab sharing (`Alt+P`). Detachable into a companion window for desktop window sharing.
+    - Status: Working ✅
+12. **Screen Share Stealth & Anti-Capture Hotkey (`Alt+H` & `Escape`)**:
+    - Global shortcut and panic key to instantly hide or reveal floating toolbar and response panel in 0ms.
+    - Status: Working ✅
+13. **Aubergine & Cream Design System Overhaul**:
+    - Slack-inspired `#4a154b` Aubergine, Canvas Cream `#f4ede4`, Lavender `#f9f0ff`, and 90px pill buttons across all UI surfaces.
     - Status: Working ✅
 
 ---
