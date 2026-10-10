@@ -87,38 +87,48 @@ async function getActiveAiMode() {
 const DEFAULT_PRESETS = [
   {
     id: "default",
-    name: "General page & problem solver",
-    text: "Analyze what is visible. If this contains a question, quiz, or problem, solve it accurately from first principles, evaluate all choices, and provide the verified correct answer. If looking for an option or UI element, state its exact position.",
+    name: "General Page Helper & Assistant",
+    text: "Visually analyze this page or screenshot. Explain what is visible, summarize the key information, answer any question I have asked, and highlight important buttons or next steps. Be direct, clear, and helpful.",
+  },
+  {
+    id: "task_copilot",
+    name: "Interactive Task Co-Pilot (Step-by-Step Guide)",
+    text: "Act as my interactive task co-pilot. I am trying to complete a specific task on this website or app. Based on what is currently visible on my screen:\n1. Identify what screen/step I am currently on.\n2. Give me the EXACT next physical action to take (e.g., \"Click the blue 'Continue' button at the bottom right\", \"Fill out the email field in the center\"). State precise button names, visual locations, and colors.\n3. Mention any critical tips or things to avoid before I click.\nKeep your instructions concise, numbered, and action-oriented so I can get the task done quickly.",
   },
   {
     id: "quiz_solver",
-    name: "Quiz & MCQ Solver (Verified)",
-    text: "Accurately solve this multiple-choice question, test, or problem. Independently evaluate every option from first principles. State the exact correct option and letter, prove why it is correct, and explain why the other options are wrong. Never assume any option selected or highlighted on screen is correct.",
+    name: "Verified Quiz & MCQ Solver (First-Principles)",
+    text: "Accurately solve this multiple-choice question, exam, or problem. Independently evaluate every option from first principles. State the exact verified correct answer and letter first, prove why it is correct with evidence, and explain why each incorrect choice is wrong. Never assume any option already selected or highlighted on screen is correct.",
+  },
+  {
+    id: "bug_hunter",
+    name: "Visual Bug Hunter & Code Fixer",
+    text: "Audit this screen for visual defects, layout bugs, responsive misalignment, contrast issues, or visible errors. Point out the exact buggy elements and provide the concrete CSS, HTML, or JavaScript code fix.",
+  },
+  {
+    id: "data_extractor",
+    name: "Table & Structured Data Extractor",
+    text: "Extract all visible tabular data, lists, pricing tiers, or structured key-value information from this screen. Format the output into clean, beautifully structured markdown tables or formatted JSON. Do not omit rows or hallucinate missing data.",
+  },
+  {
+    id: "summarizer",
+    name: "Executive Summarizer & Key Takeaways",
+    text: "Provide a high-impact executive summary of the content shown on this screen. Extract the top 3-5 key takeaways, important numbers/metrics, dates, and actionable decisions in crisp bullet points.",
+  },
+  {
+    id: "ui_critique",
+    name: "UI/UX Design Critique & Usability Review",
+    text: "Review this interface from a Senior Product Designer's perspective. Evaluate visual hierarchy, whitespace, typography, accessibility, and conversion flow. Provide actionable, constructive redesign advice to elevate the UI to top-tier quality.",
+  },
+  {
+    id: "translate",
+    name: "Translate & Localize to English",
+    text: "Translate all visible text, UI labels, and instructions on this screen into fluent, natural English (or specified language), preserving the original meaning, tone, and visual context.",
   },
   {
     id: "eli5",
     name: "Explain Like I'm 5 (ELI5)",
-    text: "Explain what is on this screen in super simple terms that a 5-year-old or non-technical beginner would understand. Use bullet points.",
-  },
-  {
-    id: "roast",
-    name: "Roast My UI / Code",
-    text: "Give a witty, humorous, but constructive roast and design critique of the UI, layout, typography, or code visible on this screen.",
-  },
-  {
-    id: "finder",
-    name: "Target Option Finder",
-    text: "Locate the specific button, setting, or navigation link on this screen. State its exact visual position (e.g. top-right, under header) and color.",
-  },
-  {
-    id: "translate",
-    name: "Translate & Summarize",
-    text: "Translate any text on this screen to clear English and provide a short executive summary.",
-  },
-  {
-    id: "bug_hunter",
-    name: "Bug & Edge Case Hunter",
-    text: "Audit this UI for design bugs, alignment errors, contrast issues, or UX anti-patterns.",
+    text: "Explain what is happening on this screen in super simple, beginner-friendly terms that a 5-year-old or non-technical person would instantly understand. Use relatable analogies and simple bullet points.",
   },
 ];
 
@@ -193,19 +203,47 @@ chrome.runtime.onInstalled.addListener((details) => {
     contexts: ["selection"],
   });
 
-  // Ensure stored presets do not contain legacy emojis
+  // Ensure stored presets match refined names, no legacy emojis, and include task_copilot
   chrome.storage.local.get(["instructionPresets"], (result) => {
     if (result.instructionPresets && Array.isArray(result.instructionPresets)) {
       let changed = false;
-      const updated = result.instructionPresets.map((p) => {
-        if (p.id === "quiz_solver" && p.name && p.name.includes("🎯")) {
+      const presets = result.instructionPresets;
+      const def = presets.find((p) => p.id === "default");
+      if (def && (def.name === "General page & problem solver" || def.text.includes("If this contains a question, quiz, or problem, solve it accurately from first principles"))) {
+        def.name = "General Page Helper & Assistant";
+        def.text = DEFAULT_PRESETS[0].text;
+        changed = true;
+      }
+      if (!presets.some((p) => p.id === "task_copilot")) {
+        const copilot = DEFAULT_PRESETS.find((p) => p.id === "task_copilot");
+        if (copilot) {
+          presets.splice(1, 0, copilot);
           changed = true;
-          return { ...p, name: "Quiz & MCQ Solver (Verified)" };
         }
-        return p;
-      });
+      }
+      const quiz = presets.find((p) => p.id === "quiz_solver");
+      if (quiz && (!quiz.name.includes("First-Principles") || quiz.name.includes("🎯"))) {
+        quiz.name = "Verified Quiz & MCQ Solver (First-Principles)";
+        quiz.text = DEFAULT_PRESETS.find((p) => p.id === "quiz_solver").text;
+        changed = true;
+      }
+      if (!presets.some((p) => p.id === "data_extractor")) {
+        const de = DEFAULT_PRESETS.find((p) => p.id === "data_extractor");
+        if (de) presets.push(de);
+        changed = true;
+      }
+      if (!presets.some((p) => p.id === "summarizer")) {
+        const sm = DEFAULT_PRESETS.find((p) => p.id === "summarizer");
+        if (sm) presets.push(sm);
+        changed = true;
+      }
+      if (!presets.some((p) => p.id === "ui_critique")) {
+        const ui = DEFAULT_PRESETS.find((p) => p.id === "ui_critique");
+        if (ui) presets.push(ui);
+        changed = true;
+      }
       if (changed) {
-        chrome.storage.local.set({ instructionPresets: updated });
+        chrome.storage.local.set({ instructionPresets: presets });
       }
     }
   });
@@ -256,15 +294,11 @@ chrome.commands.onCommand.addListener((command) => {
     const tab = tabs && tabs[0];
     if (!tab || !tab.id) return;
     if (command === "snip_screen") {
-      chrome.tabs.sendMessage(tab.id, { type: "TRIGGER_SNIP" });
+      chrome.tabs.sendMessage(tab.id, { type: "TRIGGER_SNIP" }, () => void chrome.runtime.lastError);
     } else if (command === "solve_full_page") {
-      chrome.tabs.sendMessage(tab.id, { type: "TRIGGER_FULL_SOLVE" });
+      chrome.tabs.sendMessage(tab.id, { type: "TRIGGER_FULL_SOLVE" }, () => void chrome.runtime.lastError);
     } else if (command === "toggle_stealth") {
-      chrome.tabs.sendMessage(tab.id, { type: "TOGGLE_STEALTH" });
-    } else if (command === "open_side_panel") {
-      if (chrome.sidePanel && chrome.sidePanel.open) {
-        chrome.sidePanel.open({ windowId: tab.windowId }).catch(() => {});
-      }
+      chrome.tabs.sendMessage(tab.id, { type: "TOGGLE_STEALTH" }, () => void chrome.runtime.lastError);
     }
   });
 });
@@ -311,25 +345,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
   if (message && message.type === "OPEN_SESSION_EXPORT") {
     chrome.tabs.create({ url: chrome.runtime.getURL("session.html") });
-    return true;
-  }
-  if (message && message.type === "OPEN_SIDE_PANEL") {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      const tab = tabs && tabs[0];
-      if (tab && chrome.sidePanel && chrome.sidePanel.open) {
-        chrome.sidePanel.open({ windowId: tab.windowId }).catch(() => {});
-      }
-    });
-    return true;
-  }
-  if (message && message.type === "OPEN_COMPANION_WINDOW") {
-    chrome.windows.create({
-      url: chrome.runtime.getURL("sidepanel.html?detached=true"),
-      type: "popup",
-      width: 440,
-      height: 700,
-      focused: true,
-    });
     return true;
   }
   if (message && message.type === "GET_UI_PREFERENCES") {
@@ -435,7 +450,7 @@ chrome.runtime.onConnect.addListener((port) => {
 
       if (action === "solve") {
         screenshotDataUrl = await captureTab(tab.windowId);
-        displayInstruction = "📸 [Full Page Screenshot] " + aiInstruction;
+        displayInstruction = "[Full Page Screenshot] " + aiInstruction;
       } else if (action === "snip" && region) {
         const fullShot = await captureTab(tab.windowId);
         screenshotDataUrl = await cropAndUpscale(fullShot, region);
@@ -516,7 +531,7 @@ async function handleSolve(tab, aiMode, sendResponse) {
       providerInfo: check.providerInfo,
       screenshotDataUrl: dataUrl,
       instruction: check.aiInstruction,
-      displayInstruction: "📸 [Full Page Screenshot] " + check.aiInstruction,
+      displayInstruction: "[Full Page Screenshot] " + check.aiInstruction,
       aiMode,
       sendResponse,
     });
@@ -836,8 +851,8 @@ async function upsertSessionHistoryFromConv(conv, tab) {
   const idx = sessionHistory.findIndex((e) => e.id === conv.id);
   const lastAssistant = [...conv.turns].reverse().find((t) => t.role === "assistant");
 
-  // Strip full-res screenshots to prevent chrome.storage quota overflow.
-  // Thumbnail (~20-40KB JPEG) is preserved for session report preview & PDF export.
+  // Preserve high-definition screenshots for session report preview & PDF export.
+  const highResShot = conv.screenshotDataUrl || conv.thumbnail || null;
   const entry = {
     id: conv.id,
     timestamp: conv.startedAt,
@@ -852,7 +867,8 @@ async function upsertSessionHistoryFromConv(conv, tab) {
     })),
     instruction: conv.turns[0]?.text || "",
     answer: lastAssistant?.text || "",
-    thumbnail: conv.thumbnail || null,
+    screenshot: highResShot,
+    thumbnail: conv.thumbnail || highResShot,
   };
 
   if (idx >= 0) {
@@ -951,16 +967,26 @@ async function getActiveInstruction() {
     activePresetId = DEFAULT_PRESETS[0].id;
     updated = true;
   } else {
-    // If old default text is present, upgrade to smart problem solver
+    // If old default text is present, upgrade to aligned General Page Helper
     const defPreset = instructionPresets.find((p) => p.id === "default");
-    if (defPreset && defPreset.text.includes("Explain what this page is about, or tell me the exact location")) {
-      defPreset.name = "General page & problem solver";
+    if (defPreset && (defPreset.name === "General page & problem solver" || defPreset.text.includes("If this contains a question, quiz, or problem, solve it accurately from first principles"))) {
+      defPreset.name = "General Page Helper & Assistant";
       defPreset.text = DEFAULT_PRESETS[0].text;
       updated = true;
     }
-    // Add quiz_solver if missing from presets
-    if (!instructionPresets.some((p) => p.id === "quiz_solver")) {
-      instructionPresets.splice(1, 0, DEFAULT_PRESETS[1]);
+    // Add task_copilot if missing from presets
+    if (!instructionPresets.some((p) => p.id === "task_copilot")) {
+      const copilot = DEFAULT_PRESETS.find((p) => p.id === "task_copilot");
+      if (copilot) {
+        instructionPresets.splice(1, 0, copilot);
+        updated = true;
+      }
+    }
+    // Update quiz_solver if outdated
+    const quiz = instructionPresets.find((p) => p.id === "quiz_solver");
+    if (quiz && (!quiz.name.includes("First-Principles") || quiz.name.includes("🎯"))) {
+      quiz.name = "Verified Quiz & MCQ Solver (First-Principles)";
+      quiz.text = DEFAULT_PRESETS.find((p) => p.id === "quiz_solver").text;
       updated = true;
     }
   }
@@ -1071,21 +1097,24 @@ async function blobToDataURL(blob) {
   return `data:${blob.type};base64,${btoa(binary)}`;
 }
 
-async function makeThumbnail(dataUrl, maxWidth = 360, quality = 0.55) {
+async function makeThumbnail(dataUrl, maxWidth = 1600, quality = 0.92) {
   if (!dataUrl) return null;
   try {
     const blob = await (await fetch(dataUrl)).blob();
     const bitmap = await createImageBitmap(blob);
-    const scale = Math.min(1, maxWidth / bitmap.width);
+    // If the image is already within maxWidth, preserve native resolution
+    const scale = bitmap.width > maxWidth ? maxWidth / bitmap.width : 1;
     const w = Math.max(1, Math.round(bitmap.width * scale));
     const h = Math.max(1, Math.round(bitmap.height * scale));
     const canvas = new OffscreenCanvas(w, h);
     const ctx = canvas.getContext("2d");
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
     ctx.drawImage(bitmap, 0, 0, w, h);
     const outBlob = await canvas.convertToBlob({ type: "image/jpeg", quality });
     return await blobToDataURL(outBlob);
   } catch (e) {
-    return null;
+    return dataUrl;
   }
 }
 

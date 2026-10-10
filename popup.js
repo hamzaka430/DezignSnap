@@ -11,7 +11,6 @@ const presetSelect = document.getElementById("presetSelect");
 const quickSnipBtn = document.getElementById("quickSnipBtn");
 const fallbackAskBtn = document.getElementById("fallbackAskBtn");
 const directChatBtn = document.getElementById("directChatBtn");
-const openSidePanelBtn = document.getElementById("openSidePanelBtn");
 const stealthModeToggle = document.getElementById("stealthModeToggle");
 const fallbackAnswer = document.getElementById("fallbackAnswer");
 const statusMsg = document.getElementById("statusMsg");
@@ -144,12 +143,19 @@ setupLink.addEventListener("click", (e) => {
   e.preventDefault();
   chrome.runtime.openOptionsPage();
 });
+const popupSupportLink = document.getElementById("popupSupportLink");
+if (popupSupportLink) {
+  popupSupportLink.addEventListener("click", (e) => {
+    e.preventDefault();
+    chrome.runtime.openOptionsPage();
+  });
+}
 
 // Quick Snip Area (Alt+S equivalent)
 quickSnipBtn.addEventListener("click", async () => {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   if (tab && tab.id) {
-    chrome.tabs.sendMessage(tab.id, { type: "TRIGGER_SNIP" });
+    chrome.tabs.sendMessage(tab.id, { type: "TRIGGER_SNIP" }, () => void chrome.runtime.lastError);
     window.close();
   }
 });
@@ -159,17 +165,9 @@ if (directChatBtn) {
   directChatBtn.addEventListener("click", async () => {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     if (tab && tab.id) {
-      chrome.tabs.sendMessage(tab.id, { type: "OPEN_DIRECT_CHAT" });
+      chrome.tabs.sendMessage(tab.id, { type: "OPEN_DIRECT_CHAT" }, () => void chrome.runtime.lastError);
       window.close();
     }
-  });
-}
-
-// Open Side Panel (100% immune to tab sharing)
-if (openSidePanelBtn) {
-  openSidePanelBtn.addEventListener("click", () => {
-    chrome.runtime.sendMessage({ type: "OPEN_SIDE_PANEL" });
-    window.close();
   });
 }
 

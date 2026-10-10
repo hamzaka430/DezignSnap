@@ -1,8 +1,8 @@
 /* ==========================================================================
-   DezignSnap — Action Popup Stylesheet (design.md)
-   Primary: #4a154b (Aubergine) | Press: #611f69 | Tint: #592466
-   Canvas: #ffffff (White) | #f4ede4 (Cream) | #f9f0ff (Lavender)
-   Text: #1d1d1d (Ink) | #696969 (Ink Mute) | On Primary: #ffffff
+   DezignSnap — Action Popup Stylesheet
+   Balanced Palette: Crisp White Surface (#ffffff), Neutral Slate (#f9fafb),
+   Ink Text (#111827), Neutral Hairlines (#d1d5db / #e5e7eb),
+   Single Signature Aubergine Pill (#4a154b) for Primary Action
    ========================================================================== */
 
 * {
@@ -15,14 +15,13 @@ body {
   width: 350px;
   font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   background: #ffffff;
-  color: #1d1d1d;
+  color: #111827;
   overflow-x: hidden;
-  border: 1px solid #e6e6e6;
 }
 
 .container {
   padding: 16px;
-  background: #ffffff radial-gradient(circle at 100% 0%, rgba(255, 240, 230, 0.5) 0%, rgba(233, 216, 255, 0.35) 45%, rgba(255, 255, 255, 0) 75%);
+  background: #ffffff;
 }
 
 header {
@@ -30,7 +29,7 @@ header {
   align-items: center;
   justify-content: space-between;
   margin-bottom: 14px;
-  border-bottom: 1px solid #e6e6e6;
+  border-bottom: 1px solid #e5e7eb;
   padding-bottom: 12px;
 }
 
@@ -42,14 +41,14 @@ header {
 
 .logo-wrap img {
   border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(74, 21, 75, 0.2);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
 }
 
 h1 {
   font-size: 15.5px;
   font-weight: 700;
   letter-spacing: -0.3px;
-  color: #4a154b;
+  color: #111827;
   display: flex;
   align-items: center;
   gap: 6px;
@@ -57,9 +56,8 @@ h1 {
 
 .brand-badge {
   font-size: 9.5px;
-  background: #f9f0ff;
-  color: #4a154b;
-  border: 1px solid #d9bdde;
+  background: #4a154b;
+  color: #ffffff;
   padding: 1px 7px;
   border-radius: 90px;
   font-weight: 800;
@@ -67,29 +65,30 @@ h1 {
 }
 
 #openOptionsBtn {
-  background: #f9f0ff;
-  border: 1px solid #d9bdde;
-  color: #4a154b;
+  background: #f9fafb;
+  border: 1px solid #d1d5db;
+  color: #374151;
   font-family: inherit;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 600;
   cursor: pointer;
-  padding: 6px 12px;
+  padding: 5px 12px;
   border-radius: 90px;
   transition: all 0.18s ease;
+  display: flex;
+  align-items: center;
 }
 
 #openOptionsBtn:hover {
-  background: #4a154b;
-  color: #ffffff;
-  border-color: #4a154b;
-  box-shadow: 0 2px 8px rgba(74, 21, 75, 0.25);
+  background: #f3f4f6;
+  color: #111827;
+  border-color: #9ca3af;
 }
 
 .warning {
-  background: #fdeee9;
-  border: 1px solid #cc4117;
-  color: #cc4117;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
   font-size: 12px;
   line-height: 1.45;
   padding: 9px 12px;
@@ -105,12 +104,12 @@ h1 {
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: #cc4117;
+  background: #dc2626;
   flex-shrink: 0;
 }
 
 .warning a {
-  color: #4a154b;
+  color: #dc2626;
   font-weight: 700;
   text-decoration: underline;
 }
@@ -127,18 +126,18 @@ label {
   display: flex;
   justify-content: space-between;
   margin-bottom: 5px;
-  color: #696969;
+  color: #4b5563;
 }
 
 select {
   width: 100%;
   padding: 8px 12px;
-  border: 1px solid #e6e6e6;
+  border: 1px solid #d1d5db;
   border-radius: 8px;
   font-size: 13px;
   font-family: inherit;
-  background: #f4ede4;
-  color: #1d1d1d;
+  background: #ffffff;
+  color: #111827;
   transition: all 0.2s ease;
 }
 
@@ -170,68 +169,71 @@ select:focus {
   white-space: nowrap;
 }
 
+/* Primary Filled Aubergine Pill — The Single Accent CTA */
 .btn-primary {
   flex: 1;
   background: #4a154b;
   color: #ffffff;
-  border: 1px solid #4a154b;
-  box-shadow: 0 2px 8px rgba(74, 21, 75, 0.25);
+  border: 1.5px solid #4a154b;
+  box-shadow: 0 2px 8px rgba(74, 21, 75, 0.22);
 }
 
 .btn-primary:hover {
   background: #611f69;
   border-color: #611f69;
   transform: translateY(-1px);
-  box-shadow: 0 4px 14px rgba(74, 21, 75, 0.35);
+  box-shadow: 0 4px 12px rgba(74, 21, 75, 0.32);
 }
 
+/* Secondary Clean Neutral Light Button */
 .btn-secondary {
   flex: 1;
-  background: #f9f0ff;
-  color: #4a154b;
-  border: 1px solid #d9bdde;
+  background: #f9fafb;
+  color: #374151;
+  border: 1.5px solid #d1d5db;
 }
 
 .btn-secondary:hover {
-  background: #ffffff;
-  border-color: #4a154b;
+  background: #f3f4f6;
+  border-color: #9ca3af;
+  color: #111827;
   transform: translateY(-1px);
 }
 
 .btn-chat {
-  background: #f4ede4;
-  color: #1d1d1d;
-  border: 1px solid #e6e6e6;
+  background: #f9fafb;
+  color: #374151;
+  border: 1.5px solid #d1d5db;
   font-weight: 600;
 }
 
 .btn-chat:hover {
-  background: #f9f0ff;
-  color: #4a154b;
-  border-color: #d9bdde;
+  background: #f3f4f6;
+  color: #111827;
+  border-color: #9ca3af;
 }
 
 .hint {
   margin-top: 12px;
   font-size: 11.5px;
-  color: #696969;
+  color: #6b7280;
   line-height: 1.45;
   text-align: center;
 }
 
 .hint strong {
-  color: #4a154b;
+  color: #111827;
 }
 
 #fallbackAnswer {
   margin-top: 12px;
   padding: 10px 12px;
   border-radius: 10px;
-  background: #f9f0ff;
-  border: 1px solid #d9bdde;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
   font-size: 12.5px;
   line-height: 1.5;
-  color: #1d1d1d;
+  color: #111827;
   max-height: 140px;
   overflow-y: auto;
 }
@@ -248,3 +250,4 @@ select:focus {
 .hidden {
   display: none !important;
 }
+

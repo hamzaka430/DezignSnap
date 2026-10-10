@@ -14,8 +14,8 @@ Capture webpage screenshots or snip areas for instant visual AI answers powered 
 **Language:** English (United States)  
 **Tags / Keywords:** AI, screenshot, page analysis, visual assistant, GPT-4o, Gemini, Groq, Ollama, BYOK, productivity  
 **Support Email:** hamzaka@dezignwise.com  
-**Privacy Policy URL:** https://dezignsnap-privacy.hamzaka549.workers.dev/privacy-policy  
-**Homepage URL:** https://dezignwise.com  
+**Privacy Policy URL:** https://dezignsnap.dezignwise.com/privacy-policy.html  
+**Homepage URL:** https://dezignsnap.dezignwise.com/  
 
 ---
 
@@ -39,9 +39,6 @@ DezignSnap adheres strictly to a zero-data-collection, Bring-Your-Own-Key (BYOK)
 
 ### `contextMenus`
 **Justification:** DezignSnap adds a single right-click context menu item ("⚡ Ask AI about selection") that appears when text is highlighted on a webpage. This enables users to immediately send highlighted phrases, error logs, or code snippets to the AI without needing to capture a screenshot.
-
-### `sidePanel`
-**Justification:** DezignSnap provides a Native Chrome Side Panel workspace (`Alt+P`) that allows users to view AI explanations, research questions, and manage multi-turn chat sessions without obscuring webpage content. When users share a browser tab in virtual meetings (Google Meet, Microsoft Teams, Zoom Web), Chrome's tab capture engine excludes the native Side Panel, allowing users to keep the assistant active without it being recorded or displayed in the shared stream.
 
 ### `scripting` (Note for Reviewers)
 **Justification:** DezignSnap intentionally does not request the `scripting` permission in `manifest.json`. The extension strictly adheres to Chrome's Principle of Least Privilege by declaring its content scripts in `manifest.json` under `"content_scripts"`, eliminating the need for arbitrary programmatic script execution (`chrome.scripting.executeScript`).

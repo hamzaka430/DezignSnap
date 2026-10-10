@@ -8,20 +8,19 @@
   --primary: #4a154b;
   --primary-hover: #611f69;
   --primary-active: #592466;
-  --canvas-cream: #f4ede4;
-  --canvas-lavender: #f9f0ff;
+  --canvas-bg: #f8f9fa;
   --canvas-white: #ffffff;
-  --text-ink: #1d1d1d;
-  --text-mute: #696969;
+  --text-ink: #111827;
+  --text-mute: #6b7280;
   --text-mauve: #d9bdde;
   --link-blue: #1264a3;
-  --border-subtle: rgba(74, 21, 75, 0.12);
+  --border-subtle: #e5e7eb;
   --border-focus: rgba(74, 21, 75, 0.35);
-  --shadow-sm: 0 2px 8px rgba(74, 21, 75, 0.04);
-  --shadow-md: 0 6px 22px rgba(74, 21, 75, 0.07);
-  --shadow-lg: 0 12px 36px rgba(74, 21, 75, 0.12);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.08);
   --radius-pill: 90px;
-  --radius-card: 18px;
+  --radius-card: 16px;
   --radius-inner: 12px;
 }
 
@@ -37,12 +36,8 @@ html {
 
 body {
   font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  background-color: var(--canvas-cream);
-  background-image:
-    radial-gradient(ellipse at 15% 0%, #fff0e6 0%, transparent 60%),
-    radial-gradient(ellipse at 85% 10%, #e9d8ff 0%, transparent 55%),
-    radial-gradient(ellipse at 50% 90%, #e6f4ea 0%, transparent 60%);
-  background-attachment: fixed;
+  background-color: var(--canvas-bg);
+  background-image: linear-gradient(180deg, #fdfdfd 0%, #f8f9fa 240px);
   color: var(--text-ink);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
@@ -59,10 +54,10 @@ body {
   position: sticky;
   top: 0;
   z-index: 1000;
-  background: rgba(244, 237, 228, 0.88);
+  background: rgba(255, 255, 255, 0.94);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
-  border-bottom: 1.5px solid var(--border-subtle);
+  border-bottom: 1px solid var(--border-subtle);
   transition: all 0.2s ease;
 }
 
@@ -180,27 +175,29 @@ body {
 }
 
 .btn-secondary {
-  background: #ffffff;
-  color: var(--primary);
-  border-color: var(--border-subtle);
+  background: #f9fafb;
+  color: #374151;
+  border: 1.5px solid #d1d5db;
   box-shadow: var(--shadow-sm);
 }
 
 .btn-secondary:hover {
-  background: var(--canvas-lavender);
-  border-color: var(--primary);
+  background: #f3f4f6;
+  border-color: #9ca3af;
+  color: #111827;
   transform: translateY(-2px);
 }
 
 .btn-outline {
-  background: transparent;
-  color: var(--primary);
-  border-color: rgba(74, 21, 75, 0.3);
+  background: #ffffff;
+  color: #374151;
+  border: 1.5px solid #d1d5db;
 }
 
 .btn-outline:hover {
-  background: var(--canvas-lavender);
-  border-color: var(--primary);
+  background: #f9fafb;
+  border-color: #9ca3af;
+  color: #111827;
 }
 
 /* HERO SECTION */
@@ -219,11 +216,11 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: var(--canvas-lavender);
-  border: 1.5px solid rgba(74, 21, 75, 0.2);
-  color: var(--primary);
+  background: #f9fafb;
+  border: 1px solid #d1d5db;
+  color: #374151;
   font-size: 12.5px;
-  font-weight: 700;
+  font-weight: 600;
   padding: 5px 16px;
   border-radius: var(--radius-pill);
   margin-bottom: 24px;

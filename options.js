@@ -29,6 +29,55 @@ const stealthModeToggle = document.getElementById("stealthModeToggle");
 const prefStatus = document.getElementById("prefStatus");
 
 const radioCards = document.querySelectorAll(".radio-card");
+const resetPresetsBtn = document.getElementById("resetPresetsBtn");
+
+const DEFAULT_PRESETS = [
+  {
+    id: "default",
+    name: "General Page Helper & Assistant",
+    text: "Visually analyze this page or screenshot. Explain what is visible, summarize the key information, answer any question I have asked, and highlight important buttons or next steps. Be direct, clear, and helpful.",
+  },
+  {
+    id: "task_copilot",
+    name: "Interactive Task Co-Pilot (Step-by-Step Guide)",
+    text: "Act as my interactive task co-pilot. I am trying to complete a specific task on this website or app. Based on what is currently visible on my screen:\n1. Identify what screen/step I am currently on.\n2. Give me the EXACT next physical action to take (e.g., \"Click the blue 'Continue' button at the bottom right\", \"Fill out the email field in the center\"). State precise button names, visual locations, and colors.\n3. Mention any critical tips or things to avoid before I click.\nKeep your instructions concise, numbered, and action-oriented so I can get the task done quickly.",
+  },
+  {
+    id: "quiz_solver",
+    name: "Verified Quiz & MCQ Solver (First-Principles)",
+    text: "Accurately solve this multiple-choice question, exam, or problem. Independently evaluate every option from first principles. State the exact verified correct answer and letter first, prove why it is correct with evidence, and explain why each incorrect choice is wrong. Never assume any option already selected or highlighted on screen is correct.",
+  },
+  {
+    id: "bug_hunter",
+    name: "Visual Bug Hunter & Code Fixer",
+    text: "Audit this screen for visual defects, layout bugs, responsive misalignment, contrast issues, or visible errors. Point out the exact buggy elements and provide the concrete CSS, HTML, or JavaScript code fix.",
+  },
+  {
+    id: "data_extractor",
+    name: "Table & Structured Data Extractor",
+    text: "Extract all visible tabular data, lists, pricing tiers, or structured key-value information from this screen. Format the output into clean, beautifully structured markdown tables or formatted JSON. Do not omit rows or hallucinate missing data.",
+  },
+  {
+    id: "summarizer",
+    name: "Executive Summarizer & Key Takeaways",
+    text: "Provide a high-impact executive summary of the content shown on this screen. Extract the top 3-5 key takeaways, important numbers/metrics, dates, and actionable decisions in crisp bullet points.",
+  },
+  {
+    id: "ui_critique",
+    name: "UI/UX Design Critique & Usability Review",
+    text: "Review this interface from a Senior Product Designer's perspective. Evaluate visual hierarchy, whitespace, typography, accessibility, and conversion flow. Provide actionable, constructive redesign advice to elevate the UI to top-tier quality.",
+  },
+  {
+    id: "translate",
+    name: "Translate & Localize to English",
+    text: "Translate all visible text, UI labels, and instructions on this screen into fluent, natural English (or specified language), preserving the original meaning, tone, and visual context.",
+  },
+  {
+    id: "eli5",
+    name: "Explain Like I'm 5 (ELI5)",
+    text: "Explain what is happening on this screen in super simple, beginner-friendly terms that a 5-year-old or non-technical person would instantly understand. Use relatable analogies and simple bullet points.",
+  },
+];
 
 init();
 
@@ -117,35 +166,53 @@ async function init() {
   if (hudPositionSelect) hudPositionSelect.value = hudPosition;
   if (aiModeSelect) aiModeSelect.value = aiMode;
 
-  // Ensure default and quiz_solver presets are up to date
+  // Synchronize and align stored presets with latest verified names & prompts
   let presetsUpdated = false;
-  if (instructionPresets && instructionPresets.length > 0) {
-    const defPreset = instructionPresets.find((p) => p.id === "default");
-    if (defPreset && defPreset.text.includes("Explain what this page is about, or tell me the exact location")) {
-      defPreset.name = "General page & problem solver";
-      defPreset.text = "Analyze what is visible. If this contains a question, quiz, or problem, solve it accurately from first principles, evaluate all choices, and provide the verified correct answer. If looking for an option or UI element, state its exact position.";
+  let activeList = instructionPresets;
+  if (!activeList || activeList.length === 0) {
+    activeList = [...DEFAULT_PRESETS];
+    presetsUpdated = true;
+  } else {
+    // Check if default preset has old name or mismatched text
+    const defPreset = activeList.find((p) => p.id === "default");
+    if (defPreset && (defPreset.name === "General page & problem solver" || defPreset.text.includes("If this contains a question, quiz, or problem, solve it accurately from first principles"))) {
+      defPreset.name = "General Page Helper & Assistant";
+      defPreset.text = DEFAULT_PRESETS[0].text;
       presetsUpdated = true;
     }
-    const quizPreset = instructionPresets.find((p) => p.id === "quiz_solver");
-    if (quizPreset && quizPreset.name && quizPreset.name.includes("")) {
-      quizPreset.name = "Quiz & MCQ Solver (Verified)";
+    // Ensure task_copilot exists
+    if (!activeList.some((p) => p.id === "task_copilot")) {
+      const copilot = DEFAULT_PRESETS.find((p) => p.id === "task_copilot");
+      if (copilot) {
+        activeList.splice(1, 0, copilot);
+        presetsUpdated = true;
+      }
+    }
+    // Ensure quiz_solver has verified name and text
+    const quizPreset = activeList.find((p) => p.id === "quiz_solver");
+    if (quizPreset && (!quizPreset.name.includes("First-Principles") || quizPreset.name.includes("🎯"))) {
+      quizPreset.name = "Verified Quiz & MCQ Solver (First-Principles)";
+      quizPreset.text = DEFAULT_PRESETS.find((p) => p.id === "quiz_solver").text;
       presetsUpdated = true;
     }
-    if (!instructionPresets.some((p) => p.id === "quiz_solver")) {
-      instructionPresets.splice(1, 0, {
-        id: "quiz_solver",
-        name: "Quiz & MCQ Solver (Verified)",
-        text: "Accurately solve this multiple-choice question, test, or problem. Independently evaluate every option from first principles. State the exact correct option and letter, prove why it is correct, and explain why the other options are wrong. Never assume any option selected or highlighted on screen is correct.",
-      });
-      presetsUpdated = true;
-    }
-    if (presetsUpdated) {
-      await chrome.storage.local.set({ instructionPresets });
+    // Add other standard presets if missing
+    for (const std of ["data_extractor", "summarizer", "ui_critique"]) {
+      if (!activeList.some((p) => p.id === std)) {
+        const item = DEFAULT_PRESETS.find((p) => p.id === std);
+        if (item) {
+          activeList.push(item);
+          presetsUpdated = true;
+        }
+      }
     }
   }
 
+  if (presetsUpdated) {
+    await chrome.storage.local.set({ instructionPresets: activeList, activePresetId: activePresetId || activeList[0].id });
+  }
+
   setActiveProviderCard(activeProvider);
-  renderPresets(instructionPresets, activePresetId);
+  renderPresets(activeList, activePresetId || activeList[0].id);
   historyCount.textContent = sessionHistory.length;
 }
 
@@ -422,6 +489,155 @@ clearHistoryBtn.addEventListener("click", async () => {
 exportPdfBtn.addEventListener("click", () => {
   chrome.tabs.create({ url: chrome.runtime.getURL("session.html") });
 });
+
+if (resetPresetsBtn) {
+  resetPresetsBtn.addEventListener("click", async () => {
+    if (!confirm("Restore all built-in personas and prompts to the latest default versions? Any custom modes you created will be kept.")) return;
+    const { instructionPresets = [] } = await chrome.storage.local.get(["instructionPresets"]);
+    const customOnly = instructionPresets.filter((p) => p.id && p.id.startsWith("preset_"));
+    const restored = [...DEFAULT_PRESETS, ...customOnly];
+    await chrome.storage.local.set({ instructionPresets: restored, activePresetId: DEFAULT_PRESETS[0].id });
+    renderPresets(restored, DEFAULT_PRESETS[0].id);
+    showStatus("Default personas restored successfully.", true);
+  });
+}
+
+// ---------- Help & Support Ticket System ----------
+const supportTicketForm = document.getElementById("supportTicketForm");
+const ticketUserName = document.getElementById("ticketUserName");
+const ticketUserEmail = document.getElementById("ticketUserEmail");
+const ticketCategory = document.getElementById("ticketCategory");
+const ticketSubject = document.getElementById("ticketSubject");
+const ticketMessage = document.getElementById("ticketMessage");
+const ticketIncludeDiag = document.getElementById("ticketIncludeDiag");
+const ticketSubmitBtn = document.getElementById("ticketSubmitBtn");
+const ticketMailtoBtn = document.getElementById("ticketMailtoBtn");
+const ticketStatus = document.getElementById("ticketStatus");
+
+function getDiagnosticsText() {
+  const manifest = chrome.runtime?.getManifest ? chrome.runtime.getManifest() : { version: "2.1.1" };
+  const activeCard = document.querySelector(".radio-card.active");
+  const provider = activeCard ? activeCard.dataset.provider : "unknown";
+  return [
+    "--- System & Extension Diagnostics ---",
+    `Extension: DezignSnap v${manifest.version || "2.1.1"} (Manifest V3)`,
+    `Active AI Provider: ${provider}`,
+    `Platform: ${navigator.platform || "Windows"}`,
+    `User Agent: ${navigator.userAgent}`,
+    `Screen: ${window.screen.width}x${window.screen.height}`,
+    `Timestamp: ${new Date().toISOString()}`,
+    "---------------------------------------",
+  ].join("\n");
+}
+
+function showTicketStatus(msg, isSuccess) {
+  if (!ticketStatus) return;
+  ticketStatus.textContent = msg;
+  ticketStatus.className = "status " + (isSuccess ? "success" : "error");
+  ticketStatus.classList.remove("hidden");
+  if (isSuccess) {
+    setTimeout(() => {
+      ticketStatus.classList.add("hidden");
+    }, 10000);
+  }
+}
+
+function composeMailtoUrl() {
+  const email = (ticketUserEmail?.value || "").trim();
+  const name = (ticketUserName?.value || "").trim();
+  const cat = ticketCategory?.value || "General Support";
+  const subj = (ticketSubject?.value || "").trim() || "DezignSnap Support Ticket";
+  const desc = (ticketMessage?.value || "").trim();
+  const diag = ticketIncludeDiag?.checked ? "\n\n" + getDiagnosticsText() : "";
+
+  const fullSubject = `[DezignSnap Ticket - ${cat}] ${subj}`;
+  const fullBody = [
+    `Sender Name: ${name || "Not provided"}`,
+    `Sender Email: ${email || "Not provided"}`,
+    `Category: ${cat}`,
+    `Subject: ${subj}`,
+    "",
+    "Description:",
+    desc || "(No description entered)",
+    diag,
+  ].join("\n");
+
+  return `mailto:hamzaka@dezignwise.com?subject=${encodeURIComponent(fullSubject)}&body=${encodeURIComponent(fullBody)}`;
+}
+
+if (ticketMailtoBtn) {
+  ticketMailtoBtn.addEventListener("click", () => {
+    window.location.href = composeMailtoUrl();
+  });
+}
+
+if (supportTicketForm) {
+  supportTicketForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const name = ticketUserName.value.trim();
+    const email = ticketUserEmail.value.trim();
+    const category = ticketCategory.value;
+    const subject = ticketSubject.value.trim();
+    const message = ticketMessage.value.trim();
+    const includeDiag = ticketIncludeDiag.checked;
+
+    if (!email || !subject || !message) {
+      showTicketStatus("Please fill in your email, subject, and description.", false);
+      return;
+    }
+
+    ticketSubmitBtn.disabled = true;
+    const originalBtnText = ticketSubmitBtn.innerHTML;
+    ticketSubmitBtn.textContent = "Sending Ticket...";
+
+    const diagnostics = includeDiag ? getDiagnosticsText() : "Diagnostics omitted by user";
+    const ticketId = "DS-" + Date.now().toString(36).toUpperCase();
+
+    const payload = {
+      _subject: `[DezignSnap Ticket ${ticketId} - ${category}] ${subject}`,
+      ticketId,
+      name: name || "Anonymous User",
+      email,
+      category,
+      subject,
+      message,
+      diagnostics,
+      _template: "table",
+      _captcha: "false",
+    };
+
+    try {
+      const response = await fetch("https://formsubmit.co/ajax/hamzaka@dezignwise.com", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json().catch(() => ({}));
+
+      if (response.ok && data.success !== "false") {
+        showTicketStatus(`Ticket #${ticketId} submitted successfully! Delivered directly to hamzaka@dezignwise.com. We'll reply to ${email} shortly.`, true);
+        ticketSubject.value = "";
+        ticketMessage.value = "";
+      } else {
+        // Fallback to mailto
+        window.location.href = composeMailtoUrl();
+        showTicketStatus(`Opening your email client to send ticket #${ticketId} to hamzaka@dezignwise.com...`, true);
+      }
+    } catch (err) {
+      // Offline or network block fallback
+      window.location.href = composeMailtoUrl();
+      showTicketStatus(`Opening your default email app to send ticket directly to hamzaka@dezignwise.com...`, true);
+    } finally {
+      ticketSubmitBtn.disabled = false;
+      ticketSubmitBtn.innerHTML = originalBtnText;
+    }
+  });
+}
 
 function escapeHtml(str) {
   return String(str || "")

@@ -29,9 +29,8 @@
 
 ## Current Project Status
 - ✅ **Official Brand Assets & Logo**: Custom high-resolution brand icons (`16px`, `32px`, `48px`, `128px`) and horizontal brand logo banner integrated across extension and UI surfaces.
-- ✅ **Aubergine & Cream Palette Redesign**: All pages, popup, floating HUD, and session report styled with `#4a154b`, `#f4ede4`, `#f9f0ff`, and `#1d1d1d` with 90px pill buttons.
-- ✅ **Sleek Sidebar Toggle Dock**: Modeled after modern sidebar collapse controls with outline and solid states. Docks flush against the screen boundary as an elegant edge tab that smoothly expands on hover or click.
-- ✅ **1-Minute Inactivity Auto-Collapse**: If the floating toolbar is left open and inactive for 60 seconds, it automatically transitions back to the sleek side toggle dock without disrupting browsing.
+- ✅ **Balanced Slack Aubergine Palette (design.md & WCAG AA)**: Refined, restrained color distribution across all extension pages. Aubergine (`#4a154b`) is strictly reserved for primary CTA buttons, brand badges, and subtle focus rings; backgrounds use crisp neutral white/canvas (`#ffffff` / `#f8f9fa`); typography uses high-contrast ink (`#111827`); and borders use clean neutral hairlines (`#e5e7eb`), eliminating over-saturation and muddy multi-color gradients.
+- ✅ **Sidebar-Style Corner Dock Toggle & Crisp Vector Icons**: Collapse button and edge dock tab use modern sidebar panel icons (outline in idle, solid on hover) pinned flush to the viewport corner (`bottom: 30px; right: 0`) for zero page disruption; 100% free of raw emojis.
 - ✅ **Standalone Web Showcase & Installer Portal (`web/`)**: Complete responsive website in `web/` with interactive zero-sycophancy MCQ simulator, feature deep-dives, exclusive 1-click Chrome Web Store installation, keyboard shortcut guide, and FAQ.
 - ✅ **Distribution & Commercial Model**: Proprietary freemium extension distributed exclusively through Chrome Web Store with Bring-Your-Own-Key (BYOK) privacy; planned optional premium convenience tiers as user base scales.
 - ✅ **Horizontal Positioning Modes**: HUD and chat can be placed at `Right`, `Center`, or `Left` with a 1-click cycle button (`⇋`) or options dropdown.
@@ -56,6 +55,10 @@
 - ✅ **Challenge & Correction Protocol**: Detects verification requests ("sahi answer do", "verify again", etc.) and forces an objective first-principles re-examination without anchoring to past errors.
 - ✅ **Screen Share Stealth & Anti-Capture Shield**: Real-time WebRTC `getDisplayMedia` interception auto-hides HUD/toggles during active screen share in Google Meet/Teams/Zoom Web. Global `Alt+H` panic shortcut and "Screen Share Stealth" toggle completely hide on-screen docks and HUD for 100% capture immunity during desktop or tab sharing; `Escape` key dismisses answer panel in 0ms.
 - ✅ **Security Hardened**: Protected against synthetic clickjacking (`e.isTrusted`), attribute injection, and request floods.
+- ✅ **Extension Context Invalidation Resilience**: Gracefully handles extension reloads in developer mode or silent updates without console exceptions; automatically stops orphaned DOM observers and polling loops, and warns users to refresh (F5).
+- ✅ **Aligned Personas & Interactive Task Co-Pilot**: Flagship step-by-step workflow guide ("Action Navigator") visually inspects any page and instructs the user on the exact next physical click/input with precise locations and colors, plus Verified MCQ Solver, Visual Bug Hunter, UI/UX Critique, Data Extractor, and Executive Summarizer, with 1-click default restoration.
+- ✅ **Original High-Definition Screenshot Fidelity**: Preserves full-resolution snapshots (up to 1600px width @ 0.92 quality) across Session History preview and PDF reports, eliminating legacy 360px downsampling blurriness.
+- ✅ **Direct Developer Support & Ticket Desk**: Integrated support ticket form delivering directly to `hamzaka@dezignwise.com` with pre-filled extension diagnostics and automatic mailto fallback.
 
 ## Folder & File Structure
 ```

@@ -1,0 +1,41 @@
+<svg width="600" height="360" viewBox="0 0 600 360" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="bg6a" cx="25%" cy="40%" r="55%"><stop offset="0%" stop-color="#fff0e6" stop-opacity="0.9"/><stop offset="100%" stop-color="#f4ede4" stop-opacity="0"/></radialGradient>
+    <radialGradient id="bg6b" cx="80%" cy="60%" r="50%"><stop offset="0%" stop-color="#e9d8ff" stop-opacity="0.7"/><stop offset="100%" stop-color="#f4ede4" stop-opacity="0"/></radialGradient>
+  </defs>
+  <rect width="600" height="360" rx="16" fill="#f4ede4"/>
+  <rect width="600" height="360" rx="16" fill="url(#bg6a)"/>
+  <rect width="600" height="360" rx="16" fill="url(#bg6b)"/>
+  <!-- Icon mark — aubergine square, floating above gradient -->
+  <rect x="60" y="80" width="160" height="160" rx="32" fill="#4a154b"/>
+  <!-- Browser inside -->
+  <rect x="80" y="102" width="120" height="88" rx="6" fill="none" stroke="#592466" stroke-width="2.5"/>
+  <rect x="80" y="102" width="120" height="18" rx="6" fill="#592466"/>
+  <circle cx="94" cy="111" r="3" fill="#d9bdde"/>
+  <circle cx="105" cy="111" r="3" fill="#d9bdde"/>
+  <circle cx="116" cy="111" r="3" fill="#d9bdde"/>
+  <line x1="88" y1="132" x2="192" y2="132" stroke="#592466" stroke-width="2" stroke-linecap="round"/>
+  <line x1="88" y1="146" x2="182" y2="146" stroke="#592466" stroke-width="2" stroke-linecap="round"/>
+  <line x1="88" y1="160" x2="192" y2="160" stroke="#592466" stroke-width="2" stroke-linecap="round"/>
+  <line x1="88" y1="174" x2="168" y2="174" stroke="#592466" stroke-width="2" stroke-linecap="round"/>
+  <!-- Crop box -->
+  <rect x="108" y="128" width="68" height="48" rx="3" fill="none" stroke="#f4ede4" stroke-width="2.5" stroke-dasharray="6,4"/>
+  <polyline points="108,140 108,128 120,128" fill="none" stroke="#f4ede4" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="164,140 164,128 152,128" fill="none" stroke="#f4ede4" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="108,164 108,176 120,176" fill="none" stroke="#f4ede4" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="164,164 164,176 152,176" fill="none" stroke="#f4ede4" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Spark -->
+  <circle cx="206" cy="98" r="20" fill="#611f69"/>
+  <circle cx="206" cy="98" r="8" fill="#f4ede4"/>
+  <circle cx="206" cy="98" r="3.5" fill="#4a154b"/>
+  <!-- Wordmark right side -->
+  <text x="248" y="148" font-family="'Inter',system-ui,sans-serif" font-size="52" font-weight="700" fill="#4a154b" letter-spacing="-0.624px">Dezign</text>
+  <text x="248" y="204" font-family="'Inter',system-ui,sans-serif" font-size="52" font-weight="700" fill="#611f69" letter-spacing="-0.624px">Snap</text>
+  <!-- Divider between icon + wordmark -->
+  <line x1="240" y1="96" x2="240" y2="224" stroke="#e6e6e6" stroke-width="1"/>
+  <!-- Tagline -->
+  <text x="248" y="234" font-family="'Inter',system-ui,sans-serif" font-size="13" font-weight="400" fill="#696969" letter-spacing="0.96px">AI VISUAL PAGE ASSISTANT</text>
+  <!-- Aubergine pill CTA bar at bottom -->
+  <rect x="60" y="272" width="480" height="52" rx="26" fill="#4a154b"/>
+  <text x="300" y="304" font-family="'Inter',system-ui,sans-serif" font-size="17" font-weight="700" fill="#ffffff" letter-spacing="0.2px" text-anchor="middle">Snap any page. Get AI answers instantly.</text>
+</svg>

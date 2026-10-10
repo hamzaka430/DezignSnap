@@ -36,7 +36,7 @@ The buttons should now reliably persist regardless of how a site manages its DOM
 
 DezignSnap is distributed exclusively through the official **Google Chrome Web Store**. Manual installation and developer-mode loading are not supported for end users.
 
-1. Visit the [DezignSnap Chrome Web Store Page](https://chromewebstore.google.com) (or the official web portal at [`web/index.html`](web/index.html)).
+1. Visit the [DezignSnap Chrome Web Store Page](https://chromewebstore.google.com) (or the official web portal at [dezignsnap.dezignwise.com](https://dezignsnap.dezignwise.com/)).
 2. Click **Add to Chrome**.
 3. Confirm the permission prompt.
 4. On install, the **Welcome Guide** opens automatically to guide you through saving your API key and getting started.

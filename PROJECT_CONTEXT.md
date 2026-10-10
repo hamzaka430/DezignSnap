@@ -35,7 +35,7 @@
   - **jsPDF Client Library**: `lib/jspdf.umd.min.js` (v2.x UMD build) for generating client-side downloadable PDF transcripts.
 - **Hosting & Deployment**:
   - Client runtime packaged as `.zip` (`dezignsnap-v2.1.1.zip`) for Google Chrome Web Store Developer Dashboard.
-  - Landing page hosted at `https://dezignwise.com`, Privacy Policy hosted via Cloudflare Worker at `https://dezignsnap-privacy.hamzaka549.workers.dev/privacy-policy`.
+  - Standalone web showcase hosted at custom domain `https://dezignsnap.dezignwise.com/`, Privacy Policy hosted at `https://dezignsnap.dezignwise.com/privacy-policy.html`.
   - Standalone web showcase portal in `web/` (`web/index.html`).
 - **Dev Tooling & Build Systems**:
   - Zero-build vanilla architecture (no bundler overhead; native browser ES execution).
@@ -87,10 +87,7 @@
 10. **Popup Fallback Controller**:
     - Toolbar action popup allowing trigger on sites where content script injection is restricted or disabled.
     - Status: Working ✅
-11. **Native Chrome Side Panel & Companion Window (`sidepanel.html`)**:
-    - Complete AI workspace operating outside the webpage viewport. 100% immune to Google Meet, Teams, and Zoom Web tab sharing (`Alt+P`). Detachable into a companion window for desktop window sharing.
-    - Status: Working ✅
-12. **Screen Share Stealth & Anti-Capture Hotkey (`Alt+H` & `Escape`)**:
+11. **Screen Share Stealth & Anti-Capture Hotkey (`Alt+H` & `Escape`)**:
     - Global shortcut and panic key to instantly hide or reveal floating toolbar and response panel in 0ms.
     - Status: Working ✅
 13. **Aubergine & Cream Design System Overhaul**:

@@ -3,77 +3,91 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DezignSnap — AI Visual Screen Assistant Chrome Extension</title>
+  <title>DezignSnap — Visual AI Screen Assistant &amp; MCQ Solver</title>
+  <meta name="description" content="Capture webpage screenshots, drag-select areas with Alt+S, and solve test questions with verified first-principles AI reasoning. 100% private Bring-Your-Own-Key." />
+  <meta name="keywords" content="DezignSnap, chrome extension, visual ai assistant, screenshot solver, mcq solver, byok privacy, gemini 2.5 flash, groq qwen vision, gpt-4o, ollama" />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://dezignsnap.dezignwise.com/" />
+  <meta http-equiv="refresh" content="0; url=web/index.html" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="DezignSnap — Visual AI Screen Assistant &amp; MCQ Solver" />
+  <meta property="og:description" content="Private visual AI assistant for Chrome. Capture screenshots, snip areas, or solve certification test questions independently." />
+  <meta property="og:url" content="https://dezignsnap.dezignwise.com/" />
+  <meta property="og:image" content="https://dezignsnap.dezignwise.com/icons/icon128.png" />
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="DezignSnap — Visual AI Screen Assistant &amp; MCQ Solver" />
+  <meta name="twitter:description" content="Private visual AI assistant for Chrome. Solve MCQs and analyze screens with zero sycophancy." />
+  <meta name="twitter:image" content="https://dezignsnap.dezignwise.com/icons/icon128.png" />
+
   <link rel="icon" type="image/png" href="icons/icon32.png" />
   <style>
     :root {
       --primary: #4a154b;
       --primary-hover: #611f69;
-      --canvas-cream: #f4ede4;
-      --canvas-lavender: #f9f0ff;
+      --canvas-bg: #f8f9fa;
       --canvas-white: #ffffff;
-      --text-ink: #1d1d1d;
-      --text-mute: #696969;
-      --border-subtle: rgba(74, 21, 75, 0.12);
+      --text-ink: #111827;
+      --text-mute: #6b7280;
+      --border-subtle: #e5e7eb;
       --radius-pill: 90px;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background-color: var(--canvas-cream);
-      background-image:
-        radial-gradient(ellipse at 15% 0%, #fff0e6 0%, transparent 60%),
-        radial-gradient(ellipse at 85% 10%, #e9d8ff 0%, transparent 55%),
-        radial-gradient(ellipse at 50% 90%, #e6f4ea 0%, transparent 60%);
-      background-attachment: fixed;
+      background-color: var(--canvas-bg);
+      background-image: linear-gradient(180deg, #fdfdfd 0%, #f8f9fa 240px);
       color: var(--text-ink);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 50px 20px;
+      padding: 40px 20px;
       -webkit-font-smoothing: antialiased;
     }
     .container {
       max-width: 820px;
       width: 100%;
       background: var(--canvas-white);
-      border: 1.5px solid var(--border-subtle);
-      border-radius: 24px;
-      padding: 48px 40px;
+      border: 1px solid var(--border-subtle);
+      border-radius: 20px;
+      padding: 44px 38px;
       text-align: center;
-      box-shadow: 0 12px 36px rgba(74, 21, 75, 0.08);
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.05);
     }
     .icon {
-      width: 84px;
-      height: 84px;
-      border-radius: 20px;
-      margin-bottom: 20px;
-      box-shadow: 0 6px 20px rgba(74, 21, 75, 0.2);
-      border: 1.5px solid rgba(74, 21, 75, 0.25);
+      width: 76px;
+      height: 76px;
+      border-radius: 18px;
+      margin-bottom: 18px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+      border: 1px solid var(--border-subtle);
     }
     h1 {
-      font-size: 32px;
+      font-size: 30px;
       font-weight: 800;
-      color: var(--primary);
-      margin-bottom: 12px;
+      color: var(--text-ink);
+      margin-bottom: 10px;
       letter-spacing: -0.02em;
     }
     .brand-glow {
-      color: var(--primary);
-      background: var(--canvas-lavender);
-      border: 1px solid rgba(74, 21, 75, 0.2);
+      color: #ffffff;
+      background: var(--primary);
       padding: 2px 10px;
       border-radius: var(--radius-pill);
-      font-size: 16px;
+      font-size: 14px;
       vertical-align: middle;
+      font-weight: 700;
     }
     p.lead {
       color: var(--text-mute);
-      font-size: 16px;
+      font-size: 15.5px;
       line-height: 1.6;
-      margin-bottom: 30px;
+      margin-bottom: 28px;
       max-width: 640px;
       margin-left: auto;
       margin-right: auto;
@@ -83,54 +97,57 @@
       justify-content: center;
       flex-wrap: wrap;
       gap: 8px;
-      margin-bottom: 34px;
+      margin-bottom: 30px;
     }
     .pill {
-      background: var(--canvas-lavender);
-      border: 1px solid rgba(74, 21, 75, 0.2);
-      color: var(--primary);
+      background: #f9fafb;
+      border: 1px solid #d1d5db;
+      color: #374151;
       font-size: 12px;
-      font-weight: 700;
+      font-weight: 600;
       padding: 5px 14px;
       border-radius: var(--radius-pill);
     }
     .features {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 16px;
+      gap: 14px;
       text-align: left;
-      margin-bottom: 36px;
+      margin-bottom: 32px;
     }
     @media (max-width: 600px) {
       .features { grid-template-columns: 1fr; }
     }
     .feature-card {
-      background: #fbf9fc;
-      border: 1.5px solid var(--border-subtle);
-      border-radius: 14px;
-      padding: 18px 20px;
-      font-size: 13.5px;
-      color: #444444;
-      line-height: 1.5;
-      transition: all 0.2s ease;
+      background: #ffffff;
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 16px 18px;
+      font-size: 13px;
+      color: #4b5563;
+      line-height: 1.55;
+      transition: all 0.18s ease;
     }
     .feature-card:hover {
-      border-color: var(--primary);
-      background: var(--canvas-lavender);
-      transform: translateY(-2px);
+      border-color: #d1d5db;
+      background: #f9fafb;
+      transform: translateY(-1px);
     }
     .feature-card strong {
-      color: var(--primary);
+      color: var(--text-ink);
       display: flex;
       align-items: center;
       gap: 6px;
       margin-bottom: 6px;
-      font-size: 14px;
+      font-size: 13.5px;
+    }
+    .feature-card strong svg {
+      color: var(--primary);
     }
     .cta-row {
       display: flex;
       flex-wrap: wrap;
-      gap: 12px;
+      gap: 10px;
       justify-content: center;
       margin-top: 20px;
     }
@@ -138,12 +155,12 @@
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      padding: 12px 26px;
+      padding: 11px 24px;
       border-radius: var(--radius-pill);
-      font-size: 14.5px;
+      font-size: 14px;
       font-weight: 700;
       text-decoration: none;
-      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
       border: 1.5px solid transparent;
     }
     .btn-primary {
@@ -155,21 +172,22 @@
     .btn-primary:hover {
       background: var(--primary-hover);
       border-color: var(--primary-hover);
-      box-shadow: 0 6px 20px rgba(74, 21, 75, 0.3);
+      box-shadow: 0 6px 18px rgba(74, 21, 75, 0.28);
       transform: translateY(-2px);
     }
     .btn-secondary {
-      background: #ffffff;
-      color: var(--primary);
-      border-color: var(--border-subtle);
+      background: #f9fafb;
+      color: #374151;
+      border-color: #d1d5db;
     }
     .btn-secondary:hover {
-      background: var(--canvas-lavender);
-      border-color: var(--primary);
+      background: #f3f4f6;
+      border-color: #9ca3af;
+      color: #111827;
       transform: translateY(-2px);
     }
     footer {
-      margin-top: 36px;
+      margin-top: 32px;
       color: var(--text-mute);
       font-size: 13px;
     }
@@ -179,7 +197,7 @@
 </head>
 <body>
   <div class="container">
-    <img src="assests/03-pictorial-mark.svg" alt="DezignSnap logo" class="icon" />
+    <img src="assests/02-lettermark.svg" alt="DezignSnap logo" class="icon" />
     <h1>DezignSnap <span class="brand-glow">PRO</span></h1>
     <p class="lead">
       The private visual AI assistant for your browser. Capture webpage screenshots, drag-select any element with Alt+S, or solve certification test questions with verified first-principles analysis.

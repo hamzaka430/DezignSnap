@@ -1,0 +1,6 @@
+<svg width="800" height="200" viewBox="0 0 800 200" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="200" fill="#ffffff"/>
+  <text x="60" y="118" font-family="'Inter',system-ui,sans-serif" font-size="72" font-weight="700" fill="#4a154b" letter-spacing="-0.864px">Dezign</text>
+  <text x="444" y="118" font-family="'Inter',system-ui,sans-serif" font-size="72" font-weight="700" fill="#611f69" letter-spacing="-0.864px">Snap</text>
+  <text x="60" y="152" font-family="'Inter',system-ui,sans-serif" font-size="15" font-weight="400" fill="#696969" letter-spacing="1.2px">AI VISUAL PAGE ASSISTANT</text>
+</svg>
