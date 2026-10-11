@@ -73,20 +73,35 @@ DezignSnap is distributed exclusively through the official **Google Chrome Web S
 - **Network resilience**: 30-second timeout, automatic retry (up to 3 attempts) on transient errors (5xx, 429, timeouts).
 - Restricted pages (`chrome://`, extension pages) return a clear error instead of failing silently.
 
-## 📁 File Structure
+## 📁 Project Architecture & File Structure
 
 ```
-manifest.json          Extension configuration (Manifest V3)
-background.js           Service worker: screenshots, AI calls, retries, session history, multi-turn conversations
-content.js/.css         On-page floating buttons, region selection, chat-style answer panel
-popup.html/.js          Toolbar quick-launcher (provider/preset switch, fallback ask)
-options.html/.css/.js   Full settings page (API keys, presets, history)
-welcome.html             First-install onboarding
-session.html/.js         PDF export page (uses bundled jsPDF)
-privacy-policy.html      Privacy policy (bundled, and hostable for a Web Store listing)
-STORE_LISTING.md         Chrome Web Store submission checklist
-icons/                   Extension icons (16/32/48/128px)
-lib/jspdf.umd.min.js     Bundled locally — no CDN dependency, MV3-CSP safe
+dezignsnap/
+├── extension/          Chrome Extension Manifest V3 (Load this in chrome://extensions)
+│   ├── manifest.json   Extension configuration & permissions
+│   ├── background.js   Service worker: AI APIs, hotkeys, context menu, rate limits
+│   ├── content.js/.css On-page floating buttons, region selection, chat-style answer panel
+│   ├── popup.html/.js  Toolbar quick-launcher & provider switch
+│   ├── styles.css      Popup stylesheet
+│   ├── options.html    Full settings page (API keys, presets, support ticket desk)
+│   ├── welcome.html    First-install onboarding manual
+│   ├── session.html    Session preview & PDF report export
+│   ├── privacy-policy.html Privacy policy
+│   ├── icons/          Extension icons (16/32/48/128px)
+│   ├── assests/        Branding vector marks & SVGs
+│   └── lib/            Bundled jsPDF for offline PDF generation
+├── web/                Standalone Web Showcase & Landing Portal (GitHub Pages)
+│   ├── index.html      Showcase with interactive simulator
+│   ├── styles.css      Full design.md responsive styles
+│   └── app.js          Interactive simulation logic
+├── docs/               Documentation Hub
+│   ├── PROJECT_CONTEXT.md Master documentation single source of truth
+│   ├── STORE_LISTING.md   Chrome Web Store copy & permissions justification
+│   ├── design.md          Aubergine & cream design tokens
+│   └── TODO.md            Backlog & checklist
+├── dist/               Packaged distribution archives (.zip)
+├── scripts/            Build & packaging automation scripts
+└── tasks/              Development plans & task tracking
 ```
 
 ## ⚠️ Important Notes

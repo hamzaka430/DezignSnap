@@ -63,29 +63,50 @@
 ## Folder & File Structure
 ```
 page-helper-extension/
-├── manifest.json         # Manifest V3 extension configuration (permissions & commands)
-├── background.js        # Service worker: AI APIs, hotkeys, context menu, rate limits
-├── content.js           # Content script (HUD injection, area selection, modal, hotkey listeners)
-├── content.css          # Injected HUD and modal styles (Aubergine & Cream palette)
-├── popup.html / .js     # Action toolbar popup for rapid engine switching and quick snip
-├── styles.css           # Popup styling
-├── options.html / .js   # Full options page for API keys, Ollama setup, and persona presets
-├── options.css          # Options page styling
-├── session.html / .js   # Session transcript preview and PDF exporter
-├── welcome.html         # Onboarding setup guide & operations manual
-├── privacy-policy.html  # User privacy policy (GDPR/Chrome Web Store compliant)
-├── index.html           # Project landing showcase
-├── STORE_LISTING.md     # Web store metadata, descriptions, and permission guides
-├── PROJECT_CONTEXT.md   # Master documentation single source of truth
-├── AGENT.md             # Developer & agent instructions
-├── TODO.md              # Active backlog & task list
-├── web/                 # Standalone marketing & installation portal
+├── extension/           # Chrome Extension Manifest V3 (Load this folder in chrome://extensions)
+│   ├── manifest.json    # Extension configuration (permissions & commands)
+│   ├── background.js   # Service worker: AI APIs, hotkeys, context menu, rate limits
+│   ├── content.js      # Content script (HUD injection, area selection, modal, hotkey listeners)
+│   ├── content.css     # Injected HUD and modal styles (Aubergine & Cream palette)
+│   ├── popup.html / .js# Action toolbar popup for rapid engine switching and quick snip
+│   ├── styles.css      # Popup styling
+│   ├── options.html / .js # Full options page for API keys, Ollama setup, and persona presets
+│   ├── options.css     # Options page styling
+│   ├── session.html / .js # Session transcript preview and PDF exporter
+│   ├── welcome.html    # Onboarding setup guide & operations manual
+│   ├── privacy-policy.html # User privacy policy (GDPR/Chrome Web Store compliant)
+│   ├── icons/          # 16, 32, 48, 128px PNG application icons
+│   ├── assests/        # Vector branding marks (SVGs)
+│   └── lib/
+│       └── jspdf.umd.min.js # Standalone jsPDF library for offline PDF generation
+├── web/                 # Standalone marketing & installation portal (GitHub Pages)
 │   ├── index.html       # Web showcase, interactive demo & install guide
 │   ├── styles.css       # Complete design.md responsive stylesheet
-│   └── app.js           # Zero-sycophancy simulator & copy helpers
-├── lib/
-│   └── jspdf.umd.min.js # Standalone jsPDF library for offline PDF generation
-└── icons/               # 16, 32, 48, 128px PNG application icons
+│   ├── app.js           # Zero-sycophancy simulator & copy helpers
+│   ├── privacy-policy.html
+│   ├── google06dbbd3fb24702e7.html
+│   ├── CNAME
+│   ├── icons/
+│   └── assests/
+├── docs/                # Project documentation hub
+│   ├── PROJECT_CONTEXT.md # Master documentation single source of truth
+│   ├── STORE_LISTING.md   # Web store metadata, descriptions, and permission guides
+│   ├── design.md          # Design system & color tokens
+│   └── TODO.md            # Active backlog & task list
+├── dist/                # Packaged release archives
+│   └── dezignsnap-v2.1.1.zip
+├── scripts/             # Automation and build tooling
+│   └── build-zip.ps1    # 1-click extension packager (outputs to dist/)
+├── tasks/               # Structured task plans and roadmaps
+│   ├── plan.md
+│   └── todo.md
+├── .github/workflows/   # CI/CD deployment workflows
+│   └── deploy-pages.yml
+├── CNAME                # Domain pointer for GitHub Pages
+├── index.html           # Root redirect to web/index.html
+├── AGENT.md             # Developer & agent instructions
+├── GEMINI.md            # Master context configuration
+└── README.md            # Project overview & guide
 ```
 
 ## Environment & Storage Variables
@@ -103,6 +124,7 @@ Stored securely in `chrome.storage.local`:
 
 ## Testing & Packaging
 1. Open `chrome://extensions` in Developer Mode.
-2. Click "Load unpacked" or click the reload icon on "Page Helper AI / Snip & Ask".
+2. Click **"Load unpacked"** and select the **`extension/`** directory (or click the reload icon on DezignSnap).
 3. Test `Alt+S` on any webpage to trigger instant drag-selection snip.
 4. Highlight any text and right-click to test *"⚡ Ask AI about selection"*.
+5. To package for Chrome Web Store: Run `powershell -File scripts/build-zip.ps1` to produce the clean submission package in `dist/`.
