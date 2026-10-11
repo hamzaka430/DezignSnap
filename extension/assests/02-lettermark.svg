@@ -1,14 +1,1 @@
-<svg width="400" height="400" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <radialGradient id="bg" cx="50%" cy="50%" r="60%"><stop offset="0%" stop-color="#611f69"/><stop offset="100%" stop-color="#4a154b"/></radialGradient>
-  </defs>
-  <rect width="400" height="400" rx="88" fill="url(#bg)"/>
-  <!-- D letter -->
-  <text x="68" y="272" font-family="'Inter',system-ui,sans-serif" font-size="200" font-weight="700" fill="#f4ede4" letter-spacing="-4px">D</text>
-  <!-- S letter — offset, aubergine press tint -->
-  <text x="188" y="272" font-family="'Inter',system-ui,sans-serif" font-size="200" font-weight="700" fill="#d9bdde" opacity="0.85" letter-spacing="-4px">S</text>
-  <!-- snap crop corner accent top right -->
-  <polyline points="344,48 368,48 368,72" fill="none" stroke="#f4ede4" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" opacity="0.6"/>
-  <!-- snap crop corner accent bottom left -->
-  <polyline points="56,352 32,352 32,328" fill="none" stroke="#f4ede4" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" opacity="0.6"/>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400"><defs><radialGradient id="bg" cx="50%" cy="50%" r="60%"><stop offset="0%" stop-color="#611f69"/><stop offset="100%" stop-color="#4a154b"/></radialGradient></defs><rect width="400" height="400" fill="url(#bg)" rx="88"/><text x="68" y="272" fill="#f4ede4" font-family="'Inter',system-ui,sans-serif" font-size="200" font-weight="700" letter-spacing="-4">D</text><text x="188" y="272" fill="#d9bdde" font-family="'Inter',system-ui,sans-serif" font-size="200" font-weight="700" letter-spacing="-4" opacity=".85">S</text><polyline fill="none" stroke="#f4ede4" stroke-linecap="round" stroke-linejoin="round" stroke-width="5" points="344 48 368 48 368 72" opacity=".6"/><polyline fill="none" stroke="#f4ede4" stroke-linecap="round" stroke-linejoin="round" stroke-width="5" points="56 352 32 352 32 328" opacity=".6"/></svg>
